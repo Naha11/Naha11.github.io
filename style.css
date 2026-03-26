@@ -335,9 +335,10 @@ nav {
 
 /* PROCESS */
 #process { padding: 100px 0; background: var(--dark); }
-.process-grid { display: flex; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+.process-grid { display: flex; align-items: stretch; gap: 8px; flex-wrap: wrap; }
 .process-step { flex: 1; min-width: 180px; background: var(--dark3); border: 1px solid rgba(0,245,255,0.08); padding: 28px 20px; position: relative; transition: all 0.3s; }
 .process-step:hover { border-color: rgba(0,245,255,0.2); transform: translateY(-3px); }
+.process-arrow { align-self: center; }
 .step-num { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: var(--magenta); letter-spacing: 2px; margin-bottom: 14px; text-shadow: 0 0 6px var(--magenta); }
 .step-icon { font-size: 1.8rem; margin-bottom: 12px; }
 .process-step h3 { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: white; letter-spacing: 1px; margin-bottom: 10px; }

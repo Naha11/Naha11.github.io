@@ -492,16 +492,21 @@ window.addEventListener('scroll', () => {
 
 // ─── СКРЫТЬ TIDIO БАБЛИК ─────────────────────────────────────────────────────
 (function hideTidioPopup() {
-  const hide = () => {
+  function hidePopup() {
     const chat = document.getElementById('tidio-chat');
     if (!chat) return;
     chat.querySelectorAll(':scope > *:not(#tidio-chat-iframe)').forEach(el => {
       el.style.setProperty('display', 'none', 'important');
+      el.style.setProperty('opacity', '0', 'important');
+      el.style.setProperty('pointer-events', 'none', 'important');
     });
-  };
-  const obs = new MutationObserver(hide);
+  }
+  // Проверяем каждые 300мс в течение 15 секунд после загрузки
+  const interval = setInterval(hidePopup, 300);
+  setTimeout(() => clearInterval(interval), 15000);
+  // Также через MutationObserver
+  const obs = new MutationObserver(hidePopup);
   obs.observe(document.body, { childList: true, subtree: true });
-  window.addEventListener('load', hide);
 })();
 
 // ─── ПЛАВНОЕ ПОЯВЛЕНИЕ ЭЛЕМЕНТОВ ─────────────────────────────────────────────

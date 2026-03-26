@@ -220,7 +220,7 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
   btn.addEventListener('click', () => applyTranslations(btn.dataset.lang));
 });
 
-// ─── THREE.JS 3D КРИСТАЛЛ ────────────────────────────────────────────────────
+// ─── THREE.JS 3D ЛИЦО ────────────────────────────────────────────────────────
 (function initThree() {
   const container = document.getElementById('three-container');
   if (!container || typeof THREE === 'undefined') return;
@@ -229,8 +229,8 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
   const H = container.offsetHeight || 380;
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 1000);
-  camera.position.z = 3.5;
+  const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
+  camera.position.set(0, 0, 4);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(W, H);
@@ -238,54 +238,72 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
   renderer.setClearColor(0x000000, 0);
   container.appendChild(renderer.domElement);
 
-  // Основной кристалл — икосаэдр
-  const geo = new THREE.IcosahedronGeometry(1.1, 1);
-  const wireGeo = new THREE.WireframeGeometry(geo);
-  const wireMat = new THREE.LineBasicMaterial({
-    color: 0x00f5ff, transparent: true, opacity: 0.7
-  });
-  const wireframe = new THREE.LineSegments(wireGeo, wireMat);
-  scene.add(wireframe);
+  // Освещение
+  const ambientLight = new THREE.AmbientLight(0x00f5ff, 0.4);
+  scene.add(ambientLight);
+  const pointLight = new THREE.PointLight(0x00f5ff, 2, 20);
+  pointLight.position.set(2, 2, 3);
+  scene.add(pointLight);
+  const pointLight2 = new THREE.PointLight(0xff0066, 1.5, 20);
+  pointLight2.position.set(-2, -1, 2);
+  scene.add(pointLight2);
 
-  // Внутренний кристалл — поменьше, magenta
-  const geo2 = new THREE.OctahedronGeometry(0.6, 0);
-  const wireGeo2 = new THREE.WireframeGeometry(geo2);
-  const wireMat2 = new THREE.LineBasicMaterial({
-    color: 0xff0066, transparent: true, opacity: 0.5
-  });
-  const inner = new THREE.LineSegments(wireGeo2, wireMat2);
-  scene.add(inner);
-
-  // Внешние точки — вершины
-  const dotGeo = new THREE.SphereGeometry(0.04, 6, 6);
-  const dotMat = new THREE.MeshBasicMaterial({ color: 0x00f5ff });
-  geo.attributes.position.array && (() => {
-    const pos = geo.attributes.position;
-    const seen = new Set();
-    for (let i = 0; i < pos.count; i++) {
-      const key = `${pos.getX(i).toFixed(2)},${pos.getY(i).toFixed(2)},${pos.getZ(i).toFixed(2)}`;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      const dot = new THREE.Mesh(dotGeo, dotMat);
-      dot.position.set(pos.getX(i), pos.getY(i), pos.getZ(i));
-      scene.add(dot);
-    }
-  })();
-
+  let head = null;
   let floatT = 0;
+
+  // Загрузка 3D модели головы
+  const loader = new THREE.GLTFLoader();
+  loader.load(
+    'https://threejs.org/examples/models/gltf/LeePerrySmith/LeePerrySmith.glb',
+    (gltf) => {
+      head = gltf.scene;
+
+      // Применяем wireframe + neon материал
+      head.traverse((child) => {
+        if (child.isMesh) {
+          // Solid слой — тёмный с cyan отливом
+          child.material = new THREE.MeshStandardMaterial({
+            color: 0x050510,
+            emissive: 0x001a1a,
+            roughness: 0.8,
+            metalness: 0.2,
+          });
+
+          // Wireframe поверх
+          const wireGeo = new THREE.WireframeGeometry(child.geometry);
+          const wireMat = new THREE.LineBasicMaterial({
+            color: 0x00f5ff,
+            transparent: true,
+            opacity: 0.35,
+          });
+          const wire = new THREE.LineSegments(wireGeo, wireMat);
+          child.add(wire);
+        }
+      });
+
+      head.scale.set(0.18, 0.18, 0.18);
+      head.position.set(0, 0, 0);
+      scene.add(head);
+    },
+    undefined,
+    () => {
+      // Если модель не загрузилась — показываем кристалл как fallback
+      const geo = new THREE.IcosahedronGeometry(1.1, 1);
+      const wireGeo = new THREE.WireframeGeometry(geo);
+      const wireMat = new THREE.LineBasicMaterial({ color: 0x00f5ff, transparent: true, opacity: 0.7 });
+      head = new THREE.LineSegments(wireGeo, wireMat);
+      scene.add(head);
+    }
+  );
+
   function animate() {
     requestAnimationFrame(animate);
-    floatT += 0.01;
-    const floatY = Math.sin(floatT) * 0.08;
-
-    wireframe.rotation.x += 0.004;
-    wireframe.rotation.y += 0.006;
-    wireframe.position.y = floatY;
-
-    inner.rotation.x -= 0.007;
-    inner.rotation.y += 0.009;
-    inner.position.y = floatY;
-
+    floatT += 0.008;
+    if (head) {
+      head.rotation.y += 0.005;
+      head.rotation.x = Math.sin(floatT * 0.5) * 0.08;
+      head.position.y = Math.sin(floatT) * 0.05;
+    }
     renderer.render(scene, camera);
   }
   animate();

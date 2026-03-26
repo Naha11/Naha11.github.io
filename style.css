@@ -372,6 +372,100 @@ nav {
 .stack-item:hover::before { opacity: 1; }
 .stack-item:hover span { color: #000; }
 
+/* PAYMENT */
+#payment {
+  padding: 100px 0;
+  background: var(--dark2);
+  position: relative;
+}
+
+#payment::before {
+  content: '支払';
+  position: absolute; left: 2%; bottom: 5%;
+  font-size: 14rem; color: rgba(255,215,0,0.02);
+  pointer-events: none;
+}
+
+.payment-desc {
+  font-size: 0.88rem; color: rgba(200,216,232,0.5);
+  margin-bottom: 36px;
+}
+
+.payment-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.payment-card {
+  background: var(--dark3);
+  border: 1px solid rgba(255,215,0,0.1);
+  padding: 32px 28px;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.payment-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 3px; height: 0;
+  background: var(--gold);
+  transition: height 0.4s;
+  box-shadow: 0 0 10px var(--gold);
+}
+.payment-card:hover::before { height: 100%; }
+.payment-card:hover { border-color: rgba(255,215,0,0.25); transform: translateY(-3px); }
+
+.payment-icon { font-size: 2rem; margin-bottom: 14px; }
+
+.payment-card h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 1rem; color: white;
+  letter-spacing: 2px; margin-bottom: 10px;
+}
+
+.payment-card p {
+  font-size: 0.82rem; color: rgba(200,216,232,0.6);
+  line-height: 1.6; margin-bottom: 18px;
+}
+
+.payment-val {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 1rem; color: var(--gold);
+  text-shadow: 0 0 8px rgba(255,215,0,0.4);
+  margin-bottom: 14px;
+  letter-spacing: 1px;
+}
+
+.crypto-addr {
+  font-size: 0.72rem;
+  word-break: break-all;
+}
+
+.copy-btn {
+  background: transparent;
+  border: 1px solid rgba(255,215,0,0.3);
+  color: var(--gold);
+  padding: 8px 18px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.copy-btn:hover {
+  background: var(--gold);
+  color: #000;
+  box-shadow: 0 0 16px rgba(255,215,0,0.4);
+}
+
+.payment-note {
+  font-size: 0.8rem;
+  color: rgba(200,216,232,0.4);
+  letter-spacing: 1px;
+}
+
 /* PORTFOLIO */
 #portfolio {
   padding: 100px 0;

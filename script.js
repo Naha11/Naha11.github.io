@@ -1,3 +1,20 @@
+// Копирование текста
+function copyText(id, btn) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Скопировано';
+    btn.style.background = 'var(--cyan)';
+    btn.style.color = '#000';
+    btn.style.borderColor = 'var(--cyan)';
+    setTimeout(() => {
+      btn.textContent = id === 'kaspi-num' ? 'Скопировать номер' : 'Скопировать адрес';
+      btn.style.background = '';
+      btn.style.color = '';
+      btn.style.borderColor = '';
+    }, 2000);
+  });
+}
+
 // Плавное появление секций
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {

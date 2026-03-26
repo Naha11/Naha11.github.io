@@ -17,6 +17,8 @@
     <ul class="nav-links">
       <li><a href="#services">УСЛУГИ</a></li>
       <li><a href="#stack">СТЕК</a></li>
+      <li><a href="#portfolio">РАБОТЫ</a></li>
+      <li><a href="#payment">ОПЛАТА</a></li>
       <li><a href="#about">ОБО МНЕ</a></li>
       <li><a href="#contact">КОНТАКТ</a></li>
     </ul>
@@ -189,11 +191,43 @@
     </div>
   </section>
 
+  <!-- ОПЛАТА -->
+  <section id="payment">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">04</span>
+        <h2>ОПЛАТА<span class="accent">.</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <p class="payment-desc">Принимаю оплату удобным для вас способом</p>
+      <div class="payment-grid">
+
+        <div class="payment-card">
+          <div class="payment-icon">💳</div>
+          <h3>Kaspi Pay</h3>
+          <p>Перевод на Kaspi Gold — быстро и без комиссии</p>
+          <div class="payment-val" id="kaspi-num">+7 705 743 1166</div>
+          <button class="copy-btn" onclick="copyText('kaspi-num', this)">Скопировать номер</button>
+        </div>
+
+        <div class="payment-card">
+          <div class="payment-icon">₮</div>
+          <h3>USDT TRC20</h3>
+          <p>Оплата криптовалютой — USDT в сети Tron (TRC20)</p>
+          <div class="payment-val crypto-addr" id="usdt-addr">TV9ah7JaXcjMLWejRrQ4xv8xKnAUs66y9K</div>
+          <button class="copy-btn" onclick="copyText('usdt-addr', this)">Скопировать адрес</button>
+        </div>
+
+      </div>
+      <p class="payment-note">// После оплаты — скиньте скрин в Telegram <span class="accent">@akhnnoname</span></p>
+    </div>
+  </section>
+
   <!-- ОБО МНЕ -->
   <section id="about">
     <div class="container about-wrap">
       <div class="section-header">
-        <span class="section-tag">04</span>
+        <span class="section-tag">05</span>
         <h2>ОБО МНЕ<span class="accent">.</span></h2>
         <div class="section-line"></div>
       </div>
@@ -234,7 +268,7 @@
   <section id="contact">
     <div class="container contact-wrap">
       <div class="section-header">
-        <span class="section-tag">05</span>
+        <span class="section-tag">06</span>
         <h2>КОНТАКТ<span class="accent">.</span></h2>
         <div class="section-line"></div>
       </div>
@@ -273,5 +307,8 @@
   </footer>
 
   <script src="script.js"></script>
+
+  <!-- TIDIO AI SUPPORT -->
+  <script src="//code.tidio.co/REPLACE_WITH_YOUR_TIDIO_KEY.js" async></script>
 </body>
 </html>

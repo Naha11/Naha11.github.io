@@ -326,6 +326,7 @@ nav {
 .card-list li::before { content: '▸ '; color: var(--cyan); }
 
 .card-price { font-size: 0.78rem; color: rgba(200,216,232,0.5); }
+.price-alt { font-size: 0.72rem; color: rgba(200,216,232,0.35); letter-spacing: 0.03em; }
 .card-price span {
   font-family: 'Orbitron', sans-serif;
   color: var(--gold); font-size: 1.1rem;

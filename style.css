@@ -494,7 +494,7 @@ footer { border-top: 1px solid rgba(0,245,255,0.06); padding: 28px 0; background
 
 /* SCROLL TO TOP */
 #scroll-top {
-  position: fixed; bottom: 32px; right: 32px;
+  position: fixed; bottom: 32px; left: 32px;
   width: 44px; height: 44px;
   background: transparent;
   border: 1px solid var(--cyan);
@@ -508,6 +508,14 @@ footer { border-top: 1px solid rgba(0,245,255,0.06); padding: 28px 0; background
 }
 #scroll-top.visible { opacity: 1; pointer-events: all; }
 #scroll-top:hover { background: var(--cyan); color: #000; box-shadow: 0 0 24px rgba(0,245,255,0.5); }
+
+/* TIDIO — поднять выше и скрыть приветственный баблик */
+#tidio-chat-iframe {
+  bottom: 24px !important;
+}
+#tidio-chat > div:not([id="tidio-chat-iframe"]) {
+  display: none !important;
+}
 
 /* TILT CARDS */
 .tilt-card { transform-style: preserve-3d; will-change: transform; }

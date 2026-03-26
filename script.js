@@ -490,6 +490,20 @@ window.addEventListener('scroll', () => {
   });
 });
 
+// ─── СКРЫТЬ TIDIO БАБЛИК ─────────────────────────────────────────────────────
+(function hideTidioPopup() {
+  const hide = () => {
+    const chat = document.getElementById('tidio-chat');
+    if (!chat) return;
+    chat.querySelectorAll(':scope > *:not(#tidio-chat-iframe)').forEach(el => {
+      el.style.setProperty('display', 'none', 'important');
+    });
+  };
+  const obs = new MutationObserver(hide);
+  obs.observe(document.body, { childList: true, subtree: true });
+  window.addEventListener('load', hide);
+})();
+
 // ─── ПЛАВНОЕ ПОЯВЛЕНИЕ ЭЛЕМЕНТОВ ─────────────────────────────────────────────
 const fadeObserver = new IntersectionObserver((entries) => {
   entries.forEach(e => {

@@ -220,6 +220,77 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
   btn.addEventListener('click', () => applyTranslations(btn.dataset.lang));
 });
 
+// ─── THREE.JS 3D КРИСТАЛЛ ────────────────────────────────────────────────────
+(function initThree() {
+  const container = document.getElementById('three-container');
+  if (!container || typeof THREE === 'undefined') return;
+
+  const W = container.offsetWidth || 380;
+  const H = container.offsetHeight || 380;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, W / H, 0.1, 1000);
+  camera.position.z = 3.5;
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(W, H);
+  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setClearColor(0x000000, 0);
+  container.appendChild(renderer.domElement);
+
+  // Основной кристалл — икосаэдр
+  const geo = new THREE.IcosahedronGeometry(1.1, 1);
+  const wireGeo = new THREE.WireframeGeometry(geo);
+  const wireMat = new THREE.LineBasicMaterial({
+    color: 0x00f5ff, transparent: true, opacity: 0.7
+  });
+  const wireframe = new THREE.LineSegments(wireGeo, wireMat);
+  scene.add(wireframe);
+
+  // Внутренний кристалл — поменьше, magenta
+  const geo2 = new THREE.OctahedronGeometry(0.6, 0);
+  const wireGeo2 = new THREE.WireframeGeometry(geo2);
+  const wireMat2 = new THREE.LineBasicMaterial({
+    color: 0xff0066, transparent: true, opacity: 0.5
+  });
+  const inner = new THREE.LineSegments(wireGeo2, wireMat2);
+  scene.add(inner);
+
+  // Внешние точки — вершины
+  const dotGeo = new THREE.SphereGeometry(0.04, 6, 6);
+  const dotMat = new THREE.MeshBasicMaterial({ color: 0x00f5ff });
+  geo.attributes.position.array && (() => {
+    const pos = geo.attributes.position;
+    const seen = new Set();
+    for (let i = 0; i < pos.count; i++) {
+      const key = `${pos.getX(i).toFixed(2)},${pos.getY(i).toFixed(2)},${pos.getZ(i).toFixed(2)}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const dot = new THREE.Mesh(dotGeo, dotMat);
+      dot.position.set(pos.getX(i), pos.getY(i), pos.getZ(i));
+      scene.add(dot);
+    }
+  })();
+
+  let floatT = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    floatT += 0.01;
+    const floatY = Math.sin(floatT) * 0.08;
+
+    wireframe.rotation.x += 0.004;
+    wireframe.rotation.y += 0.006;
+    wireframe.position.y = floatY;
+
+    inner.rotation.x -= 0.007;
+    inner.rotation.y += 0.009;
+    inner.position.y = floatY;
+
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+
 // ─── МОБИЛЬНОЕ МЕНЮ ─────────────────────────────────────────────────────────
 const hamburger = document.getElementById('hamburger');
 const mobileNav = document.getElementById('mobile-nav');

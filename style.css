@@ -372,6 +372,73 @@ nav {
 .stack-item:hover::before { opacity: 1; }
 .stack-item:hover span { color: #000; }
 
+/* PORTFOLIO */
+#portfolio {
+  padding: 100px 0;
+  background: var(--dark);
+  position: relative;
+}
+
+#portfolio::before {
+  content: '実績';
+  position: absolute; right: 2%; top: 10%;
+  font-size: 16rem; color: rgba(0,245,255,0.02);
+  pointer-events: none;
+}
+
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.portfolio-card {
+  background: var(--dark3);
+  border: 1px solid rgba(0,245,255,0.08);
+  padding: 28px 24px;
+  position: relative;
+  transition: all 0.3s;
+}
+
+.portfolio-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0;
+  width: 0; height: 2px;
+  background: var(--cyan);
+  transition: width 0.4s;
+  box-shadow: 0 0 8px var(--cyan);
+}
+
+.portfolio-card:hover::before { width: 100%; }
+.portfolio-card:hover {
+  border-color: rgba(0,245,255,0.2);
+  transform: translateY(-3px);
+}
+
+.portfolio-tag {
+  font-size: 0.65rem; letter-spacing: 2px;
+  color: var(--magenta); margin-bottom: 12px;
+  text-shadow: 0 0 6px var(--magenta);
+}
+
+.portfolio-card h3 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 0.9rem; color: white;
+  letter-spacing: 1px; margin-bottom: 10px;
+}
+
+.portfolio-card p {
+  font-size: 0.8rem; line-height: 1.7;
+  color: rgba(200,216,232,0.6); margin-bottom: 18px;
+}
+
+.portfolio-link {
+  font-size: 0.75rem; color: var(--cyan);
+  text-decoration: none; letter-spacing: 1px;
+  transition: text-shadow 0.2s;
+}
+.portfolio-link:hover { text-shadow: 0 0 8px var(--cyan); }
+
 /* ABOUT */
 #about {
   padding: 100px 0;

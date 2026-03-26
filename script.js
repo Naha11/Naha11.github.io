@@ -220,7 +220,7 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
   btn.addEventListener('click', () => applyTranslations(btn.dataset.lang));
 });
 
-// ─── THREE.JS 3D ЛИЦО ────────────────────────────────────────────────────────
+// ─── THREE.JS КИБЕР-ЛИЦО ─────────────────────────────────────────────────────
 (function initThree() {
   const container = document.getElementById('three-container');
   if (!container || typeof THREE === 'undefined') return;
@@ -230,7 +230,7 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(45, W / H, 0.1, 100);
-  camera.position.set(0, 0, 4);
+  camera.position.set(0, 0, 4.5);
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(W, H);
@@ -238,72 +238,119 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
   renderer.setClearColor(0x000000, 0);
   container.appendChild(renderer.domElement);
 
-  // Освещение
-  const ambientLight = new THREE.AmbientLight(0x00f5ff, 0.4);
-  scene.add(ambientLight);
-  const pointLight = new THREE.PointLight(0x00f5ff, 2, 20);
-  pointLight.position.set(2, 2, 3);
-  scene.add(pointLight);
-  const pointLight2 = new THREE.PointLight(0xff0066, 1.5, 20);
-  pointLight2.position.set(-2, -1, 2);
-  scene.add(pointLight2);
+  // Материалы
+  const darkMat  = new THREE.MeshStandardMaterial({ color: 0x04040f, roughness: 1 });
+  const cyanMat  = new THREE.MeshStandardMaterial({ color: 0x00f5ff, emissive: 0x00f5ff, emissiveIntensity: 0.6 });
+  const magMat   = new THREE.MeshStandardMaterial({ color: 0xff0066, emissive: 0xff0066, emissiveIntensity: 0.8 });
+  const wireMat  = new THREE.LineBasicMaterial({ color: 0x00f5ff, transparent: true, opacity: 0.4 });
+  const wireMat2 = new THREE.LineBasicMaterial({ color: 0xff0066, transparent: true, opacity: 0.25 });
 
-  let head = null;
-  let floatT = 0;
+  // Свет
+  scene.add(new THREE.AmbientLight(0x001a2a, 2));
+  const l1 = new THREE.PointLight(0x00f5ff, 3, 10);
+  l1.position.set(2, 1, 3); scene.add(l1);
+  const l2 = new THREE.PointLight(0xff0066, 2, 10);
+  l2.position.set(-2, -1, 2); scene.add(l2);
 
-  // Загрузка 3D модели головы
-  const loader = new THREE.GLTFLoader();
-  loader.load(
-    'https://threejs.org/examples/models/gltf/LeePerrySmith/LeePerrySmith.glb',
-    (gltf) => {
-      head = gltf.scene;
+  const face = new THREE.Group();
 
-      // Применяем wireframe + neon материал
-      head.traverse((child) => {
-        if (child.isMesh) {
-          // Solid слой — тёмный с cyan отливом
-          child.material = new THREE.MeshStandardMaterial({
-            color: 0x050510,
-            emissive: 0x001a1a,
-            roughness: 0.8,
-            metalness: 0.2,
-          });
+  function addWire(geo, mat, mesh) {
+    const wg = new THREE.WireframeGeometry(geo);
+    const wl = new THREE.LineSegments(wg, mat);
+    if (mesh) { wl.position.copy(mesh.position); wl.scale.copy(mesh.scale); wl.rotation.copy(mesh.rotation); }
+    face.add(wl);
+    return wl;
+  }
 
-          // Wireframe поверх
-          const wireGeo = new THREE.WireframeGeometry(child.geometry);
-          const wireMat = new THREE.LineBasicMaterial({
-            color: 0x00f5ff,
-            transparent: true,
-            opacity: 0.35,
-          });
-          const wire = new THREE.LineSegments(wireGeo, wireMat);
-          child.add(wire);
-        }
-      });
+  // ── ГОЛОВА (череп-форма) ──────────────────────────────────────
+  const skullGeo = new THREE.SphereGeometry(1, 18, 14);
+  const skull = new THREE.Mesh(skullGeo, darkMat);
+  skull.scale.set(0.88, 1.08, 0.84);
+  face.add(skull);
+  addWire(skullGeo, wireMat, skull);
 
-      head.scale.set(0.18, 0.18, 0.18);
-      head.position.set(0, 0, 0);
-      scene.add(head);
-    },
-    undefined,
-    () => {
-      // Если модель не загрузилась — показываем кристалл как fallback
-      const geo = new THREE.IcosahedronGeometry(1.1, 1);
-      const wireGeo = new THREE.WireframeGeometry(geo);
-      const wireMat = new THREE.LineBasicMaterial({ color: 0x00f5ff, transparent: true, opacity: 0.7 });
-      head = new THREE.LineSegments(wireGeo, wireMat);
-      scene.add(head);
-    }
-  );
+  // ── НИЖНЯЯ ЧАСТЬ (скулы/челюсть) ─────────────────────────────
+  const jawGeo = new THREE.SphereGeometry(0.7, 14, 10);
+  const jaw = new THREE.Mesh(jawGeo, darkMat);
+  jaw.scale.set(0.78, 0.6, 0.72);
+  jaw.position.set(0, -0.82, 0.12);
+  face.add(jaw);
+  addWire(jawGeo, wireMat2, jaw);
 
+  // ── ГЛАЗА — кольца ────────────────────────────────────────────
+  const eyeRingGeo = new THREE.TorusGeometry(0.22, 0.03, 8, 28);
+  [-0.34, 0.34].forEach(x => {
+    const ring = new THREE.Mesh(eyeRingGeo, cyanMat);
+    ring.position.set(x, 0.22, 0.78);
+    ring.rotation.x = 0.15;
+    face.add(ring);
+
+    // Светящийся зрачок
+    const pupil = new THREE.Mesh(new THREE.SphereGeometry(0.12, 10, 10), cyanMat);
+    pupil.position.set(x, 0.22, 0.84);
+    face.add(pupil);
+
+    // Внешнее кольцо (magenta)
+    const outerRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.28, 0.015, 6, 28), magMat
+    );
+    outerRing.position.copy(ring.position);
+    outerRing.rotation.copy(ring.rotation);
+    face.add(outerRing);
+  });
+
+  // ── НОС ───────────────────────────────────────────────────────
+  const noseGeo = new THREE.ConeGeometry(0.07, 0.22, 4);
+  const nose = new THREE.Mesh(noseGeo, darkMat);
+  nose.position.set(0, -0.08, 0.88);
+  nose.rotation.x = Math.PI * 0.48;
+  face.add(nose);
+  addWire(noseGeo, wireMat, nose);
+
+  // ── НОЗДРИ ────────────────────────────────────────────────────
+  [-0.08, 0.08].forEach(x => {
+    const n = new THREE.Mesh(new THREE.SphereGeometry(0.045, 6, 6), magMat);
+    n.position.set(x, -0.26, 0.84);
+    face.add(n);
+  });
+
+  // ── РОТ ───────────────────────────────────────────────────────
+  const mouthGeo = new THREE.TorusGeometry(0.22, 0.025, 6, 20, Math.PI);
+  const mouth = new THREE.Mesh(mouthGeo, cyanMat);
+  mouth.position.set(0, -0.52, 0.76);
+  mouth.rotation.z = Math.PI;
+  face.add(mouth);
+
+  // ── СКУЛЫ ─────────────────────────────────────────────────────
+  [-0.68, 0.68].forEach(x => {
+    const chGeo = new THREE.BoxGeometry(0.28, 0.12, 0.18);
+    const ch = new THREE.Mesh(chGeo, darkMat);
+    ch.position.set(x, -0.22, 0.58);
+    ch.rotation.y = x > 0 ? -0.3 : 0.3;
+    face.add(ch);
+    addWire(chGeo, wireMat, ch);
+  });
+
+  // ── ГОРИЗОНТАЛЬНЫЕ ЛИНИИ НА ЛБУ (кибер-стиль) ────────────────
+  for (let i = 0; i < 3; i++) {
+    const lineGeo = new THREE.BoxGeometry(0.9 - i * 0.12, 0.02, 0.01);
+    const line = new THREE.Mesh(lineGeo,
+      new THREE.MeshStandardMaterial({ color: 0x00f5ff, emissive: 0x00f5ff, emissiveIntensity: 0.4, transparent: true, opacity: 0.5 })
+    );
+    line.position.set(0, 0.65 + i * 0.16, 0.82);
+    face.add(line);
+  }
+
+  scene.add(face);
+
+  let t = 0;
   function animate() {
     requestAnimationFrame(animate);
-    floatT += 0.008;
-    if (head) {
-      head.rotation.y += 0.005;
-      head.rotation.x = Math.sin(floatT * 0.5) * 0.08;
-      head.position.y = Math.sin(floatT) * 0.05;
-    }
+    t += 0.008;
+    face.rotation.y = Math.sin(t * 0.4) * 0.45;
+    face.rotation.x = Math.sin(t * 0.3) * 0.06;
+    face.position.y = Math.sin(t) * 0.06;
+    l1.intensity = 2.5 + Math.sin(t * 2) * 0.5;
     renderer.render(scene, camera);
   }
   animate();

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AKHAN // DEV</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- SCANLINES OVERLAY -->
+  <div class="scanlines"></div>
+
+  <!-- НАВИГАЦИЯ -->
+  <nav>
+    <div class="nav-logo">AK<span class="accent">_</span>DEV</div>
+    <ul class="nav-links">
+      <li><a href="#services">УСЛУГИ</a></li>
+      <li><a href="#stack">СТЕК</a></li>
+      <li><a href="#about">ОБО МНЕ</a></li>
+      <li><a href="#contact">КОНТАКТ</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg-grid"></div>
+    <div class="container hero-content">
+      <div class="hero-label">// FULLSTACK BOT DEVELOPER</div>
+      <h1 class="hero-title">
+        <span class="glitch" data-text="АХАН">АХАН</span><br/>
+        <span class="hero-sub">Telegram-боты <span class="accent">&</span> автоматизация</span>
+      </h1>
+      <p class="hero-desc">
+        Разрабатываю ботов, автоматизирую процессы и парсю данные.<br/>
+        Быстро. Чисто. Под ваш бизнес.
+      </p>
+      <div class="hero-btns">
+        <a href="https://t.me/akhnnoname" class="btn btn-neon" target="_blank">
+          <span class="btn-icon">▶</span> Написать в Telegram
+        </a>
+        <a href="https://kwork.ru/user/akhanali" class="btn btn-outline" target="_blank">
+          Kwork профиль
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">3+</span><span class="stat-label">готовых бота</span></div>
+        <div class="stat-divider">//</div>
+        <div class="stat"><span class="stat-num">1-2</span><span class="stat-label">дня на задачу</span></div>
+        <div class="stat-divider">//</div>
+        <div class="stat"><span class="stat-num">24h</span><span class="stat-label">ответ</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- УСЛУГИ -->
+  <section id="services">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">01</span>
+        <h2>УСЛУГИ<span class="accent">.</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="services-grid">
+
+        <div class="service-card">
+          <div class="card-corner"></div>
+          <div class="card-num">01</div>
+          <div class="card-icon">🤖</div>
+          <h3>Telegram-бот</h3>
+          <p>Запись клиентов, приём заказов, рассылки, оплата через ЮKassa. Любая логика под ваш бизнес.</p>
+          <ul class="card-list">
+            <li>Простой бот</li>
+            <li>Бот с логикой</li>
+            <li>Бот с оплатой</li>
+          </ul>
+          <div class="card-price">от <span>1 500 ₽</span></div>
+        </div>
+
+        <div class="service-card featured">
+          <div class="card-corner"></div>
+          <div class="card-badge">ХИТ</div>
+          <div class="card-num">02</div>
+          <div class="card-icon">⚡</div>
+          <h3>Автоматизация</h3>
+          <p>Python-скрипты для Excel и Google Sheets. Автозаполнение, формулы, интеграции с API.</p>
+          <ul class="card-list">
+            <li>Excel / Google Sheets</li>
+            <li>Авто-отчёты</li>
+            <li>Интеграция с Telegram</li>
+          </ul>
+          <div class="card-price">от <span>2 000 ₽</span></div>
+        </div>
+
+        <div class="service-card">
+          <div class="card-corner"></div>
+          <div class="card-num">03</div>
+          <div class="card-icon">🔍</div>
+          <h3>Парсинг данных</h3>
+          <p>Соберу данные с любого сайта — товары, цены, контакты. Выдам в Excel или Google Sheets.</p>
+          <ul class="card-list">
+            <li>WB / Ozon</li>
+            <li>Любой сайт</li>
+            <li>Регулярный сбор</li>
+          </ul>
+          <div class="card-price">от <span>2 500 ₽</span></div>
+        </div>
+
+        <div class="service-card">
+          <div class="card-corner"></div>
+          <div class="card-num">04</div>
+          <div class="card-icon">🌐</div>
+          <h3>Сайт-визитка</h3>
+          <p>Одностраничный сайт для бизнеса или фрилансера. Имя, услуги, кнопки связи. Быстро.</p>
+          <ul class="card-list">
+            <li>HTML / CSS</li>
+            <li>GitHub Pages (бесплатно)</li>
+            <li>Любой дизайн</li>
+          </ul>
+          <div class="card-price">от <span>1 500 ₽</span></div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- СТЕК -->
+  <section id="stack">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">02</span>
+        <h2>СТЕК<span class="accent">.</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="stack-grid">
+        <div class="stack-item"><span>Python</span></div>
+        <div class="stack-item"><span>aiogram 3.x</span></div>
+        <div class="stack-item"><span>BeautifulSoup</span></div>
+        <div class="stack-item"><span>Google Sheets API</span></div>
+        <div class="stack-item"><span>ЮKassa</span></div>
+        <div class="stack-item"><span>Robokassa</span></div>
+        <div class="stack-item"><span>GitHub</span></div>
+        <div class="stack-item"><span>HTML / CSS</span></div>
+        <div class="stack-item"><span>SQLite</span></div>
+        <div class="stack-item"><span>discord.py</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ОБО МНЕ -->
+  <section id="about">
+    <div class="container about-wrap">
+      <div class="section-header">
+        <span class="section-tag">03</span>
+        <h2>ОБО МНЕ<span class="accent">.</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="about-content">
+        <div class="about-text">
+          <p>Меня зовут <span class="accent">Ахан</span>. Разрабатываю Telegram-ботов и пишу Python-скрипты для автоматизации бизнес-процессов.</p>
+          <p>Работаю быстро и по делу — без лишних слов и затянутых сроков. После сдачи объясняю как пользоваться и остаюсь на связи.</p>
+          <div class="about-points">
+            <div class="point"><span class="point-icon">▸</span> Отвечаю в течение часа</div>
+            <div class="point"><span class="point-icon">▸</span> Сдаю в срок, простое — за 1-2 дня</div>
+            <div class="point"><span class="point-icon">▸</span> Код публикую на GitHub — можно проверить</div>
+            <div class="point"><span class="point-icon">▸</span> Даю инструкцию и поддержку после сдачи</div>
+          </div>
+        </div>
+        <div class="terminal-box">
+          <div class="terminal-header">
+            <span class="dot red"></span>
+            <span class="dot yellow"></span>
+            <span class="dot green"></span>
+            <span class="terminal-title">akhan@dev:~$</span>
+          </div>
+          <div class="terminal-body">
+            <p><span class="cmd">$</span> whoami</p>
+            <p class="out">Ахан — Python / Bot Developer</p>
+            <p><span class="cmd">$</span> skills --list</p>
+            <p class="out">Python, aiogram, parsing, automation</p>
+            <p><span class="cmd">$</span> status</p>
+            <p class="out accent">✓ Available for work</p>
+            <p><span class="cmd">$</span> contact --telegram</p>
+            <p class="out">@akhnnoname <span class="cursor">█</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- КОНТАКТ -->
+  <section id="contact">
+    <div class="container contact-wrap">
+      <div class="section-header">
+        <span class="section-tag">04</span>
+        <h2>КОНТАКТ<span class="accent">.</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <p class="contact-desc">Напишите — обсудим задачу и назову точную цену без лишних слов</p>
+      <div class="contact-links">
+        <a href="https://t.me/akhnnoname" class="contact-card" target="_blank">
+          <div class="contact-icon">✈</div>
+          <div>
+            <div class="contact-name">Telegram</div>
+            <div class="contact-val">@akhnnoname</div>
+          </div>
+        </a>
+        <a href="https://kwork.ru/user/akhanali" class="contact-card" target="_blank">
+          <div class="contact-icon">K</div>
+          <div>
+            <div class="contact-name">Kwork</div>
+            <div class="contact-val">akhanali</div>
+          </div>
+        </a>
+        <a href="https://github.com/Naha11" class="contact-card" target="_blank">
+          <div class="contact-icon">⌥</div>
+          <div>
+            <div class="contact-name">GitHub</div>
+            <div class="contact-val">Naha11</div>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container footer-inner">
+      <span>© 2026 AKHAN_DEV</span>
+      <span class="accent">// Telegram-боты & автоматизация</span>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

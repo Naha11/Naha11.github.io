@@ -15,6 +15,40 @@ function copyText(id, btn) {
   });
 }
 
+// Анимированные счётчики
+function animateCounter(el) {
+  const target = parseInt(el.dataset.target);
+  const duration = 1500;
+  const step = target / (duration / 16);
+  let current = 0;
+  const timer = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(timer); }
+    el.textContent = Math.floor(current) + (el.dataset.target === '100' ? '%' : '+');
+  }, 16);
+}
+
+const statsObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.stat-number').forEach(animateCounter);
+      statsObserver.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.3 });
+
+const statsSection = document.getElementById('stats');
+if (statsSection) statsObserver.observe(statsSection);
+
+// Форма заявки → Telegram
+function sendToTelegram() {
+  const name = document.getElementById('order-name').value.trim();
+  const task = document.getElementById('order-task').value.trim();
+  if (!name || !task) { alert('Заполните имя и описание задачи'); return; }
+  const msg = encodeURIComponent(`Привет! Меня зовут ${name}.\n\nЗадача: ${task}`);
+  window.open(`https://t.me/akhnnoname?text=${msg}`, '_blank');
+}
+
 // Плавное появление секций
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => {

@@ -192,11 +192,128 @@
     </div>
   </section>
 
+  <!-- СЧЁТЧИКИ -->
+  <section id="stats">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" data-target="4">0</div>
+          <div class="stat-label">выполненных проекта</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="1">0</div>
+          <div class="stat-label">час — время ответа</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="2">0</div>
+          <div class="stat-label">дня на простую задачу</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" data-target="100">0</div>
+          <div class="stat-label">% поддержка после сдачи</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ПРОЦЕСС РАБОТЫ -->
+  <section id="process">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">04</span>
+        <h2>КАК РАБОТАЕМ<span class="accent">.</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="process-grid">
+        <div class="process-step">
+          <div class="step-num">01</div>
+          <div class="step-icon">💬</div>
+          <h3>Обсуждение</h3>
+          <p>Пишете в Telegram, описываете задачу. Отвечаю в течение часа, задаю вопросы и называю цену.</p>
+        </div>
+        <div class="process-arrow">▶</div>
+        <div class="process-step">
+          <div class="step-num">02</div>
+          <div class="step-icon">⚙️</div>
+          <h3>Разработка</h3>
+          <p>Берусь за работу после предоплаты 50%. Держу в курсе по ходу разработки.</p>
+        </div>
+        <div class="process-arrow">▶</div>
+        <div class="process-step">
+          <div class="step-num">03</div>
+          <div class="step-icon">🧪</div>
+          <h3>Тестирование</h3>
+          <p>Проверяю всё сам перед сдачей. Показываю демо — вы тестируете и даёте правки.</p>
+        </div>
+        <div class="process-arrow">▶</div>
+        <div class="process-step">
+          <div class="step-num">04</div>
+          <div class="step-icon">🚀</div>
+          <h3>Сдача</h3>
+          <p>Передаю исходный код, объясняю как пользоваться. Остаюсь на связи после сдачи.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ГАРАНТИИ -->
+  <section id="guarantees">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">05</span>
+        <h2>ГАРАНТИИ<span class="accent">.</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="guarantees-grid">
+        <div class="guarantee-card">
+          <div class="g-icon">🛡</div>
+          <h3>Исходный код</h3>
+          <p>Весь код передаю вам. Он ваш — можете изменять, передавать кому угодно.</p>
+        </div>
+        <div class="guarantee-card">
+          <div class="g-icon">🔧</div>
+          <h3>Правки бесплатно</h3>
+          <p>Если что-то работает не так как договорились — исправлю бесплатно.</p>
+        </div>
+        <div class="guarantee-card">
+          <div class="g-icon">📞</div>
+          <h3>Поддержка 14 дней</h3>
+          <p>После сдачи 14 дней отвечаю на вопросы и помогаю с настройкой.</p>
+        </div>
+        <div class="guarantee-card">
+          <div class="g-icon">⏱</div>
+          <h3>Сдача в срок</h3>
+          <p>Называю реальные сроки и придерживаюсь их. Предупреждаю заранее если что-то меняется.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ФОРМА ЗАЯВКИ -->
+  <section id="order">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">06</span>
+        <h2>ЗАЯВКА<span class="accent">.</span></h2>
+        <div class="section-line"></div>
+      </div>
+      <p class="order-desc">Опишите задачу — отвечу в течение часа и назову точную цену</p>
+      <div class="order-form">
+        <input type="text" id="order-name" placeholder="Ваше имя" class="form-input" />
+        <input type="text" id="order-task" placeholder="Опишите задачу (бот, сайт, парсинг...)" class="form-input" />
+        <button class="btn btn-neon" onclick="sendToTelegram()">
+          <span class="btn-icon">▶</span> Отправить в Telegram
+        </button>
+      </div>
+      <p class="order-note">// Нажимая кнопку вы перейдёте в Telegram с готовым сообщением</p>
+    </div>
+  </section>
+
   <!-- ОПЛАТА -->
   <section id="payment">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag">04</span>
+        <span class="section-tag">07</span>
         <h2>ОПЛАТА<span class="accent">.</span></h2>
         <div class="section-line"></div>
       </div>
@@ -228,7 +345,7 @@
   <section id="about">
     <div class="container about-wrap">
       <div class="section-header">
-        <span class="section-tag">05</span>
+        <span class="section-tag">08</span>
         <h2>ОБО МНЕ<span class="accent">.</span></h2>
         <div class="section-line"></div>
       </div>
@@ -269,7 +386,7 @@
   <section id="contact">
     <div class="container contact-wrap">
       <div class="section-header">
-        <span class="section-tag">06</span>
+        <span class="section-tag">09</span>
         <h2>КОНТАКТ<span class="accent">.</span></h2>
         <div class="section-line"></div>
       </div>

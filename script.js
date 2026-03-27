@@ -55,7 +55,7 @@ const translations = {
     ab1: 'Отвечаю в течение часа', ab2: 'Сдаю в срок, простое — за 1–2 дня',
     ab3: 'Код публикую на GitHub — можно проверить', ab4: 'Даю инструкцию и поддержку после сдачи',
     p1_title: 'Бот-визитка', p2_title: 'Бот записи клиентов', p3_title: 'Бот приёма заказов', p4_title: 'Сайт-визитка',
-    p5_title: 'Генератор отчётов', p6_title: 'Парсинг в Excel', p7_title: 'Шаблон учёта бизнеса',
+    p5_title: 'Генератор отчётов', p6_title: 'Парсинг в Excel', p7_title: 'Шаблон учёта бизнеса', p8_title: 'Discord-бот',
     p1_desc: 'Telegram-бот для бизнеса: меню, кнопки, контакты, описание услуг. aiogram 3.x.',
     p2_desc: 'Бот для онлайн-записи: выбор услуги, дата/время, уведомление администратору. aiogram 3.x.',
     p3_desc: 'Бот для магазина: каталог, корзина, оформление заказа, уведомления. aiogram 3.x.',
@@ -63,6 +63,7 @@ const translations = {
     p5_desc: 'Автоматический Excel-отчёт с графиками, форматированием и сводным листом. Python + openpyxl.',
     p6_desc: 'Сбор данных с любого сайта и сохранение в красивую Excel таблицу. Python + BeautifulSoup.',
     p7_desc: 'Готовый Excel шаблон: доходы/расходы, 12 месяцев, годовой отчёт, выпадающие списки.',
+    p8_desc: 'Бот для Discord-сервера: слэш-команды /ping /info /help, автоприветствие участников. discord.py.',
   },
   en: {
     nav_services: 'SERVICES', nav_stack: 'STACK', nav_portfolio: 'WORKS',
@@ -119,7 +120,7 @@ const translations = {
     ab1: 'I reply within an hour', ab2: 'On time delivery, simple tasks in 1–2 days',
     ab3: 'Code is published on GitHub — you can review it', ab4: 'I provide instructions and support after delivery',
     p1_title: 'Business Card Bot', p2_title: 'Client Booking Bot', p3_title: 'Order Intake Bot', p4_title: 'Landing Page',
-    p5_title: 'Report Generator', p6_title: 'Web Scraper to Excel', p7_title: 'Business Tracker Template',
+    p5_title: 'Report Generator', p6_title: 'Web Scraper to Excel', p7_title: 'Business Tracker Template', p8_title: 'Discord Bot',
     p1_desc: 'Telegram bot for business: menu, buttons, contacts, service descriptions. aiogram 3.x.',
     p2_desc: 'Online booking bot: service selection, date/time, admin notifications. aiogram 3.x.',
     p3_desc: 'Shop bot: catalog, cart, order placement, notifications. aiogram 3.x.',
@@ -127,6 +128,7 @@ const translations = {
     p5_desc: 'Auto-generated Excel report with charts, formatting and summary sheet. Python + openpyxl.',
     p6_desc: 'Collects data from any website and saves it to a clean Excel table. Python + BeautifulSoup.',
     p7_desc: 'Ready-made Excel template: income/expenses, 12 months, yearly report, dropdowns.',
+    p8_desc: 'Discord server bot: /ping /info /help slash commands, welcome messages for new members. discord.py.',
   },
   kz: {
     nav_services: 'ҚЫЗМЕТТЕР', nav_stack: 'СТЕК', nav_portfolio: 'ЖҰМЫСТАР',
@@ -183,7 +185,7 @@ const translations = {
     ab1: 'Бір сағат ішінде жауап беремін', ab2: 'Мерзімінде тапсырамын',
     ab3: 'Код GitHub-та жарияланады', ab4: 'Нұсқаулық пен қолдау беремін',
     p1_title: 'Визитка боты', p2_title: 'Жазылым боты', p3_title: 'Тапсырыс боты', p4_title: 'Сайт-визитка',
-    p5_title: 'Есеп генераторы', p6_title: 'Excel-ге парсинг', p7_title: 'Бизнес есеп шаблоны',
+    p5_title: 'Есеп генераторы', p6_title: 'Excel-ге парсинг', p7_title: 'Бизнес есеп шаблоны', p8_title: 'Discord боты',
     p1_desc: 'Бизнес үшін Telegram боты: мәзір, түймелер, байланыстар.',
     p2_desc: 'Онлайн жазылым боты: қызмет таңдау, күн/уақыт, хабарламалар.',
     p3_desc: 'Дүкен боты: каталог, себет, тапсырыс рәсімдеу.',
@@ -191,6 +193,7 @@ const translations = {
     p5_desc: 'Графиктер мен форматтаумен автоматты Excel есебі. Python + openpyxl.',
     p6_desc: 'Кез келген сайттан деректер жинап Excel кестесіне сақтайды.',
     p7_desc: 'Дайын Excel шаблоны: кіріс/шығыс, 12 ай, жылдық есеп.',
+    p8_desc: 'Discord сервер боты: /ping /info /help командалары, жаңа мүшелерді қарсы алу. discord.py.',
   }
 };
 

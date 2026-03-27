@@ -65,7 +65,7 @@ nav {
 .nav-links { list-style: none; display: flex; gap: 28px; }
 .nav-links a {
   color: var(--text); text-decoration: none;
-  font-size: 0.78rem; letter-spacing: 2px;
+  font-size: 0.85rem; letter-spacing: 2px;
   transition: color 0.2s;
 }
 .nav-links a:hover { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); }
@@ -189,7 +189,7 @@ nav {
   background: rgba(40,200,64,0.08);
   border: 1px solid rgba(40,200,64,0.25);
   padding: 6px 14px; margin-bottom: 18px;
-  font-size: 0.72rem; letter-spacing: 2px;
+  font-size: 0.85rem; letter-spacing: 2px;
   color: #28c840;
 }
 .available-dot {
@@ -205,7 +205,7 @@ nav {
 }
 
 .hero-label {
-  font-size: 0.78rem; letter-spacing: 4px;
+  font-size: 0.95rem; letter-spacing: 4px;
   color: var(--cyan); margin-bottom: 20px;
   text-shadow: 0 0 8px var(--cyan);
 }
@@ -257,9 +257,9 @@ nav {
 }
 .hero-desc {
   margin: 24px 0 36px;
-  font-size: 0.95rem; line-height: 1.8;
+  font-size: 1.1rem; line-height: 1.8;
   color: rgba(200,216,232,0.7);
-  max-width: 520px;
+  max-width: 580px;
 }
 .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 48px; }
 
@@ -323,11 +323,11 @@ nav {
 .card-num { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: var(--border); letter-spacing: 2px; margin-bottom: 20px; }
 .card-icon { font-size: 2rem; margin-bottom: 16px; }
 .service-card h3 { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: white; letter-spacing: 2px; margin-bottom: 12px; }
-.service-card p { font-size: 0.83rem; line-height: 1.7; color: rgba(200,216,232,0.65); margin-bottom: 18px; }
+.service-card p { font-size: 0.95rem; line-height: 1.7; color: rgba(200,216,232,0.65); margin-bottom: 18px; }
 .card-list { list-style: none; margin-bottom: 22px; }
-.card-list li { font-size: 0.78rem; color: rgba(200,216,232,0.5); padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+.card-list li { font-size: 0.9rem; color: rgba(200,216,232,0.5); padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
 .card-list li::before { content: '▸ '; color: var(--cyan); }
-.card-price { font-size: 0.78rem; color: rgba(200,216,232,0.5); }
+.card-price { font-size: 0.9rem; color: rgba(200,216,232,0.5); }
 .price-alt { font-size: 0.72rem; color: rgba(200,216,232,0.35); letter-spacing: 0.03em; }
 .card-price span { font-family: 'Orbitron', sans-serif; color: var(--gold); font-size: 1.1rem; text-shadow: 0 0 8px rgba(255,215,0,0.4); }
 
@@ -359,7 +359,7 @@ nav {
 .step-num { font-family: 'Orbitron', sans-serif; font-size: 0.65rem; color: var(--magenta); letter-spacing: 2px; margin-bottom: 14px; text-shadow: 0 0 6px var(--magenta); }
 .step-icon { font-size: 1.8rem; margin-bottom: 12px; }
 .process-step h3 { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: white; letter-spacing: 1px; margin-bottom: 10px; }
-.process-step p { font-size: 0.78rem; line-height: 1.7; color: rgba(200,216,232,0.6); }
+.process-step p { font-size: 0.92rem; line-height: 1.7; color: rgba(200,216,232,0.6); }
 .process-arrow { color: var(--cyan); font-size: 1.2rem; align-self: center; opacity: 0.4; flex-shrink: 0; }
 
 /* GUARANTEES */
@@ -371,7 +371,7 @@ nav {
 .guarantee-card:hover { transform: translateY(-3px); }
 .g-icon { font-size: 2rem; margin-bottom: 14px; }
 .guarantee-card h3 { font-family: 'Orbitron', sans-serif; font-size: 0.85rem; color: white; letter-spacing: 1px; margin-bottom: 10px; }
-.guarantee-card p { font-size: 0.8rem; line-height: 1.7; color: rgba(200,216,232,0.6); }
+.guarantee-card p { font-size: 0.95rem; line-height: 1.7; color: rgba(200,216,232,0.6); }
 
 /* REVIEWS */
 #reviews { padding: 100px 0; background: var(--dark); position: relative; }
@@ -388,7 +388,7 @@ nav {
 .review-card:hover::before { width: 100%; }
 .review-card:hover { border-color: rgba(255,215,0,0.15); transform: translateY(-3px); }
 .review-stars { color: var(--gold); font-size: 0.9rem; letter-spacing: 3px; margin-bottom: 16px; text-shadow: 0 0 8px rgba(255,215,0,0.5); }
-.review-text { font-size: 0.85rem; line-height: 1.8; color: rgba(200,216,232,0.75); margin-bottom: 24px; font-style: italic; }
+.review-text { font-size: 0.95rem; line-height: 1.8; color: rgba(200,216,232,0.75); margin-bottom: 24px; font-style: italic; }
 .review-author { display: flex; align-items: center; gap: 14px; }
 .review-avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg, var(--cyan), var(--magenta)); display: flex; align-items: center; justify-content: center; font-family: 'Orbitron', sans-serif; font-size: 1rem; color: #000; font-weight: 700; flex-shrink: 0; }
 .review-name { font-size: 0.82rem; color: white; margin-bottom: 2px; }
@@ -416,7 +416,7 @@ nav {
   width: 100%; background: none; border: none;
   color: var(--text); text-align: left;
   padding: 20px 24px;
-  font-family: 'Share Tech Mono', monospace; font-size: 0.9rem;
+  font-family: 'Share Tech Mono', monospace; font-size: 1rem;
   cursor: pointer; display: flex; justify-content: space-between; align-items: center;
   transition: color 0.2s; gap: 16px;
 }
@@ -431,7 +431,7 @@ nav {
 .faq-answer.open { max-height: 200px; }
 .faq-answer p {
   padding: 0 24px 20px;
-  font-size: 0.83rem; line-height: 1.8;
+  font-size: 0.95rem; line-height: 1.8;
   color: rgba(200,216,232,0.6);
   border-top: 1px solid rgba(0,245,255,0.06);
   padding-top: 16px;
@@ -448,7 +448,7 @@ nav {
 .payment-card:hover { border-color: rgba(255,215,0,0.25); transform: translateY(-3px); }
 .payment-icon { font-size: 2rem; margin-bottom: 14px; }
 .payment-card h3 { font-family: 'Orbitron', sans-serif; font-size: 1rem; color: white; letter-spacing: 2px; margin-bottom: 10px; }
-.payment-card p { font-size: 0.82rem; color: rgba(200,216,232,0.6); line-height: 1.6; margin-bottom: 18px; }
+.payment-card p { font-size: 0.95rem; color: rgba(200,216,232,0.6); line-height: 1.6; margin-bottom: 18px; }
 .payment-val { font-family: 'Share Tech Mono', monospace; font-size: 1rem; color: var(--gold); text-shadow: 0 0 8px rgba(255,215,0,0.4); margin-bottom: 14px; letter-spacing: 1px; }
 .crypto-addr { font-size: 0.72rem; word-break: break-all; }
 .copy-btn { background: transparent; border: 1px solid rgba(255,215,0,0.3); color: var(--gold); padding: 8px 18px; font-family: 'Share Tech Mono', monospace; font-size: 0.75rem; letter-spacing: 1px; cursor: pointer; transition: all 0.2s; }
@@ -465,7 +465,7 @@ nav {
 .portfolio-card:hover { border-color: rgba(0,245,255,0.2); transform: translateY(-3px); }
 .portfolio-tag { font-size: 0.65rem; letter-spacing: 2px; color: var(--magenta); margin-bottom: 12px; text-shadow: 0 0 6px var(--magenta); }
 .portfolio-card h3 { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; color: white; letter-spacing: 1px; margin-bottom: 10px; }
-.portfolio-card p { font-size: 0.8rem; line-height: 1.7; color: rgba(200,216,232,0.6); margin-bottom: 18px; }
+.portfolio-card p { font-size: 0.95rem; line-height: 1.7; color: rgba(200,216,232,0.6); margin-bottom: 18px; }
 .portfolio-link { font-size: 0.75rem; color: var(--cyan); text-decoration: none; letter-spacing: 1px; transition: text-shadow 0.2s; }
 .portfolio-link:hover { text-shadow: 0 0 8px var(--cyan); }
 
@@ -473,9 +473,9 @@ nav {
 #about { padding: 100px 0; background: var(--dark2); position: relative; }
 #about::before { content: '武士'; position: absolute; right: 3%; top: 10%; font-size: 18rem; color: rgba(255,34,68,0.03); pointer-events: none; line-height: 1; }
 .about-content { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
-.about-text p { font-size: 0.9rem; line-height: 1.9; color: rgba(200,216,232,0.75); margin-bottom: 20px; }
+.about-text p { font-size: 1rem; line-height: 1.9; color: rgba(200,216,232,0.75); margin-bottom: 20px; }
 .about-points { margin-top: 28px; }
-.point { padding: 10px 0; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text); }
+.point { padding: 10px 0; font-size: 0.95rem; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text); }
 .point-icon { color: var(--cyan); margin-right: 10px; }
 
 /* TERMINAL */
@@ -496,7 +496,7 @@ nav {
 
 /* CONTACT */
 #contact { padding: 100px 0; }
-.contact-desc { font-size: 0.88rem; color: rgba(200,216,232,0.55); margin-bottom: 40px; }
+.contact-desc { font-size: 1rem; color: rgba(200,216,232,0.55); margin-bottom: 40px; }
 .contact-links { display: flex; flex-wrap: wrap; gap: 16px; }
 .contact-card { display: flex; align-items: center; gap: 20px; background: var(--dark3); border: 1px solid rgba(0,245,255,0.08); padding: 22px 28px; text-decoration: none; color: var(--text); min-width: 220px; transition: all 0.25s; position: relative; }
 .contact-card::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--cyan); opacity: 0; transition: opacity 0.25s; box-shadow: 0 0 8px var(--cyan); }

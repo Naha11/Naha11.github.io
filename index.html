@@ -391,39 +391,24 @@
         <h2 data-i18n="rev_title">ОТЗЫВЫ<span class="accent">.</span></h2>
         <div class="section-line"></div>
       </div>
-      <div class="reviews-grid">
-        <div class="review-card tilt-card">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text" data-i18n="r1_text">"Бот работает отлично! Всё сделано быстро и чисто. Под наши задачи сделал функционал, которого нигде не нашли."</p>
-          <div class="review-author">
-            <div class="review-avatar">М</div>
-            <div>
-              <div class="review-name" data-i18n="r1_name">Магазин одежды</div>
-              <div class="review-source">Kwork · ★ 5.0</div>
-            </div>
+      <div id="reviews-list" class="reviews-grid">
+        <!-- Отзывы загружаются из localStorage -->
+      </div>
+      <div class="review-form-wrap">
+        <p class="review-empty" id="review-empty" data-i18n="rev_empty">Пока отзывов нет. Будьте первым!</p>
+        <div class="review-form">
+          <input type="text" id="review-name" data-i18n-ph="ph_rev_name" placeholder="Ваше имя" class="form-input" maxlength="50" />
+          <textarea id="review-text" data-i18n-ph="ph_rev_text" placeholder="Ваш отзыв..." class="form-input review-textarea" maxlength="300" rows="3"></textarea>
+          <div class="review-stars-input" id="review-stars-input">
+            <span class="star-btn" data-star="1">★</span>
+            <span class="star-btn" data-star="2">★</span>
+            <span class="star-btn" data-star="3">★</span>
+            <span class="star-btn" data-star="4">★</span>
+            <span class="star-btn" data-star="5">★</span>
           </div>
-        </div>
-        <div class="review-card tilt-card">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text" data-i18n="r2_text">"Автоматизировал наши таблицы Excel — экономим около трёх часов в день. Объяснил как пользоваться, всё понятно."</p>
-          <div class="review-author">
-            <div class="review-avatar">Б</div>
-            <div>
-              <div class="review-name" data-i18n="r2_name">Малый бизнес</div>
-              <div class="review-source">Kwork · ★ 5.0</div>
-            </div>
-          </div>
-        </div>
-        <div class="review-card tilt-card">
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text" data-i18n="r3_text">"Сайт-визитку сделал за два дня. Смотрится профессионально, загружается быстро. Рекомендую как надёжного исполнителя."</p>
-          <div class="review-author">
-            <div class="review-avatar">Ф</div>
-            <div>
-              <div class="review-name" data-i18n="r3_name">Фрилансер</div>
-              <div class="review-source">Kwork · ★ 5.0</div>
-            </div>
-          </div>
+          <button class="btn btn-neon" onclick="submitReview()">
+            <span class="btn-icon">✎</span> <span data-i18n="btn_review">Оставить отзыв</span>
+          </button>
         </div>
       </div>
     </div>

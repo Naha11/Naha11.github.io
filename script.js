@@ -30,10 +30,9 @@ const translations = {
     s5_desc: 'Бот для вашего Discord-сервера: приветствие, слэш-команды, автоответы. Под ключ.',
     s5_l1: 'Слэш-команды', s5_l2: 'Приветствие участников', s5_l3: 'Кастомная логика',
     badge_hit: 'ХИТ',
-    r1_text: '"Бот работает отлично! Всё сделано быстро и чисто. Под наши задачи сделал функционал, которого нигде не нашли."',
-    r2_text: '"Автоматизировал наши таблицы Excel — экономим около трёх часов в день. Объяснил как пользоваться, всё понятно."',
-    r3_text: '"Сайт-визитку сделал за два дня. Смотрится профессионально, загружается быстро. Рекомендую как надёжного исполнителя."',
-    r1_name: 'Магазин одежды', r2_name: 'Малый бизнес', r3_name: 'Фрилансер',
+    rev_empty: 'Пока отзывов нет. Будьте первым!',
+    btn_review: 'Оставить отзыв',
+    ph_rev_name: 'Ваше имя', ph_rev_text: 'Ваш отзыв...',
     faq1_q: 'Какой срок выполнения?', faq2_q: 'Нужна ли предоплата?',
     faq3_q: 'Что если результат не понравится?', faq4_q: 'Можно ли добавить функции позже?',
     faq5_q: 'Работаете с зарубежными клиентами?',
@@ -97,10 +96,9 @@ const translations = {
     s5_desc: 'Bot for your Discord server: welcome messages, slash commands, auto-replies. Ready to use.',
     s5_l1: 'Slash commands', s5_l2: 'Member welcome', s5_l3: 'Custom logic',
     badge_hit: 'HOT',
-    r1_text: '"The bot works great! Everything was done quickly and cleanly. Built features we couldn\'t find anywhere else."',
-    r2_text: '"Automated our Excel spreadsheets — saving about three hours a day. Explained how to use it, very clear."',
-    r3_text: '"Built the landing page in two days. Looks professional, loads fast. I recommend him as a reliable developer."',
-    r1_name: 'Clothing Store', r2_name: 'Small Business', r3_name: 'Freelancer',
+    rev_empty: 'No reviews yet. Be the first!',
+    btn_review: 'Leave a review',
+    ph_rev_name: 'Your name', ph_rev_text: 'Your review...',
     faq1_q: 'What is the turnaround time?', faq2_q: 'Is a deposit required?',
     faq3_q: 'What if I am not satisfied with the result?', faq4_q: 'Can features be added later?',
     faq5_q: 'Do you work with international clients?',
@@ -164,10 +162,9 @@ const translations = {
     s5_desc: 'Discord серверіңіз үшін бот: қарсы алу, слэш-командалар, автожауаптар.',
     s5_l1: 'Слэш-командалар', s5_l2: 'Мүшелерді қарсы алу', s5_l3: 'Кастомды логика',
     badge_hit: 'ХИТ',
-    r1_text: '"Бот тамаша жұмыс істейді! Барлығы жылдам және таза орындалды. Басқа жерде таба алмаған функционал жасады."',
-    r2_text: '"Excel кестелерін автоматтандырды — күніне үш сағатқа жуық уақыт үнемдейміз. Қолдануды түсіндірді."',
-    r3_text: '"Сайт-визитканы екі күнде жасады. Кәсіби көрінеді, жылдам жүктеледі. Сенімді орындаушы ретінде ұсынамын."',
-    r1_name: 'Киім дүкені', r2_name: 'Шағын бизнес', r3_name: 'Фрилансер',
+    rev_empty: 'Әзірге пікірлер жоқ. Бірінші болыңыз!',
+    btn_review: 'Пікір қалдыру',
+    ph_rev_name: 'Атыңыз', ph_rev_text: 'Пікіріңіз...',
     faq1_q: 'Орындау мерзімі қандай?', faq2_q: 'Алдын ала төлем қажет пе?',
     faq3_q: 'Нәтиже ұнамаса ше?', faq4_q: 'Кейінірек функционал қосуға болады ма?',
     faq5_q: 'Шетелдік клиенттермен жұмыс жасайсыз ба?',
@@ -610,6 +607,115 @@ function copyText(id, btn) {
     }, 2000);
   });
 }
+
+// ─── ОТЗЫВЫ (localStorage) ───────────────────────────────────────────────────
+let selectedStars = 5;
+
+document.querySelectorAll('.star-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedStars = parseInt(btn.dataset.star);
+    document.querySelectorAll('.star-btn').forEach(s => {
+      s.classList.toggle('active', parseInt(s.dataset.star) <= selectedStars);
+    });
+  });
+  btn.addEventListener('mouseenter', () => {
+    const val = parseInt(btn.dataset.star);
+    document.querySelectorAll('.star-btn').forEach(s => {
+      s.classList.toggle('active', parseInt(s.dataset.star) <= val);
+    });
+  });
+});
+
+document.querySelector('.review-stars-input')?.addEventListener('mouseleave', () => {
+  document.querySelectorAll('.star-btn').forEach(s => {
+    s.classList.toggle('active', parseInt(s.dataset.star) <= selectedStars);
+  });
+});
+
+// Инициализация звёзд
+document.querySelectorAll('.star-btn').forEach(s => {
+  s.classList.toggle('active', parseInt(s.dataset.star) <= selectedStars);
+});
+
+function getReviews() {
+  try { return JSON.parse(localStorage.getItem('naha_reviews') || '[]'); }
+  catch { return []; }
+}
+
+function saveReviews(reviews) {
+  localStorage.setItem('naha_reviews', JSON.stringify(reviews));
+}
+
+function renderReviews() {
+  const list = document.getElementById('reviews-list');
+  const empty = document.getElementById('review-empty');
+  const reviews = getReviews();
+  list.innerHTML = '';
+
+  if (reviews.length === 0) {
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+
+  reviews.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'review-card tilt-card fade-in visible';
+    const stars = '★'.repeat(r.stars) + '☆'.repeat(5 - r.stars);
+    const name = escapeHtml(r.name);
+    const text = escapeHtml(r.text);
+    card.innerHTML = `
+      <div class="review-stars">${stars}</div>
+      <p class="review-text">"${text}"</p>
+      <div class="review-author">
+        <div class="review-avatar">${name.charAt(0).toUpperCase()}</div>
+        <div>
+          <div class="review-name">${name}</div>
+          <div class="review-date">${r.date}</div>
+        </div>
+      </div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function submitReview() {
+  const nameEl = document.getElementById('review-name');
+  const textEl = document.getElementById('review-text');
+  const name = nameEl.value.trim();
+  const text = textEl.value.trim();
+
+  if (!name || !text) {
+    alert(currentLang === 'en' ? 'Please fill in your name and review' :
+          currentLang === 'kz' ? 'Атыңызды және пікіріңізді толтырыңыз' :
+          'Заполните имя и отзыв');
+    return;
+  }
+
+  const reviews = getReviews();
+  const now = new Date();
+  reviews.unshift({
+    name,
+    text,
+    stars: selectedStars,
+    date: now.toLocaleDateString('ru-RU')
+  });
+  saveReviews(reviews);
+  renderReviews();
+
+  nameEl.value = '';
+  textEl.value = '';
+  selectedStars = 5;
+  document.querySelectorAll('.star-btn').forEach(s => s.classList.add('active'));
+}
+
+renderReviews();
 
 // ─── FAQ АККОРДЕОН ───────────────────────────────────────────────────────────
 function toggleFaq(btn) {

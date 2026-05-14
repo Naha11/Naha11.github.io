@@ -64,7 +64,7 @@
     width: 100%;
     height: 100%;
   }
-  #matrix { z-index: 0; }
+  #matrix { z-index: 0; opacity: 0.45; }
   #heart  { z-index: 1; }
 </style>
 </head>
@@ -127,7 +127,7 @@ function setupMatrix() {
 }
 
 function matrixFrame() {
-  mx.fillStyle = 'rgba(0,0,0,0.045)';
+  mx.fillStyle = 'rgba(0,0,0,0.08)';
   mx.fillRect(0, 0, mxW, mxH);
   mx.font = MX_FONT + 'px "Courier New", monospace';
   mx.textBaseline = 'top';
@@ -151,12 +151,11 @@ function matrixFrame() {
       ? WORD[((d.charIndex % WORD.length) + WORD.length) % WORD.length]
       : CHARSET[Math.floor(Math.random() * CHARSET.length)];
 
-    // glowing head
-    mx.shadowColor = 'hsl(' + d.hue + ', 100%, 55%)';
-    mx.shadowBlur = d.isWord ? 14 : 10;
+    mx.shadowColor = 'hsl(' + d.hue + ', 90%, 45%)';
+    mx.shadowBlur = d.isWord ? 10 : 6;
     mx.fillStyle = d.isWord
-      ? 'hsl(' + d.hue + ', 100%, 82%)'
-      : 'hsl(' + d.hue + ', 100%, 75%)';
+      ? 'hsl(' + d.hue + ', 95%, 65%)'
+      : 'hsl(' + d.hue + ', 85%, 50%)';
     mx.fillText(ch, x, y);
 
     if (y > mxH + 60) {
@@ -262,8 +261,8 @@ function frame(now) {
     const b = Math.floor(40 + w.tone * 50);
 
     ctx.font = w.size + 'px "Pixelify Sans", "Press Start 2P", monospace';
-    ctx.shadowColor = 'rgba(255,40,70,0.8)';
-    ctx.shadowBlur = 6;
+    ctx.shadowColor = 'rgba(255,30,60,1)';
+    ctx.shadowBlur = 12;
     ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.95) + ')';
     ctx.fillText(w.text, w.x, w.y);
   }

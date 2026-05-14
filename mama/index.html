@@ -105,7 +105,7 @@ let mxW = 0, mxH = 0;
 let cells = 0, rows = 0;
 let walkers = [];
 const CHARSET = '01<>{}[]()=+-*/!?#$%&|01アイウエオカキクケコサシスセソタチツテトナニヌネノ01';
-const WORD = 'MAMA LOVE ';
+const WORD = 'GALA ';
 const MX_FONT = 16;
 
 // directions (no straight UP — overall drift remains downward)
@@ -268,7 +268,7 @@ function buildWords() {
           speed: 0.5 + Math.random() * 1.3,
           size: 14 + Math.random() * 4,
           tone: Math.random(),
-          text: Math.random() < 0.5 ? 'i love u' : 'MAMA'
+          text: Math.random() < 0.5 ? 'i love u' : 'GULNARA'
         });
         if (y < minY) minY = y;
         if (y > maxY) maxY = y;

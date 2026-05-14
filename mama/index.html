@@ -141,9 +141,9 @@ function spawnWalker() {
     dir,
     stepsLeft: 3 + Math.floor(Math.random() * 8),
     tick: 0,
-    speed: 0.20 + Math.random() * 0.55,
-    hue: Math.random() * 360,
-    hueSpeed: 0.3 + Math.random() * 1.2,
+    speed: 0.06 + Math.random() * 0.18,
+    hue: 120,
+    hueSpeed: 0,
     isWord: Math.random() < 0.32,
     charIndex: Math.floor(Math.random() * WORD.length)
   };
@@ -194,11 +194,11 @@ function matrixFrame() {
     }
 
     if (ch !== ' ') {
-      mx.shadowColor = 'hsl(' + w.hue + ', 90%, 45%)';
-      mx.shadowBlur = w.isWord ? 10 : 6;
+      mx.shadowColor = 'hsl(120, 100%, 45%)';
+      mx.shadowBlur = w.isWord ? 12 : 8;
       mx.fillStyle = w.isWord
-        ? 'hsl(' + w.hue + ', 95%, 65%)'
-        : 'hsl(' + w.hue + ', 85%, 50%)';
+        ? 'hsl(120, 100%, 70%)'
+        : 'hsl(120, 100%, 55%)';
       mx.fillText(ch, x, y);
     }
 
@@ -300,12 +300,12 @@ function frame(now) {
     const alpha = blink * fadeIn;
 
     const r = 255;
-    const g = Math.floor(20 + w.tone * 70);
-    const b = Math.floor(40 + w.tone * 50);
+    const g = Math.floor(40 + w.tone * 60);
+    const b = Math.floor(180 + w.tone * 60);
 
     ctx.font = w.size + 'px "Pixelify Sans", "Press Start 2P", monospace';
-    ctx.shadowColor = 'rgba(255,30,60,1)';
-    ctx.shadowBlur = 12;
+    ctx.shadowColor = 'rgba(255,80,200,1)';
+    ctx.shadowBlur = 14;
     ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.95) + ')';
     ctx.fillText(w.text, w.x, w.y);
   }

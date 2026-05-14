@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #080810; overflow: hidden; }
+  canvas { display: block; }
+</style>
+</head>
+<body>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/"
+  }
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const scene  = new THREE.Scene();
+scene.background = new THREE.Color(0x080810);
+
+const camera = new THREE.PerspectiveCamera(42, innerWidth/innerHeight, 0.1, 100);
+camera.position.set(0, 0.3, 5.5);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(innerWidth, innerHeight);
+renderer.setPixelRatio(devicePixelRatio);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+document.body.appendChild(renderer.domElement);
+
+// Туман (почти нет, только по краям)
+scene.fog = new THREE.FogExp2(0x080810, 0.04);
+
+// ── Освещение ─────────────────────────────────────────────────────────────
+// Ambient — мягкий нейтральный
+const ambient = new THREE.AmbientLight(0x445566, 3.5);
+scene.add(ambient);
+
+// Ключевой белый свет (слева сверху спереди)
+const key = new THREE.PointLight(0xffffff, 60, 18);
+key.position.set(-3.0, 3.5, 4.0);
+scene.add(key);
+
+// Заполняющий (справа, мягче)
+const fill = new THREE.PointLight(0xddeeff, 30, 15);
+fill.position.set(3.0, 0.5, 3.5);
+scene.add(fill);
+
+// Rim-свет сзади — даёт белый силуэт
+const rim = new THREE.DirectionalLight(0xffffff, 2.5);
+rim.position.set(0, 2, -5);
+scene.add(rim);
+
+// Красный акцент (усиливает свечение глаз)
+const redGlow = new THREE.PointLight(0xff1100, 12, 5);
+redGlow.position.set(0, 0.2, 2.0);
+scene.add(redGlow);
+
+// Нижний fill снизу — мягкий серый
+const bottom = new THREE.PointLight(0x334455, 8, 10);
+bottom.position.set(0, -4, 2);
+scene.add(bottom);
+
+// ── Частицы фона (тёмно-красные, редкие) ─────────────────────────────────
+const particles = new THREE.BufferGeometry();
+const pCount = 600;
+const pPos = new Float32Array(pCount * 3);
+for (let i = 0; i < pCount * 3; i++) pPos[i] = (Math.random() - 0.5) * 22;
+particles.setAttribute('position', new THREE.BufferAttribute(pPos, 3));
+const pMat = new THREE.PointsMaterial({ color: 0xff2200, size: 0.025, transparent: true, opacity: 0.35 });
+scene.add(new THREE.Points(particles, pMat));
+
+// ── Загрузка модели ───────────────────────────────────────────────────────
+const loader = new GLTFLoader();
+let mask;
+loader.load('./kitsune_mask.glb', (gltf) => {
+  mask = gltf.scene;
+  mask.scale.setScalar(1.0);
+  mask.rotation.x = 0.08;
+  scene.add(mask);
+});
+
+// ── Управление ────────────────────────────────────────────────────────────
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping  = true;
+controls.dampingFactor  = 0.05;
+controls.minDistance    = 2.5;
+controls.maxDistance    = 9;
+controls.autoRotate     = true;
+controls.autoRotateSpeed = 1.0;
+controls.target.set(0, 0, 0);
+
+// ── Анимация ──────────────────────────────────────────────────────────────
+let t = 0;
+function animate() {
+  requestAnimationFrame(animate);
+  t += 0.016;
+  // Пульсация красного акцента (имитирует мерцание глаз)
+  redGlow.intensity = 10 + Math.sin(t * 3.2) * 5;
+  // Мягкая пульсация ключевого
+  key.intensity = 58 + Math.sin(t * 1.4) * 6;
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+window.addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+});
+</script>
+</body>
+</html>

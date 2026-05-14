@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Heart Landing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: #000;
+    color: #fff;
+    font-family: 'Pixelify Sans', 'Courier New', monospace;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #screen1 {
+    text-align: center;
+    color: #ff3344;
+    font-size: 14px;
+    line-height: 1.9;
+    padding: 20px;
+    z-index: 10;
+  }
+  #screen1 .big {
+    font-size: 60px;
+    color: #eaeaea;
+    margin-bottom: 32px;
+    font-family: 'Press Start 2P', 'Pixelify Sans', monospace;
+    letter-spacing: 3px;
+  }
+  #screen1 .line { color: #ff4466; opacity: 0.85; }
+  #screen1 .small { color: #777; font-size: 12px; margin-top: 10px; }
+  #decryptBtn {
+    margin-top: 22px;
+    background: #1a0006;
+    color: #ff4466;
+    border: 1px solid #ff4466;
+    padding: 11px 24px;
+    font-family: inherit;
+    font-size: 14px;
+    cursor: pointer;
+    letter-spacing: 1.5px;
+    transition: background .2s;
+  }
+  #decryptBtn:hover { background: #4a0010; }
+  #screen2 {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    background: #000;
+  }
+  #screen2 canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  #matrix { z-index: 0; }
+  #heart  { z-index: 1; }
+</style>
+</head>
+<body>
+<div id="screen1">
+  <div class="big">ADELYA</div>
+  <div class="line">[system] Initializing heart.PROTOCOL...</div>
+  <div class="line">&gt; One encrypted package found for you</div>
+  <button id="decryptBtn">🔒 DECRYPT MESSAGE</button>
+  <div class="small">(or just click anywhere)</div>
+</div>
+
+<div id="screen2">
+  <canvas id="matrix"></canvas>
+  <canvas id="heart"></canvas>
+</div>
+
+<script>
+const screen1 = document.getElementById('screen1');
+const screen2 = document.getElementById('screen2');
+const btn     = document.getElementById('decryptBtn');
+
+function start() {
+  if (screen1.style.display === 'none') return;
+  screen1.style.display = 'none';
+  screen2.style.display = 'block';
+  setupMatrix();
+  requestAnimationFrame(matrixFrame);
+  drawHeart();
+}
+btn.addEventListener('click', start);
+screen1.addEventListener('click', start);
+
+// ===== MATRIX RAIN (RGB) =====
+const mxCanvas = document.getElementById('matrix');
+const mx = mxCanvas.getContext('2d');
+let mxW = 0, mxH = 0;
+let drops = [];
+const CHARSET = '01<>{}[]()=+-*/!?#$%&|01アイウエオカキクケコサシスセソタチツテトナニヌネノ01';
+const WORD = 'AKHAN';
+const MX_FONT = 16;
+
+function setupMatrix() {
+  mxW = mxCanvas.width  = window.innerWidth;
+  mxH = mxCanvas.height = window.innerHeight;
+  const cols = Math.floor(mxW / MX_FONT);
+  drops = [];
+  for (let i = 0; i < cols; i++) {
+    const isWord = Math.random() < 0.28;
+    drops.push({
+      row: Math.floor(Math.random() * -40),
+      tick: 0,
+      speed: 0.35 + Math.random() * 0.9,
+      hue: Math.random() * 360,
+      hueSpeed: 0.3 + Math.random() * 1.2,
+      isWord: isWord,
+      charIndex: Math.floor(Math.random() * WORD.length)
+    });
+  }
+}
+
+function matrixFrame() {
+  mx.fillStyle = 'rgba(0,0,0,0.045)';
+  mx.fillRect(0, 0, mxW, mxH);
+  mx.font = MX_FONT + 'px "Courier New", monospace';
+  mx.textBaseline = 'top';
+
+  for (let i = 0; i < drops.length; i++) {
+    const d = drops[i];
+    const x = i * MX_FONT;
+
+    d.tick += d.speed;
+    if (d.tick >= 1) {
+      d.row += 1;
+      d.charIndex += 1;
+      d.tick = 0;
+    }
+    const y = d.row * MX_FONT;
+
+    if (y < -MX_FONT) continue;
+
+    d.hue = (d.hue + d.hueSpeed) % 360;
+    const ch = d.isWord
+      ? WORD[((d.charIndex % WORD.length) + WORD.length) % WORD.length]
+      : CHARSET[Math.floor(Math.random() * CHARSET.length)];
+
+    // glowing head
+    mx.shadowColor = 'hsl(' + d.hue + ', 100%, 55%)';
+    mx.shadowBlur = d.isWord ? 14 : 10;
+    mx.fillStyle = d.isWord
+      ? 'hsl(' + d.hue + ', 100%, 82%)'
+      : 'hsl(' + d.hue + ', 100%, 75%)';
+    mx.fillText(ch, x, y);
+
+    if (y > mxH + 60) {
+      d.row = -2 - Math.floor(Math.random() * 30);
+      d.speed = 0.35 + Math.random() * 0.9;
+      d.charIndex = Math.floor(Math.random() * WORD.length);
+    }
+  }
+  mx.shadowBlur = 0;
+  requestAnimationFrame(matrixFrame);
+}
+
+// ===== HEART =====
+const canvas = document.getElementById('heart');
+const ctx = canvas.getContext('2d');
+let words = [];
+let heartTop = 0;
+let heartBottom = 0;
+let animStart = 0;
+
+function buildWords() {
+  const W = canvas.width  = window.innerWidth;
+  const H = canvas.height = window.innerHeight;
+
+  const mask = document.createElement('canvas');
+  mask.width = W; mask.height = H;
+  const mctx = mask.getContext('2d');
+
+  const scale = Math.min(W, H) / 38;
+  const cx = W / 2;
+  const cy = H / 2;
+
+  mctx.fillStyle = '#fff';
+  mctx.beginPath();
+  for (let t = 0; t <= Math.PI * 2 + 0.01; t += 0.005) {
+    const x = 16 * Math.pow(Math.sin(t), 3);
+    const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+    const px = cx + x * scale;
+    const py = cy + y * scale;
+    if (t === 0) mctx.moveTo(px, py);
+    else mctx.lineTo(px, py);
+  }
+  mctx.closePath();
+  mctx.fill();
+
+  const data = mctx.getImageData(0, 0, W, H).data;
+
+  words = [];
+  const stepY = 18;
+  const stepX = 70;
+  let minY = Infinity, maxY = -Infinity;
+
+  for (let y = 0; y < H; y += stepY) {
+    const offset = (y / stepY) % 2 === 0 ? 0 : stepX / 2;
+    for (let x = offset; x < W; x += stepX + (Math.random() - 0.5) * 12) {
+      const ix = Math.floor(x);
+      const iy = Math.floor(y);
+      if (ix < 0 || iy < 0 || ix >= W || iy >= H) continue;
+      const idx = (iy * W + ix) * 4;
+      if (data[idx] > 0) {
+        const jitterX = (Math.random() - 0.5) * 8;
+        const jitterY = (Math.random() - 0.5) * 6;
+        words.push({
+          x: x + jitterX,
+          y: y + jitterY,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.5 + Math.random() * 1.3,
+          size: 14 + Math.random() * 4,
+          tone: Math.random(),
+          text: Math.random() < 0.5 ? 'i love u' : 'ADELYA'
+        });
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+  }
+  heartTop = minY;
+  heartBottom = maxY;
+
+  const fillDuration = 2000;
+  for (const w of words) {
+    const k = (heartBottom - w.y) / (heartBottom - heartTop || 1);
+    w.appearAt = k * fillDuration + (Math.random() * 150);
+  }
+}
+
+function frame(now) {
+  const t = now - animStart;
+  const W = canvas.width;
+  const H = canvas.height;
+
+  ctx.clearRect(0, 0, W, H);
+
+  for (const w of words) {
+    if (t < w.appearAt) continue;
+    const age = (t - w.appearAt) / 1000;
+    const blink = 0.55 + 0.45 * Math.sin(age * Math.PI * w.speed + w.phase);
+    const fadeIn = Math.min(1, age * 2.2);
+    const alpha = blink * fadeIn;
+
+    const r = 255;
+    const g = Math.floor(20 + w.tone * 70);
+    const b = Math.floor(40 + w.tone * 50);
+
+    ctx.font = w.size + 'px "Pixelify Sans", "Press Start 2P", monospace';
+    ctx.shadowColor = 'rgba(255,40,70,0.8)';
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = 'rgba(' + r + ',' + g + ',' + b + ',' + (alpha * 0.95) + ')';
+    ctx.fillText(w.text, w.x, w.y);
+  }
+  ctx.shadowBlur = 0;
+
+  requestAnimationFrame(frame);
+}
+
+function drawHeart() {
+  const run = () => {
+    buildWords();
+    animStart = performance.now();
+    requestAnimationFrame(frame);
+  };
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(run);
+  } else {
+    run();
+  }
+}
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  if (screen2.style.display !== 'block') return;
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    setupMatrix();
+    drawHeart();
+  }, 150);
+});
+</script>
+</body>
+</html>

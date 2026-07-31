@@ -7,7 +7,7 @@
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#2b0b4d">
 <meta property="og:title" content="🎉 Секрет Ахана">
-<meta property="og:description" content="10 мини-игр, 10 фрагментов пазла и один праздничный сюрприз">
+<meta property="og:description" content="20 мини-игр, 20 фрагментов пазла и один праздничный сюрприз">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎉</text></svg>">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -23,7 +23,7 @@
   <div class="start-box">
     <div class="cake-emoji">🎉</div>
     <h1 class="title-glow">Секрет Ахана</h1>
-    <p class="subtitle">10 испытаний. 10 фрагментов. Одна тайна.</p>
+    <p class="subtitle">20 испытаний. 20 фрагментов. Одна тайна.</p>
     <p class="hint-text">Пройди все уровни, собери пазл и узнай, что скрывает фотография.</p>
     <button class="btn btn-big" id="btnStart">Начать игру ✨</button>
     <button class="btn btn-ghost" id="btnReset">Сбросить прогресс</button>
@@ -66,7 +66,11 @@
 <!-- ПАЗЛ -->
 <section class="screen" id="screen-puzzle">
   <h2 class="screen-title">Финальная сборка</h2>
-  <p class="subtitle small">Перетащи фрагменты на свои места — они прилипнут сами.</p>
+  <p class="subtitle small">Перетащи 20 фрагментов на свои места — они прилипнут сами.</p>
+  <div class="puzzle-toolbar">
+    <span class="puzzle-count" id="puzzleCount">0 / 20</span>
+    <button class="btn btn-ghost" id="btnHint">👀 Подсказка</button>
+  </div>
   <div class="puzzle-stage" id="puzzleStage">
     <div class="puzzle-board" id="puzzleBoard"></div>
     <div class="puzzle-tray" id="puzzleTray"></div>
@@ -79,6 +83,30 @@
     <div class="final-photo-wrap"><img id="finalPhoto" src="assets/family.jpeg" alt="Финальное фото"></div>
     <h1 class="final-title">🎉 С Днём Рождения, Гульнара! 🎉</h1>
     <p class="final-sub">«Пусть все мечты сбываются!»</p>
+
+    <div class="credits" id="credits">
+      <div class="credits-roll">
+        <p class="cr-big">🎬 ТИТРЫ 🎬</p>
+        <p class="cr-role">Автор идеи</p><p class="cr-name">Ахан</p>
+        <p class="cr-role">Создал</p><p class="cr-name">Ахан</p>
+        <p class="cr-role">Сценарий и постановка</p><p class="cr-name">Ахан</p>
+        <p class="cr-role">Главный тестировщик</p><p class="cr-name">Ахан</p>
+        <p class="cr-role">Отдел смешных шуток</p><p class="cr-name">Ахан</p>
+        <p class="cr-role">Спонсор всех тортов</p><p class="cr-name">Ахан (пока в кредит)</p>
+        <p class="cr-big">Ахан молодец 👏</p>
+        <p class="cr-role">Ахан вообще молодец</p><p class="cr-name">это подтверждено</p>
+        <p class="cr-big">💸 Ахан хочет, чтобы вы срочно пополнили ему каспи 10 000 ₸ 💸</p>
+        <p class="cr-role">Это не реклама</p><p class="cr-name">это крик души</p>
+        <p class="cr-role">Каспи Ахана</p><p class="cr-name">спросите у Ахана</p>
+        <p class="cr-role">Съёмочная группа благодарит</p><p class="cr-name">Гульнару — за всё 💜</p>
+        <p class="cr-role">Отдельное спасибо</p><p class="cr-name">Алуа, Галимжану и Рахиму<br>(за то, что убегали)</p>
+        <p class="cr-role">Ни один торт</p><p class="cr-name">не пострадал… почти</p>
+        <p class="cr-big">🎉 С Днём Рождения, Гульнара! 🎉</p>
+        <p class="cr-name">Мы тебя очень любим</p>
+        <p class="cr-role">The End</p>
+      </div>
+    </div>
+
     <button class="btn btn-big" id="btnAgain">Играть снова 🔁</button>
   </div>
 </section>

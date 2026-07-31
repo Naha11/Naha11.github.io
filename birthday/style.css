@@ -132,7 +132,7 @@ h1.title-glow{
 
 .pieces-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:min(430px,88vw)}
 .piece-thumb{
-  aspect-ratio:1080/734;border-radius:8px;border:2px solid rgba(255,255,255,.18);
+  border-radius:6px;border:2px solid rgba(255,255,255,.18);
   background-image:url('assets/family.jpeg');background-repeat:no-repeat;
   filter:grayscale(1) brightness(.28);transition:filter .5s, box-shadow .4s, transform .4s;
 }
@@ -265,9 +265,101 @@ h1.title-glow{
 .mystery-box.opened{background:rgba(255,255,255,.07);cursor:default;transform:none}
 .mystery-box.win{background:linear-gradient(150deg,var(--gold),var(--green));box-shadow:0 0 30px var(--gold)}
 
+/* Ур.11 — убегающая кнопка */
+.answer.runner{cursor:pointer}
+.answer.runner.tired{
+  background:linear-gradient(135deg,var(--green),var(--cyan));color:#052b21;
+  animation:none;box-shadow:0 0 26px var(--green);transform:rotate(-3deg);
+}
+/* «устал» в викторине: цвет тот же, только слегка покачивается — надо заметить самому */
+.answer.tired{animation:tiredWobble .55s ease-in-out infinite}
+@keyframes tiredWobble{
+  0%,100%{transform:rotate(-2.5deg) translateY(0)}
+  50%{transform:rotate(2.5deg) translateY(2px)}
+}
+
+/* Ур.12 — свечи */
+.candles{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;width:min(430px,92%)}
+.candle{position:relative;display:flex;flex-direction:column;align-items:center;cursor:pointer;font-size:clamp(20px,5vw,28px);transition:transform .15s}
+.candle:hover{transform:scale(1.12)}
+.candle .flame{animation:flicker .7s infinite alternate;filter:drop-shadow(0 0 8px var(--gold))}
+.candle.out .flame{opacity:.12;filter:grayscale(1);animation:none}
+@keyframes flicker{from{transform:scale(.92) translateY(1px)}to{transform:scale(1.08) translateY(-2px)}}
+
+/* Ур.13 — цветы (Симон) */
+.simon-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;width:min(340px,88%)}
+.simon-btn{
+  aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:clamp(28px,8vw,40px);
+  border-radius:18px;background:rgba(255,255,255,.07);border:2px solid var(--card-brd);cursor:pointer;
+  transition:transform .12s, box-shadow .2s, background .2s;
+}
+.simon-btn:hover{transform:scale(1.05)}
+.simon-btn.lit{background:linear-gradient(135deg,var(--gold),var(--pink));box-shadow:0 0 28px var(--gold);transform:scale(1.12)}
+
+/* Ур.14 — танцы */
+.dance-field{display:flex;gap:6px;width:min(430px,94%);height:340px;background:rgba(0,0,0,.25);border-radius:16px;padding:6px;touch-action:none}
+.lane{position:relative;flex:1;border-radius:12px;background:rgba(255,255,255,.04);overflow:hidden;cursor:pointer}
+.lane.hit{background:rgba(66,230,164,.25)}
+.lane-target{
+  position:absolute;left:0;right:0;bottom:8%;height:30%;display:flex;align-items:center;justify-content:center;
+  font-size:26px;opacity:.5;border-top:2px dashed var(--gold);border-bottom:2px dashed var(--gold);
+  background:rgba(255,212,94,.1);
+}
+.note{position:absolute;left:0;right:0;text-align:center;font-size:28px;filter:drop-shadow(0 0 8px var(--cyan))}
+
+/* Ур.15 — викторина списком */
+.answers-col{display:flex;flex-direction:column;gap:10px;width:min(520px,94%)}
+.answer-row{
+  padding:14px 18px;border-radius:14px;cursor:pointer;font-size:15px;text-align:center;
+  background:rgba(255,255,255,.07);border:1px solid var(--card-brd);transition:all .2s;
+}
+.answer-row:hover{background:linear-gradient(135deg,#5c3a8e,#8146c9);transform:translateY(-2px)}
+.answer-row.ok{background:linear-gradient(135deg,var(--green),var(--cyan));color:#04291f;font-weight:bold}
+.answer-row.no{background:rgba(255,95,109,.35);animation:shake .4s}
+
+/* Ур.16 / босс — прыгающая цель */
+.runaway-cake{position:absolute;font-size:68px;cursor:pointer;transition:left .18s ease,top .18s ease,font-size .25s;filter:drop-shadow(0 6px 12px rgba(0,0,0,.45))}
+
+/* Ур.17 — найди лишнего */
+.odd-grid{display:grid;gap:6px;width:min(400px,90%)}
+.odd-cell{
+  aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;font-size:clamp(18px,4.6vw,28px);
+  border-radius:10px;background:rgba(255,255,255,.06);cursor:pointer;transition:transform .12s,background .2s;
+}
+.odd-cell:hover{transform:scale(1.1);background:rgba(255,255,255,.14)}
+.odd-cell.wrong{animation:shake .35s;background:rgba(255,95,109,.3)}
+
+/* Ур.18 — змейка */
+.snake-grid{display:grid;gap:2px;background:rgba(0,0,0,.3);border-radius:12px;padding:6px;width:min(460px,94%);touch-action:none}
+.sn{aspect-ratio:1/1;border-radius:4px;background:rgba(255,255,255,.05);display:flex;align-items:center;justify-content:center;font-size:min(3.4vw,15px)}
+.sn.body{background:linear-gradient(135deg,var(--violet),var(--pink))}
+.sn.head{background:radial-gradient(circle,#fff,var(--cyan));box-shadow:0 0 10px var(--cyan)}
+
+/* Ур.19 — чай */
+.tea-bar{
+  position:relative;width:110px;height:250px;border-radius:16px;overflow:hidden;
+  background:rgba(255,255,255,.08);border:2px solid var(--card-brd);
+}
+.tea-zone{position:absolute;left:0;right:0;background:rgba(66,230,164,.35);border-top:2px solid var(--green);border-bottom:2px solid var(--green)}
+.tea-fill{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(180deg,#d98b3a,#8a4a13);transition:height .05s linear}
+
+/* Ур.20 — реакция */
+.react-pad{
+  width:min(320px,80%);height:170px;border-radius:20px;display:flex;align-items:center;justify-content:center;
+  font-size:26px;font-weight:bold;cursor:pointer;background:linear-gradient(135deg,#b0203a,#7a1030);
+  box-shadow:0 0 26px rgba(255,95,109,.4);transition:background .12s;
+}
+.react-pad.go{background:linear-gradient(135deg,var(--green),var(--cyan));color:#03291e;box-shadow:0 0 40px var(--green)}
+.flash-strip{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-height:52px}
+.flash-item{
+  width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px;
+  background:rgba(255,255,255,.1);border:1px solid var(--card-brd);animation:popIn .4s;
+}
+.answer-strip{opacity:.9}
+
 /* Награда */
 .reward-piece{
-  width:min(300px,80vw);aspect-ratio:1080/734;margin:16px auto;border-radius:14px;
+  width:min(300px,80vw);margin:16px auto;border-radius:14px;
   background-image:url('assets/family.jpeg');background-repeat:no-repeat;
   border:3px solid var(--gold);box-shadow:0 0 34px rgba(255,212,94,.75);animation:popIn .8s ease;
 }
@@ -278,6 +370,13 @@ h1.title-glow{
   position:relative;width:100%;aspect-ratio:1080/734;border-radius:14px;
   background:rgba(0,0,0,.35);border:2px dashed var(--card-brd);overflow:hidden;
 }
+.puzzle-board.ghost::before{
+  content:'';position:absolute;inset:0;background:url('assets/family.jpeg') center/100% 100% no-repeat;
+  opacity:.28;animation:popIn .4s;
+}
+.puzzle-toolbar{display:flex;align-items:center;gap:14px}
+.puzzle-count{font-weight:bold;color:var(--gold);font-size:17px}
+.puzzle-toolbar .btn-ghost{margin-top:0}
 .slot{position:absolute;border:1px dashed rgba(255,255,255,.12)}
 .puzzle-tray{position:relative;width:100%;height:230px;margin-top:14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--card-brd)}
 .ppiece{
@@ -301,6 +400,26 @@ h1.title-glow{
   animation:shine 5s linear infinite;
 }
 .final-sub{font-size:clamp(15px,3.5vw,21px);opacity:.9;margin-top:8px;margin-bottom:16px}
+
+/* Титры */
+.credits{
+  position:relative;height:230px;overflow:hidden;margin:6px auto 18px;
+  border-radius:16px;background:rgba(0,0,0,.45);border:1px solid var(--card-brd);
+  -webkit-mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent);
+  mask-image:linear-gradient(180deg,transparent,#000 18%,#000 82%,transparent);
+}
+.credits-roll{
+  position:absolute;left:0;right:0;top:100%;padding:0 14px;text-align:center;
+  animation:roll 46s linear infinite;
+}
+.credits.paused .credits-roll{animation-play-state:paused}
+@keyframes roll{from{transform:translateY(0)}to{transform:translateY(-100%)}}
+.cr-role{font-size:13px;opacity:.6;margin-top:16px;letter-spacing:1px;text-transform:uppercase}
+.cr-name{font-size:19px;font-weight:bold;color:var(--gold);margin-top:2px}
+.cr-big{
+  font-size:20px;font-weight:bold;margin:26px 0;color:var(--cyan);
+  text-shadow:0 0 16px rgba(63,240,255,.6);line-height:1.4;
+}
 
 /* Тост */
 .toast{

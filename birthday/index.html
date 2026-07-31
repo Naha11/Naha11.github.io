@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎉 Секрет Ахана</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2b0b4d">
+<meta property="og:title" content="🎉 Секрет Ахана">
+<meta property="og:description" content="10 мини-игр, 10 фрагментов пазла и один праздничный сюрприз">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎉</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="bg-particles" id="bgParticles"></div>
+<canvas id="confetti"></canvas>
+
+<button id="soundBtn" class="sound-btn" title="Звук">🔊</button>
+
+<!-- СТАРТ -->
+<section class="screen active" id="screen-start">
+  <div class="start-box">
+    <div class="cake-emoji">🎉</div>
+    <h1 class="title-glow">Секрет Ахана</h1>
+    <p class="subtitle">10 испытаний. 10 фрагментов. Одна тайна.</p>
+    <p class="hint-text">Пройди все уровни, собери пазл и узнай, что скрывает фотография.</p>
+    <button class="btn btn-big" id="btnStart">Начать игру ✨</button>
+    <button class="btn btn-ghost" id="btnReset">Сбросить прогресс</button>
+  </div>
+</section>
+
+<!-- КАРТА -->
+<section class="screen" id="screen-map">
+  <h2 class="screen-title">Карта приключения</h2>
+  <div class="progress-line"><div class="progress-fill" id="progressFill"></div></div>
+  <p class="progress-text" id="progressText"></p>
+  <div class="map-grid" id="mapGrid"></div>
+  <div class="pieces-bar" id="piecesBar"></div>
+  <button class="btn btn-big btn-final" id="btnGoPuzzle" disabled>🧩 Собрать пазл</button>
+</section>
+
+<!-- УРОВЕНЬ -->
+<section class="screen" id="screen-level">
+  <div class="level-head">
+    <button class="btn btn-ghost btn-back" id="btnBack">← Карта</button>
+    <div>
+      <h2 class="level-title" id="levelTitle"></h2>
+      <p class="level-desc" id="levelDesc"></p>
+    </div>
+    <div class="level-status" id="levelStatus"></div>
+  </div>
+  <div class="level-host" id="levelHost"></div>
+</section>
+
+<!-- НАГРАДА -->
+<section class="screen" id="screen-reward">
+  <div class="start-box">
+    <h2 class="title-glow">Фрагмент получен!</h2>
+    <div class="reward-piece" id="rewardPiece"></div>
+    <p class="subtitle" id="rewardText"></p>
+    <button class="btn btn-big" id="btnRewardNext">Дальше →</button>
+  </div>
+</section>
+
+<!-- ПАЗЛ -->
+<section class="screen" id="screen-puzzle">
+  <h2 class="screen-title">Финальная сборка</h2>
+  <p class="subtitle small">Перетащи фрагменты на свои места — они прилипнут сами.</p>
+  <div class="puzzle-stage" id="puzzleStage">
+    <div class="puzzle-board" id="puzzleBoard"></div>
+    <div class="puzzle-tray" id="puzzleTray"></div>
+  </div>
+</section>
+
+<!-- ФИНАЛ -->
+<section class="screen" id="screen-final">
+  <div class="final-box">
+    <div class="final-photo-wrap"><img id="finalPhoto" src="assets/family.jpeg" alt="Финальное фото"></div>
+    <h1 class="final-title">🎉 С Днём Рождения, Гульнара! 🎉</h1>
+    <p class="final-sub">«Пусть все мечты сбываются!»</p>
+    <button class="btn btn-big" id="btnAgain">Играть снова 🔁</button>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,319 @@
+/* ===== Секрет Ахана — праздничная браузерная игра ===== */
+:root{
+  --bg1:#12002e;
+  --bg2:#2b0b4d;
+  --bg3:#480b53;
+  --pink:#ff4fa3;
+  --violet:#a35bff;
+  --cyan:#3ff0ff;
+  --gold:#ffd45e;
+  --green:#42e6a4;
+  --red:#ff5f6d;
+  --txt:#f6f0ff;
+  --card:rgba(255,255,255,.07);
+  --card-brd:rgba(255,255,255,.16);
+  --shadow:0 10px 40px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:'Trebuchet MS','Segoe UI',system-ui,sans-serif;
+  color:var(--txt);
+  background:radial-gradient(circle at 20% 10%,var(--bg3),transparent 55%),
+             radial-gradient(circle at 85% 80%,#0b3b6b,transparent 55%),
+             linear-gradient(160deg,var(--bg1),var(--bg2) 60%,#1b0538);
+  background-attachment:fixed;
+  min-height:100%;
+  overflow-x:hidden;
+  user-select:none;
+}
+
+/* фоновые частицы */
+.bg-particles{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-particles span{
+  position:absolute;bottom:-40px;font-size:22px;opacity:.35;
+  animation:floatUp linear infinite;
+  filter:drop-shadow(0 0 6px rgba(255,255,255,.3));
+}
+@keyframes floatUp{
+  0%{transform:translateY(0) rotate(0deg);opacity:0}
+  10%{opacity:.45}
+  100%{transform:translateY(-115vh) rotate(360deg);opacity:0}
+}
+
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
+
+.sound-btn{
+  position:fixed;top:14px;right:14px;z-index:80;
+  width:46px;height:46px;border-radius:50%;
+  border:1px solid var(--card-brd);background:var(--card);
+  backdrop-filter:blur(8px);color:#fff;font-size:20px;cursor:pointer;
+  transition:transform .2s, box-shadow .2s;
+}
+.sound-btn:hover{transform:scale(1.1);box-shadow:0 0 18px var(--violet)}
+
+/* ===== Экраны ===== */
+.screen{
+  display:none;position:relative;z-index:2;
+  min-height:100vh;padding:24px 16px 40px;
+  flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  animation:screenIn .45s ease;
+}
+.screen.active{display:flex}
+@keyframes screenIn{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+.start-box,.final-box{
+  width:min(560px,94vw);text-align:center;
+  background:var(--card);border:1px solid var(--card-brd);
+  border-radius:26px;padding:34px 26px;backdrop-filter:blur(10px);
+  box-shadow:var(--shadow);
+}
+.final-box{width:min(780px,96vw)}
+.cake-emoji{font-size:70px;animation:bounce 2.2s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-14px) rotate(4deg)}}
+
+h1.title-glow{
+  font-size:clamp(30px,7vw,52px);letter-spacing:1px;margin:8px 0 6px;
+  background:linear-gradient(90deg,var(--gold),var(--pink),var(--cyan),var(--gold));
+  background-size:300% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shine 6s linear infinite;
+  filter:drop-shadow(0 0 16px rgba(255,79,163,.5));
+}
+@keyframes shine{to{background-position:300% 0}}
+.subtitle{opacity:.9;font-size:17px;margin:6px 0}
+.subtitle.small{font-size:15px;opacity:.75}
+.hint-text{opacity:.6;font-size:14px;margin:10px 0 20px}
+
+.btn{
+  border:none;cursor:pointer;font-family:inherit;font-weight:bold;
+  color:#fff;border-radius:16px;padding:13px 26px;font-size:16px;
+  background:linear-gradient(135deg,var(--violet),var(--pink));
+  box-shadow:0 8px 24px rgba(163,91,255,.4);
+  transition:transform .18s, box-shadow .18s, filter .18s;
+}
+.btn:hover{transform:translateY(-2px) scale(1.03);box-shadow:0 12px 30px rgba(255,79,163,.55)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.4;cursor:not-allowed;filter:grayscale(.6)}
+.btn-big{font-size:19px;padding:15px 34px;margin-top:6px}
+.btn-ghost{background:transparent;border:1px solid var(--card-brd);box-shadow:none;font-weight:normal;opacity:.75;font-size:14px;padding:9px 18px;margin-top:10px}
+.btn-final{background:linear-gradient(135deg,var(--gold),var(--pink));color:#2b0038}
+
+.screen-title{font-size:clamp(24px,5vw,36px);text-shadow:0 0 22px rgba(163,91,255,.8)}
+
+/* ===== Карта ===== */
+.progress-line{width:min(640px,92vw);height:10px;border-radius:8px;background:rgba(255,255,255,.12);overflow:hidden}
+.progress-fill{height:100%;width:0;border-radius:8px;background:linear-gradient(90deg,var(--cyan),var(--green),var(--gold));transition:width .6s ease;box-shadow:0 0 16px var(--green)}
+.progress-text{font-size:14px;opacity:.8}
+
+.map-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:14px;
+  width:min(720px,94vw);
+}
+.map-cell{
+  position:relative;aspect-ratio:1/1;border-radius:20px;cursor:pointer;
+  background:var(--card);border:1px solid var(--card-brd);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  transition:transform .2s, box-shadow .2s, background .3s;
+  backdrop-filter:blur(6px);overflow:hidden;
+}
+.map-cell .lvl-num{font-size:clamp(16px,3.6vw,22px);font-weight:bold}
+.map-cell .lvl-ico{font-size:clamp(20px,5vw,30px)}
+.map-cell.locked{opacity:.45;cursor:not-allowed;filter:grayscale(.8)}
+.map-cell.open{border-color:var(--cyan);box-shadow:0 0 20px rgba(63,240,255,.35)}
+.map-cell.open:hover{transform:translateY(-5px) scale(1.05);box-shadow:0 0 30px var(--cyan)}
+.map-cell.done{border-color:var(--green);background:linear-gradient(160deg,rgba(66,230,164,.22),rgba(255,255,255,.05))}
+.map-cell.done::after{content:'✓';position:absolute;top:6px;right:9px;color:var(--green);font-weight:bold}
+.map-cell.open::before{
+  content:'';position:absolute;inset:-40%;background:conic-gradient(from 0deg,transparent,rgba(63,240,255,.25),transparent 40%);
+  animation:spin 4s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.pieces-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;width:min(430px,88vw)}
+.piece-thumb{
+  aspect-ratio:1080/734;border-radius:8px;border:2px solid rgba(255,255,255,.18);
+  background-image:url('assets/family.jpeg');background-repeat:no-repeat;
+  filter:grayscale(1) brightness(.28);transition:filter .5s, box-shadow .4s, transform .4s;
+}
+.piece-thumb.got{filter:none;border-color:var(--gold);box-shadow:0 0 14px rgba(255,212,94,.7)}
+.piece-thumb.pop{animation:popIn .7s ease}
+@keyframes popIn{0%{transform:scale(.3) rotate(-20deg)}60%{transform:scale(1.2) rotate(6deg)}100%{transform:scale(1)}}
+
+/* ===== Уровень ===== */
+.level-head{
+  width:min(860px,96vw);display:flex;align-items:center;gap:14px;
+  background:var(--card);border:1px solid var(--card-brd);border-radius:18px;padding:12px 16px;
+}
+.level-head>div:nth-child(2){flex:1;text-align:center}
+.level-title{font-size:clamp(18px,4vw,25px);color:var(--gold)}
+.level-desc{font-size:13px;opacity:.75}
+.level-status{min-width:96px;text-align:right;font-weight:bold;font-size:15px;color:var(--cyan)}
+.btn-back{margin:0}
+.level-host{
+  width:min(860px,96vw);min-height:400px;
+  background:var(--card);border:1px solid var(--card-brd);border-radius:22px;
+  padding:18px;backdrop-filter:blur(8px);box-shadow:var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  position:relative;overflow:hidden;
+}
+.game-msg{font-size:16px;opacity:.85;text-align:center}
+
+/* Ур.1 — найди подарок */
+.find-grid{display:grid;gap:8px;width:100%;justify-content:center}
+.find-item{
+  font-size:clamp(24px,6vw,38px);display:flex;align-items:center;justify-content:center;
+  aspect-ratio:1/1;border-radius:14px;background:rgba(255,255,255,.06);cursor:pointer;
+  transition:transform .15s, background .2s;
+}
+.find-item:hover{transform:scale(1.15);background:rgba(255,255,255,.14)}
+.find-item.wrong{animation:shake .4s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+
+/* Ур.2 — лабиринт */
+.maze{display:grid;gap:0;background:rgba(0,0,0,.3);border-radius:12px;padding:6px;touch-action:none}
+.mz{width:100%;aspect-ratio:1/1;border-radius:3px}
+.mz.wall{background:linear-gradient(135deg,var(--violet),#5b2a9e);box-shadow:inset 0 0 4px rgba(0,0,0,.5)}
+.mz.path{background:rgba(255,255,255,.05)}
+.mz.exit{background:radial-gradient(circle,var(--green),transparent 70%);animation:pulse 1.4s infinite}
+.mz.ball{background:radial-gradient(circle,#fff,var(--cyan));box-shadow:0 0 12px var(--cyan);border-radius:50%}
+@keyframes pulse{0%,100%{opacity:.6}50%{opacity:1}}
+.dpad{display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,48px);gap:6px;justify-content:center}
+.dpad button{border:1px solid var(--card-brd);background:var(--card);color:#fff;border-radius:12px;font-size:19px;cursor:pointer}
+.dpad button:active{background:var(--violet)}
+
+/* Ур.3 — память */
+.mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:min(420px,90%)}
+.mem-card{aspect-ratio:3/4;perspective:600px;cursor:pointer}
+.mem-inner{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}
+.mem-card.flip .mem-inner{transform:rotateY(180deg)}
+.mem-face{position:absolute;inset:0;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:clamp(24px,7vw,36px);backface-visibility:hidden}
+.mem-front{background:linear-gradient(140deg,var(--violet),var(--pink));box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.mem-back{background:rgba(255,255,255,.12);border:2px solid var(--card-brd);transform:rotateY(180deg)}
+.mem-card.matched .mem-back{border-color:var(--green);box-shadow:0 0 18px var(--green)}
+
+/* Ур.4 — шарики */
+.balloon-field{position:relative;width:100%;height:420px;overflow:hidden;border-radius:16px;background:rgba(0,0,0,.18);touch-action:none}
+.balloon{position:absolute;font-size:44px;cursor:pointer;will-change:transform;filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+.pop-fx{position:absolute;pointer-events:none;font-size:30px;animation:popOut .5s forwards}
+@keyframes popOut{to{transform:scale(2.2);opacity:0}}
+
+/* Ур.5 — торт */
+.cake-area{display:flex;gap:22px;flex-wrap:wrap;justify-content:center;align-items:flex-end;width:100%}
+.cake-slots{display:flex;flex-direction:column-reverse;gap:6px;align-items:center}
+.cake-slot{
+  width:min(260px,60vw);height:52px;border-radius:12px;border:2px dashed var(--card-brd);
+  display:flex;align-items:center;justify-content:center;font-size:13px;opacity:.85;transition:all .2s;
+}
+.cake-slot.hover{border-color:var(--gold);background:rgba(255,212,94,.15)}
+.cake-slot.filled{border-style:solid;opacity:1}
+.cake-tray{display:flex;flex-direction:column;gap:8px}
+.cake-layer{
+  width:min(240px,58vw);height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-weight:bold;color:#3a0030;cursor:grab;box-shadow:0 6px 16px rgba(0,0,0,.35);touch-action:none;font-size:14px;
+}
+.cake-layer.dragging{opacity:.85;transform:scale(1.05);z-index:999;cursor:grabbing}
+
+/* Ур.6 — викторина */
+.quiz-question{font-size:clamp(18px,4.2vw,26px);text-align:center;color:var(--gold);margin-bottom:6px}
+.quiz-field{position:relative;width:100%;height:330px;border-radius:16px;background:rgba(0,0,0,.15);overflow:hidden;touch-action:none}
+.answer{
+  position:absolute;padding:12px 20px;border-radius:14px;font-weight:bold;font-size:16px;cursor:pointer;
+  background:linear-gradient(135deg,#5c3a8e,#8146c9);border:1px solid var(--card-brd);white-space:nowrap;
+  transition:left .28s cubic-bezier(.2,1.5,.4,1), top .28s cubic-bezier(.2,1.5,.4,1);
+}
+.answer.correct{
+  background:linear-gradient(135deg,var(--gold),var(--pink));color:#33002b;
+  box-shadow:0 0 22px var(--gold);animation:glowPulse 1.6s infinite;
+}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 16px var(--gold)}50%{box-shadow:0 0 34px var(--pink)}}
+.quiz-ok{font-size:34px;color:var(--green);animation:popIn .6s}
+.quiz-count{font-size:14px;opacity:.7}
+
+/* Ур.7 — отличия */
+.diff-wrap{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;width:100%}
+.diff-panel{
+  position:relative;width:min(380px,44vw);aspect-ratio:4/3;border-radius:16px;
+  background:linear-gradient(160deg,#1d0a3d,#3b1360);border:2px solid var(--card-brd);overflow:hidden;
+}
+@media(max-width:640px){.diff-panel{width:min(380px,88vw)}}
+.diff-item{position:absolute;transform:translate(-50%,-50%);font-size:clamp(22px,4vw,34px)}
+.diff-mark{position:absolute;width:54px;height:54px;border:3px solid var(--green);border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 16px var(--green);animation:popIn .5s;pointer-events:none}
+.diff-panel.shake{animation:shake .4s}
+
+/* Ур.8 — код */
+.code-display{font-size:46px;letter-spacing:8px;color:var(--cyan);text-shadow:0 0 20px var(--cyan);min-height:56px}
+.keypad{display:grid;grid-template-columns:repeat(3,68px);gap:9px}
+.keypad button{height:58px;font-size:22px;border-radius:14px;border:1px solid var(--card-brd);background:var(--card);color:#fff;cursor:pointer;font-family:inherit}
+.keypad button:hover{background:var(--violet)}
+.code-hint{font-size:16px;opacity:.85;text-align:center}
+.code-wrong{color:var(--red)}
+
+/* Ур.9 — лови подарки */
+.catch-field{position:relative;width:100%;height:430px;overflow:hidden;border-radius:16px;background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.35));touch-action:none;cursor:none}
+.falling{position:absolute;font-size:34px;will-change:transform}
+.basket{position:absolute;bottom:6px;font-size:46px;transform:translateX(-50%);filter:drop-shadow(0 0 10px var(--gold))}
+
+/* Ур.10 — коробки */
+.box-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;width:min(520px,92%)}
+.mystery-box{
+  aspect-ratio:1/1;border-radius:16px;background:linear-gradient(150deg,#7a3ac0,#c0399a);
+  display:flex;align-items:center;justify-content:center;font-size:clamp(26px,7vw,40px);cursor:pointer;
+  box-shadow:0 8px 20px rgba(0,0,0,.4);transition:transform .2s;
+}
+.mystery-box:hover{transform:translateY(-6px) rotate(-3deg)}
+.mystery-box.opened{background:rgba(255,255,255,.07);cursor:default;transform:none}
+.mystery-box.win{background:linear-gradient(150deg,var(--gold),var(--green));box-shadow:0 0 30px var(--gold)}
+
+/* Награда */
+.reward-piece{
+  width:min(300px,80vw);aspect-ratio:1080/734;margin:16px auto;border-radius:14px;
+  background-image:url('assets/family.jpeg');background-repeat:no-repeat;
+  border:3px solid var(--gold);box-shadow:0 0 34px rgba(255,212,94,.75);animation:popIn .8s ease;
+}
+
+/* ===== Пазл ===== */
+.puzzle-stage{position:relative;width:min(760px,96vw);touch-action:none}
+.puzzle-board{
+  position:relative;width:100%;aspect-ratio:1080/734;border-radius:14px;
+  background:rgba(0,0,0,.35);border:2px dashed var(--card-brd);overflow:hidden;
+}
+.slot{position:absolute;border:1px dashed rgba(255,255,255,.12)}
+.puzzle-tray{position:relative;width:100%;height:230px;margin-top:14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid var(--card-brd)}
+.ppiece{
+  position:absolute;background-image:url('assets/family.jpeg');background-repeat:no-repeat;
+  border-radius:6px;border:2px solid rgba(255,255,255,.35);cursor:grab;
+  box-shadow:0 6px 16px rgba(0,0,0,.5);touch-action:none;z-index:5;
+  transition:box-shadow .2s;
+}
+.ppiece.drag{cursor:grabbing;z-index:60;box-shadow:0 14px 34px rgba(0,0,0,.6);border-color:var(--cyan)}
+.ppiece.locked{border-color:transparent;box-shadow:none;cursor:default;z-index:2;animation:lockFx .5s}
+@keyframes lockFx{0%{filter:brightness(2.2)}100%{filter:none}}
+
+/* Финал */
+.final-photo-wrap{border-radius:18px;overflow:hidden;box-shadow:0 0 50px rgba(255,212,94,.55);border:3px solid var(--gold)}
+#finalPhoto{display:block;width:100%;animation:zoomIn 2.4s cubic-bezier(.2,.8,.3,1) forwards}
+@keyframes zoomIn{from{transform:scale(1.22);filter:blur(6px) brightness(.7)}to{transform:scale(1);filter:none}}
+.final-title{
+  margin-top:20px;font-size:clamp(24px,6vw,44px);
+  background:linear-gradient(90deg,var(--gold),var(--pink),var(--cyan),var(--gold));
+  background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  animation:shine 5s linear infinite;
+}
+.final-sub{font-size:clamp(15px,3.5vw,21px);opacity:.9;margin-top:8px;margin-bottom:16px}
+
+/* Тост */
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,140%);
+  background:rgba(20,4,45,.94);border:1px solid var(--card-brd);color:#fff;
+  padding:12px 22px;border-radius:14px;z-index:200;transition:transform .35s;font-size:15px;
+  box-shadow:var(--shadow);max-width:90vw;text-align:center;
+}
+.toast.show{transform:translate(-50%,0)}
+
+@media(max-width:520px){
+  .level-head{flex-wrap:wrap;justify-content:center}
+  .level-status{min-width:auto;text-align:center;width:100%}
+  .map-grid{gap:9px}
+  .puzzle-tray{height:170px}
+}

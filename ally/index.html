@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ally — Accessibility Audit for Framer</title>
+<meta name="description" content="Ally scans your Framer site for contrast failures, missing image descriptions and broken heading structure — and fixes most of them in one click.">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Ally">
+<meta property="og:title" content="Ally — Accessibility Audit for Framer">
+<meta property="og:description" content="Contrast, alt text and heading order, checked in light theme and dark theme. Most of it fixed in one click.">
+<meta property="og:url" content="https://naha11.github.io/ally/">
+<meta property="og:image" content="https://naha11.github.io/ally/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Ally, an accessibility audit plugin for Framer. A circle split light and dark.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --void:#05060A;
+    --void-2:#0B0E17;
+    --band:#080B12;
+    --star:#E9EEFF;
+    --ink:#FFFFFF;
+    --body:#A8B0C4;
+    --muted:#757F96;
+    --line:rgba(168,176,196,.14);
+    --blue:#4C7DFF;
+    --blue-dim:#2E4FA8;
+    --cyan:#7FE3D4;
+    --red:#FF6B6B;
+    --indigo:#1B2A6B;
+    --teal:#0E4B4B;
+    --display:"Sora",system-ui,-apple-system,"Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",ui-monospace,"SF Mono",Consolas,monospace;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--void);
+    color:var(--body);
+    font-family:var(--display);
+    font-size:16px;
+    line-height:1.65;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* ---------- космический фон ---------- */
+  #stars{
+    position:fixed;
+    inset:0;
+    width:100%;
+    height:100%;
+    z-index:0;
+    pointer-events:none;
+  }
+  .nebula{
+    position:fixed;
+    inset:0;
+    z-index:0;
+    pointer-events:none;
+    background:
+      radial-gradient(46% 38% at 18% 12%, rgba(27,42,107,.55), transparent 70%),
+      radial-gradient(38% 32% at 82% 30%, rgba(14,75,75,.38), transparent 72%),
+      radial-gradient(52% 44% at 50% 96%, rgba(27,42,107,.30), transparent 75%),
+      linear-gradient(180deg, var(--void) 0%, var(--void-2) 55%, var(--void) 100%);
+    filter:blur(6px);
+  }
+  .page{position:relative;z-index:1}
+  .wrap{max-width:1120px;margin:0 auto;padding-inline:28px}
+
+  /* ---------- шапка ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:40;
+    backdrop-filter:blur(14px);
+    background:rgba(5,6,10,.62);
+    border-bottom:1px solid transparent;
+    transition:border-color .3s ease, background .3s ease;
+  }
+  header.scrolled{border-bottom-color:var(--line);background:rgba(5,6,10,.86)}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:68px;gap:24px}
+  .brand{display:flex;align-items:center;gap:9px;font-weight:600;color:var(--ink);font-size:17px;letter-spacing:-.01em}
+  .glyph{width:15px;height:15px;flex:none;color:var(--blue);filter:drop-shadow(0 0 6px rgba(76,125,255,.8))}
+  nav{display:flex;align-items:center;gap:28px}
+  nav a{color:var(--body);text-decoration:none;font-size:14.5px;transition:color .2s}
+  nav a:hover{color:var(--ink)}
+
+  /* ---------- кнопки ---------- */
+  .btn{
+    position:relative;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:12px 22px;
+    border-radius:10px;
+    font-family:var(--display);
+    font-size:15px;
+    font-weight:500;
+    text-decoration:none;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .22s cubic-bezier(.2,.7,.3,1), box-shadow .28s ease, background .22s ease, border-color .22s;
+  }
+  .btn-primary{
+    color:#08111F;
+    background:linear-gradient(180deg,#7EA1FF,var(--blue));
+    box-shadow:0 0 0 rgba(76,125,255,0), 0 6px 20px rgba(76,125,255,.28);
+    font-weight:600;
+  }
+  .btn-primary::after{
+    content:"";
+    position:absolute;
+    inset:-1.5px;
+    border-radius:11px;
+    padding:1.5px;
+    background:conic-gradient(from var(--angle,0deg), transparent 0deg, rgba(127,227,212,.9) 60deg, transparent 130deg, transparent 360deg);
+    -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;
+    mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    mask-composite:exclude;
+    opacity:0;
+    transition:opacity .3s;
+    animation:spin 4s linear infinite;
+  }
+  .btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 34px rgba(76,125,255,.5), 0 10px 28px rgba(76,125,255,.34)}
+  .btn-primary:hover::after{opacity:1}
+  .btn-ghost{color:var(--ink);background:rgba(168,176,196,.05);border-color:var(--line)}
+  .btn-ghost:hover{transform:translateY(-2px);border-color:rgba(76,125,255,.55);box-shadow:0 0 26px rgba(76,125,255,.18);background:rgba(76,125,255,.07)}
+  .btn-sm{padding:9px 17px;font-size:14px;border-radius:9px}
+  @property --angle{syntax:"<angle>";inherits:false;initial-value:0deg}
+  @keyframes spin{to{--angle:360deg}}
+
+  /* ---------- типографика ---------- */
+  .label{
+    font-family:var(--mono);
+    font-size:11.5px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--muted);
+  }
+  .label .hi{color:var(--cyan)}
+  h1{
+    font-size:clamp(40px,7.4vw,80px);
+    line-height:1.03;
+    letter-spacing:-.035em;
+    font-weight:600;
+    color:var(--ink);
+    margin:22px 0 0;
+  }
+  h1 .dim{color:var(--muted)}
+  h2{
+    font-size:clamp(27px,3.7vw,42px);
+    line-height:1.12;
+    letter-spacing:-.028em;
+    font-weight:600;
+    color:var(--ink);
+    margin:14px 0 0;
+  }
+  h3{font-size:19px;font-weight:600;color:var(--ink);margin:0 0 8px;letter-spacing:-.012em}
+  .lead{font-size:18.5px;line-height:1.62;max-width:62ch;margin:22px 0 0}
+  section{padding-block:clamp(72px,10vw,132px)}
+
+  /* ---------- герой ---------- */
+  .hero{position:relative;text-align:center;padding-top:clamp(74px,11vw,128px);padding-bottom:clamp(56px,7vw,88px);overflow:hidden}
+  .hero .inner{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center}
+  .hero .lead{text-align:center}
+  .scanner{
+    position:absolute;
+    left:-10%;
+    width:120%;
+    height:1px;
+    top:0;
+    background:linear-gradient(90deg,transparent,rgba(76,125,255,.85),rgba(127,227,212,.7),transparent);
+    box-shadow:0 0 22px rgba(76,125,255,.8);
+    animation:sweep 7.5s cubic-bezier(.4,0,.6,1) infinite;
+    z-index:1;
+    opacity:.85;
+  }
+  @keyframes sweep{
+    0%{transform:translateY(0);opacity:0}
+    12%{opacity:.9}
+    88%{opacity:.9}
+    100%{transform:translateY(560px);opacity:0}
+  }
+  .cta-row{display:flex;gap:14px;margin-top:36px;flex-wrap:wrap;justify-content:center}
+  .fineprint{font-family:var(--mono);font-size:12.5px;color:var(--muted);margin-top:22px;letter-spacing:.02em}
+
+  /* ---------- статистика ---------- */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .stat{padding:34px 26px;text-align:center;border-left:1px solid var(--line)}
+  .stat:first-child{border-left:0}
+  .stat .num{font-size:clamp(30px,4.4vw,46px);font-weight:600;color:var(--ink);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+  .stat .num .unit{color:var(--blue)}
+  .stat .cap{font-size:14px;color:var(--muted);margin-top:11px;line-height:1.45}
+
+  /* ---------- окно продукта ---------- */
+  .shot-wrap{position:relative;display:flex;justify-content:center;padding-block:18px}
+  .orbit{
+    position:absolute;
+    top:50%;left:50%;
+    width:min(1180px,116%);
+    height:min(560px,74%);
+    transform:translate(-50%,-50%);
+    border:1px solid rgba(76,125,255,.17);
+    border-radius:50%;
+    animation:rotate 46s linear infinite;
+    pointer-events:none;
+  }
+  .orbit::after{
+    content:"";
+    position:absolute;
+    top:50%;right:-3.5px;
+    width:7px;height:7px;
+    border-radius:50%;
+    background:var(--cyan);
+    box-shadow:0 0 14px var(--cyan);
+  }
+  @keyframes rotate{to{transform:translate(-50%,-50%) rotate(360deg)}}
+  .browser{
+    position:relative;
+    width:100%;
+    border-radius:14px;
+    overflow:hidden;
+    background:#0A0D15;
+    border:1px solid rgba(168,176,196,.19);
+    box-shadow:0 0 0 1px rgba(76,125,255,.13), 0 34px 90px rgba(0,0,0,.75), 0 0 90px rgba(76,125,255,.13);
+  }
+  .chrome{display:flex;align-items:center;gap:8px;height:40px;padding-inline:15px;background:#0D1119;border-bottom:1px solid rgba(168,176,196,.13)}
+  .dot{width:10px;height:10px;border-radius:50%;background:#242A38}
+  .url{flex:1;margin-left:12px;height:22px;border-radius:6px;background:#11151F;display:flex;align-items:center;padding-inline:10px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+  .editor{display:grid;grid-template-columns:1fr 320px;min-height:392px}
+  .canvas-area{position:relative;padding:26px;background:
+      linear-gradient(rgba(168,176,196,.05) 1px,transparent 1px) 0 0/26px 26px,
+      linear-gradient(90deg,rgba(168,176,196,.05) 1px,transparent 1px) 0 0/26px 26px,
+      #0A0D15;}
+  .mock{background:#fff;border-radius:8px;padding:22px;color:#111;max-width:390px;box-shadow:0 16px 40px rgba(0,0,0,.5)}
+  .mock .m-h{font-size:19px;font-weight:600;letter-spacing:-.02em}
+  .mock .m-p{font-size:12.5px;color:#8d8d8d;margin-top:9px;line-height:1.5}
+  .mock .m-faint{font-size:11px;color:#c9c9c9;margin-top:12px}
+  .mock .m-btn{display:inline-block;margin-top:15px;background:#ff6b35;color:#fff;font-size:12px;padding:8px 15px;border-radius:6px}
+  .mock .m-img{margin-top:15px;height:64px;border-radius:6px;background:#eceff4;display:flex;align-items:center;justify-content:center;font-size:10px;color:#a6adba;font-family:var(--mono)}
+
+  /* панель плагина */
+  .panel{background:#0C1017;border-left:1px solid rgba(168,176,196,.15);display:flex;flex-direction:column}
+  .panel-top{padding:13px 15px;border-bottom:1px solid rgba(168,176,196,.11);display:flex;align-items:center;justify-content:space-between}
+  .panel-top .t{display:flex;align-items:center;gap:7px;color:var(--ink);font-size:13.5px;font-weight:600}
+  .panel-top .n{font-family:var(--mono);font-size:11px;color:var(--red)}
+  .panel-scope{display:flex;gap:5px;padding:11px 15px;border-bottom:1px solid rgba(168,176,196,.11)}
+  .chip{font-family:var(--mono);font-size:10px;padding:4px 9px;border-radius:5px;border:1px solid var(--line);color:var(--muted)}
+  .chip.on{color:var(--ink);border-color:rgba(76,125,255,.6);background:rgba(76,125,255,.14)}
+  .issues{padding:5px 0;overflow:hidden}
+  .issue{display:flex;gap:9px;padding:11px 15px;border-bottom:1px solid rgba(168,176,196,.07);align-items:flex-start}
+  .sev{width:6px;height:6px;border-radius:50%;margin-top:6px;flex:none}
+  .sev.e{background:var(--red);box-shadow:0 0 8px rgba(255,107,107,.75)}
+  .sev.w{background:#F5B942;box-shadow:0 0 8px rgba(245,185,66,.6)}
+  .issue .txt{flex:1;min-width:0}
+  .issue .tag{font-family:var(--mono);font-size:9.5px;color:var(--blue);letter-spacing:.04em}
+  .issue .msg{font-size:12px;color:#C6CCDA;margin-top:2px;line-height:1.4}
+  .fix{font-family:var(--display);font-size:10.5px;font-weight:500;color:var(--ink);background:rgba(76,125,255,.16);border:1px solid rgba(76,125,255,.42);border-radius:5px;padding:3px 8px;flex:none}
+
+  /* ---------- полоса «почему сейчас» ---------- */
+  .band{background:var(--band);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:44px;margin-top:34px}
+  .two-col p{margin:0}
+
+  /* ---------- семь проверок ---------- */
+  .checks{margin-top:38px;border-top:1px solid var(--line)}
+  .check{
+    display:grid;
+    grid-template-columns:86px 1fr;
+    gap:22px;
+    padding:19px 14px;
+    border-bottom:1px solid var(--line);
+    align-items:baseline;
+    transition:transform .22s cubic-bezier(.2,.7,.3,1), background .22s;
+  }
+  .check:hover{transform:translateX(5px);background:rgba(76,125,255,.045)}
+  .check .wcag{font-family:var(--mono);font-size:12.5px;color:var(--blue);transition:text-shadow .22s}
+  .check:hover .wcag{text-shadow:0 0 12px rgba(76,125,255,.85)}
+  .check .name{color:var(--ink);font-weight:500;font-size:16.5px}
+  .check .desc{font-size:14.5px;color:var(--muted);margin-top:3px}
+
+  /* ---------- демонстрация контраста ---------- */
+  .demo{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:center;margin-top:34px}
+  .cards{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .swatch{border-radius:12px;padding:22px 20px;border:1px solid var(--line);min-height:168px;display:flex;flex-direction:column;justify-content:space-between}
+  .swatch.light{background:#F7F8FA}
+  .swatch.dark{background:#141821}
+  .swatch .sample{font-size:15.5px;font-weight:500;line-height:1.45}
+  .badge{align-self:flex-start;font-family:var(--mono);font-size:10.5px;padding:4px 9px;border-radius:5px;letter-spacing:.05em;margin-top:16px}
+  .badge.pass{color:#0A3B33;background:var(--cyan)}
+  .badge.fail{color:#3B0F0F;background:var(--red)}
+  .slider-row{margin-top:20px}
+  .slider-row .cap{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-bottom:9px}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:3px;border-radius:2px;
+    background:linear-gradient(90deg,#0B0E17,#9AA3B8,#F2F5FF);outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+    background:var(--blue);border:2px solid #0B0E17;cursor:pointer;
+    box-shadow:0 0 16px rgba(76,125,255,.85);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:17px;height:17px;border-radius:50%;background:var(--blue);
+    border:2px solid #0B0E17;cursor:pointer;box-shadow:0 0 16px rgba(76,125,255,.85);
+  }
+
+  /* ---------- тарифы ---------- */
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-top:38px;align-items:stretch}
+  .plan{position:relative;border-radius:15px;padding:30px 28px;border:1px solid var(--line);background:rgba(168,176,196,.028);display:flex;flex-direction:column}
+  .plan.pro{background:linear-gradient(180deg,rgba(76,125,255,.11),rgba(76,125,255,.03));border-color:transparent;box-shadow:0 0 52px rgba(76,125,255,.15)}
+  .plan.pro::before{
+    content:"";position:absolute;inset:0;border-radius:15px;padding:1px;
+    background:linear-gradient(140deg,rgba(127,227,212,.85),rgba(76,125,255,.75),rgba(76,125,255,.1));
+    -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    -webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);
+    mask-composite:exclude;pointer-events:none;
+  }
+  .plan .pname{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  .plan .price{font-size:38px;font-weight:600;color:var(--ink);letter-spacing:-.03em;margin-top:13px;line-height:1}
+  .plan .price small{font-size:15px;font-weight:400;color:var(--muted);letter-spacing:0}
+  .plan ul{list-style:none;padding:0;margin:22px 0 26px;flex:1}
+  .plan li{display:flex;gap:10px;padding:7px 0;font-size:14.8px;line-height:1.5}
+  .plan li svg{flex:none;margin-top:5px;color:var(--cyan)}
+  .plan .note{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:13px;text-align:center}
+
+  /* ---------- честная секция ---------- */
+  .honest{border-top:1px solid var(--line)}
+  .honest p{max-width:74ch;font-size:15.5px;color:var(--muted);margin:12px 0 0}
+  .honest h2{font-size:clamp(22px,2.6vw,28px)}
+
+  /* ---------- подвал ---------- */
+  footer{border-top:1px solid var(--line);background:linear-gradient(180deg,transparent,#020306);padding-block:44px}
+  .fbar{display:flex;justify-content:space-between;align-items:center;gap:22px;flex-wrap:wrap}
+  .flinks{display:flex;gap:24px}
+  .flinks a{color:var(--muted);text-decoration:none;font-size:14px;transition:color .2s}
+  .flinks a:hover{color:var(--ink)}
+  .fnote{font-family:var(--mono);font-size:11.5px;color:#6B7692;margin-top:22px}
+
+  /* ---------- появление при скролле ---------- */
+  .rise{opacity:0;transform:translateY(24px);transition:opacity .75s cubic-bezier(.2,.7,.3,1),transform .75s cubic-bezier(.2,.7,.3,1)}
+  .rise.in{opacity:1;transform:none}
+
+  /* ---------- узкие экраны ---------- */
+  @media (max-width:900px){
+    .editor{grid-template-columns:1fr}
+    .panel{border-left:0;border-top:1px solid rgba(168,176,196,.15)}
+    .two-col,.demo,.plans{grid-template-columns:1fr;gap:30px}
+    .stats{grid-template-columns:1fr}
+    .stat{border-left:0;border-top:1px solid var(--line)}
+    .stat:first-child{border-top:0}
+    nav a{display:none}
+    .orbit{display:none}
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .rise{opacity:1;transform:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+<div class="nebula"></div>
+
+<div class="page">
+
+<header id="top">
+  <div class="wrap bar">
+    <div class="brand">
+      <svg class="glyph" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l2.2 9.8L24 12l-9.8 2.2L12 24l-2.2-9.8L0 12l9.8-2.2z"/></svg>
+      Ally
+    </div>
+    <nav>
+      <a href="#why">How it works</a>
+      <a href="#checks">Checks</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#">Docs</a>
+      <a class="btn btn-primary btn-sm" href="#pricing">Install free</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ГЕРОЙ -->
+<section class="hero">
+  <div class="scanner"></div>
+  <div class="wrap inner">
+    <p class="label">21:1 — <span class="hi">white on black</span>. the highest contrast there is.</p>
+    <h1>Most sites fail<br><span class="dim">long before that.</span></h1>
+    <p class="lead">Ally scans your Framer site for the contrast failures, missing image descriptions and broken heading structure that make pages unreadable — and fixes most of them in one click.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#pricing">Install free</a>
+      <a class="btn btn-ghost" href="#checks">See the seven checks</a>
+    </div>
+    <p class="fineprint">Free forever to scan. Pro unlocks one-click fixes.</p>
+  </div>
+</section>
+
+<!-- СТАТИСТИКА -->
+<div class="wrap">
+  <div class="stats rise">
+    <div class="stat">
+      <div class="num"><span data-count="21">0</span><span class="unit">:1</span></div>
+      <div class="cap">maximum possible contrast<br>white on black</div>
+    </div>
+    <div class="stat">
+      <div class="num"><span data-count="4.5">0</span><span class="unit">:1</span></div>
+      <div class="cap">minimum the law requires<br>for body text</div>
+    </div>
+    <div class="stat">
+      <div class="num"><span data-count="7">0</span></div>
+      <div class="cap">checks Ally runs<br>on every page</div>
+    </div>
+  </div>
+</div>
+
+<!-- ОКНО ПРОДУКТА -->
+<section style="padding-top:clamp(44px,6vw,72px)">
+  <div class="wrap shot-wrap rise">
+    <div class="orbit"></div>
+    <div class="browser">
+      <div class="chrome">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+        <div class="url">framer.com/projects/acme-studio</div>
+      </div>
+      <div class="editor">
+        <div class="canvas-area">
+          <div class="mock" role="img" aria-label="Example of a customer page with text too faint to read, an image with no description and an unlabelled button - the problems Ally reports in the panel beside it">
+            <div class="m-h">Book a consultation</div>
+            <div class="m-p">Our team replies within one business day.</div>
+            <div class="m-faint">Fields marked with an asterisk are required</div>
+            <div class="m-img">product-shot-final-v3.png</div>
+            <span class="m-btn">Send request</span>
+          </div>
+        </div>
+        <aside class="panel">
+          <div class="panel-top">
+            <span class="t">
+              <svg class="glyph" style="width:12px;height:12px" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l2.2 9.8L24 12l-9.8 2.2L12 24l-2.2-9.8L0 12l9.8-2.2z"/></svg>
+              Ally
+            </span>
+            <span class="n">6 issues</span>
+          </div>
+          <div class="panel-scope">
+            <span class="chip on">This page</span>
+            <span class="chip">Whole site</span>
+            <span class="chip">Unpublished</span>
+          </div>
+          <div class="issues">
+            <div class="issue">
+              <span class="sev e"></span>
+              <span class="txt"><span class="tag">1.4.3 · CONTRAST</span><span class="msg">Caption text 1.74:1 — needs 4.5:1</span></span>
+              <span class="fix">Fix</span>
+            </div>
+            <div class="issue">
+              <span class="sev e"></span>
+              <span class="txt"><span class="tag">1.1.1 · ALT TEXT</span><span class="msg">Image has no description</span></span>
+              <span class="fix">Fix</span>
+            </div>
+            <div class="issue">
+              <span class="sev e"></span>
+              <span class="txt"><span class="tag">1.4.3 · DARK THEME</span><span class="msg">Body text 2.74:1 in dark mode</span></span>
+              <span class="fix">Fix</span>
+            </div>
+            <div class="issue">
+              <span class="sev w"></span>
+              <span class="txt"><span class="tag">1.3.1 · HEADINGS</span><span class="msg">H1 followed by H3, level skipped</span></span>
+              <span class="fix">Fix</span>
+            </div>
+            <div class="issue">
+              <span class="sev w"></span>
+              <span class="txt"><span class="tag">2.5.8 · TAP TARGET</span><span class="msg">Icon link is 18×18, needs 24×24</span></span>
+            </div>
+            <div class="issue">
+              <span class="sev w"></span>
+              <span class="txt"><span class="tag">2.4.4 · LINK NAME</span><span class="msg">Link has no readable label</span></span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ПОЧЕМУ СЕЙЧАС -->
+<div class="band" id="why">
+  <section>
+    <div class="wrap rise">
+      <p class="label">why now</p>
+      <h2>Accessibility became law,<br>not a nice-to-have.</h2>
+      <div class="two-col">
+        <p>The European Accessibility Act has applied since June 2025. It covers any business serving customers in the EU, regardless of where that business is registered — a shop outside Europe taking European orders falls under it too. The operative standard is WCAG 2.1 level AA.</p>
+        <p>Enforcement bodies across all 27 member states are already handling complaints, issuing warnings and, in several countries, fines. Only microenterprises are exempt: fewer than ten staff and under two million euro turnover. Everyone above that line has to comply.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- СЕМЬ ПРОВЕРОК -->
+<section id="checks">
+  <div class="wrap rise">
+    <p class="label">what it finds</p>
+    <h2>The seven checks.</h2>
+    <div class="checks">
+      <div class="check"><span class="wcag">1.4.3</span><span><span class="name">Text contrast below the required ratio</span><span class="desc">Measured against the real background behind the text, not the layer it sits on.</span></span></div>
+      <div class="check"><span class="wcag">1.1.1</span><span><span class="name">Images with no alternative text</span><span class="desc">Screen readers announce nothing at all for these.</span></span></div>
+      <div class="check"><span class="wcag">1.3.1</span><span><span class="name">Skipped heading levels</span><span class="desc">An H1 followed by an H3 breaks the document outline.</span></span></div>
+      <div class="check"><span class="wcag">1.3.1</span><span><span class="name">Missing or duplicated page H1</span><span class="desc">Every page needs exactly one top-level heading.</span></span></div>
+      <div class="check"><span class="wcag">2.5.8</span><span><span class="name">Tap targets under 24 by 24 pixels</span><span class="desc">Icon links and small buttons that fingers cannot hit reliably.</span></span></div>
+      <div class="check"><span class="wcag">2.4.4</span><span><span class="name">Links with no readable label</span><span class="desc">An icon-only link reads as nothing but a destination.</span></span></div>
+      <div class="check"><span class="wcag">12px</span><span><span class="name">Text too small to read comfortably</span><span class="desc">Not strictly in the standard, but the first thing users complain about.</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ДЕМО КОНТРАСТА -->
+<div class="band">
+  <section>
+    <div class="wrap rise">
+      <p class="label">the difference</p>
+      <h2>One color. Two verdicts.</h2>
+      <div class="demo">
+        <div>
+          <p>Framer color styles store separate values for light and dark themes. A grey that reads perfectly on white quietly collapses on a dark background — same layer, same style, opposite verdict.</p>
+          <p style="margin-top:16px">Every checker in the marketplace looks at one theme. Ally reports both, so a dark-mode failure never ships unnoticed.</p>
+          <div class="slider-row">
+            <div class="cap"><span>Drag to change the text color</span><span class="mono" id="hex">#767676</span></div>
+            <input type="range" id="tone" min="0" max="255" value="118" aria-label="Text lightness">
+          </div>
+        </div>
+        <div class="cards">
+          <div class="swatch light">
+            <div class="sample" id="s-light">Replies within one business day.</div>
+            <span class="badge pass" id="b-light">PASSES 4.54:1</span>
+          </div>
+          <div class="swatch dark">
+            <div class="sample" id="s-dark">Replies within one business day.</div>
+            <span class="badge fail" id="b-dark">FAILS 3.10:1</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ТАРИФЫ -->
+<section id="pricing">
+  <div class="wrap rise">
+    <p class="label">pricing</p>
+    <h2>Scan for free. Pay to fix.</h2>
+    <div class="plans">
+      <div class="plan">
+        <span class="pname">Free</span>
+        <div class="price">$0</div>
+        <ul>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Scan any page in your project</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>See every issue Ally finds</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Jump straight to the layer on canvas</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Light and dark theme reported separately</li>
+        </ul>
+        <a class="btn btn-ghost" href="#">Install free</a>
+      </div>
+      <div class="plan pro">
+        <span class="pname">Pro · one-time</span>
+        <div class="price">$—<small> once</small></div>
+        <ul>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>One-click fixes for alt text and headings</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Suggested passing color for every contrast failure</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Scan the whole site, or only unpublished changes</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Exportable report for the client</li>
+        </ul>
+        <a class="btn btn-primary" href="#">Buy Pro</a>
+        <p class="note">One-time payment. Not a subscription.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ЧЕСТНАЯ СЕКЦИЯ -->
+<div class="honest">
+  <section style="padding-block:clamp(56px,7vw,88px)">
+    <div class="wrap rise">
+      <h2>What Ally does not do.</h2>
+      <p>No automated tool can certify full WCAG compliance, and any tool claiming otherwise is selling you a false sense of safety. Ally covers the static, checkable part: contrast, alternative text, heading structure and target sizes. It does not test screen reader behaviour, keyboard navigation order, or text placed over images and gradients. Those still need a human, and Ally is built to make that human's job smaller — not to replace it.</p>
+    </div>
+  </section>
+</div>
+
+<footer>
+  <div class="wrap">
+    <div class="fbar">
+      <div class="brand">
+        <svg class="glyph" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0l2.2 9.8L24 12l-9.8 2.2L12 24l-2.2-9.8L0 12l9.8-2.2z"/></svg>
+        Ally
+      </div>
+      <div class="flinks">
+        <a href="#">Docs</a>
+        <a href="#">Support</a>
+        <a href="#">Changelog</a>
+        <a href="#">Privacy</a>
+      </div>
+    </div>
+    <p class="fnote">A plugin for Framer. Not affiliated with Framer B.V.</p>
+  </div>
+</footer>
+
+</div>
+
+<script>
+(() => {
+  "use strict"
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+
+  /* ---------- звёздное поле на canvas, три слоя параллакса ---------- */
+  const canvas = document.getElementById("stars")
+  const ctx = canvas.getContext("2d")
+  let stars = []
+  let width = 0
+  let height = 0
+  let scrollY = window.scrollY
+
+  // Слои: дальние мельче, тусклее и медленнее. Отсюда ощущение глубины.
+  const LAYERS = [
+    { count: 130, size: [0.4, 0.9], speed: 0.012, drift: 0.006, alpha: [0.25, 0.5] },
+    { count: 70,  size: [0.8, 1.5], speed: 0.045, drift: 0.014, alpha: [0.4, 0.75] },
+    { count: 26,  size: [1.4, 2.3], speed: 0.10,  drift: 0.03,  alpha: [0.7, 1.0] },
+  ]
+
+  const random = (min, max) => min + Math.random() * (max - min)
+
+  function build() {
+    const ratio = Math.min(window.devicePixelRatio || 1, 2)
+    width = window.innerWidth
+    height = window.innerHeight
+    canvas.width = width * ratio
+    canvas.height = height * ratio
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
+
+    // Плотность привязана к площади: на большом мониторе небо не должно пустеть
+    const density = Math.max(0.55, Math.min(1.8, (width * height) / (1440 * 900)))
+
+    stars = []
+    for (const layer of LAYERS) {
+      const total = Math.round(layer.count * density)
+      for (let i = 0; i < total; i++) {
+        stars.push({
+          x: Math.random() * width,
+          // Небо плотнее сверху: квадратичное распределение по высоте
+          y: Math.pow(Math.random(), 1.7) * height * 2.4,
+          r: random(layer.size[0], layer.size[1]),
+          a: random(layer.alpha[0], layer.alpha[1]),
+          speed: layer.speed,
+          drift: layer.drift,
+          // Мерцание: у каждой звезды своя фаза, иначе небо запульсирует целиком
+          phase: Math.random() * Math.PI * 2,
+          twinkle: random(0.0006, 0.0018),
+          bloom: layer.size[1] > 1.3 && Math.random() > 0.55,
+        })
+      }
+    }
+  }
+
+  function draw(time) {
+    ctx.clearRect(0, 0, width, height)
+
+    for (const star of stars) {
+      // Медленный дрейф вбок плюс параллакс от прокрутки
+      const x = (star.x + time * star.drift) % (width + 40) - 20
+      const y = star.y - scrollY * star.speed
+
+      // Небо бесконечное: ушедшие вверх звёзды возвращаются снизу
+      const wrapped = ((y % (height * 2.4)) + height * 2.4) % (height * 2.4)
+      if (wrapped > height + 4) continue
+
+      const flicker = reduced ? 1 : 0.75 + 0.25 * Math.sin(time * star.twinkle + star.phase)
+      const alpha = star.a * flicker
+
+      if (star.bloom) {
+        const glow = ctx.createRadialGradient(x, wrapped, 0, x, wrapped, star.r * 4.5)
+        glow.addColorStop(0, `rgba(233,238,255,${alpha * 0.5})`)
+        glow.addColorStop(1, "rgba(233,238,255,0)")
+        ctx.fillStyle = glow
+        ctx.beginPath()
+        ctx.arc(x, wrapped, star.r * 4.5, 0, Math.PI * 2)
+        ctx.fill()
+      }
+
+      ctx.fillStyle = `rgba(233,238,255,${alpha})`
+      ctx.beginPath()
+      ctx.arc(x, wrapped, star.r, 0, Math.PI * 2)
+      ctx.fill()
+    }
+  }
+
+  let frame = 0
+  function loop(time) {
+    draw(time)
+    frame = requestAnimationFrame(loop)
+  }
+
+  build()
+  if (reduced) {
+    draw(0)
+  } else {
+    frame = requestAnimationFrame(loop)
+  }
+
+  let resizeTimer = 0
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer)
+    resizeTimer = setTimeout(() => {
+      build()
+      if (reduced) draw(0)
+    }, 160)
+  })
+
+  /* ---------- шапка и прокрутка ---------- */
+  const header = document.getElementById("top")
+  window.addEventListener("scroll", () => {
+    scrollY = window.scrollY
+    header.classList.toggle("scrolled", scrollY > 12)
+  }, { passive: true })
+
+  /* ---------- появление секций ---------- */
+  const rising = document.querySelectorAll(".rise")
+  if ("IntersectionObserver" in window && !reduced) {
+    const observer = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in")
+          observer.unobserve(entry.target)
+        }
+      }
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" })
+    rising.forEach(element => observer.observe(element))
+  } else {
+    rising.forEach(element => element.classList.add("in"))
+  }
+
+  /* ---------- счётчики ---------- */
+  const counters = document.querySelectorAll("[data-count]")
+  function runCounter(element) {
+    const target = parseFloat(element.dataset.count)
+    const decimals = element.dataset.count.includes(".") ? 1 : 0
+    const duration = 1100
+    const start = performance.now()
+
+    function step(now) {
+      const progress = Math.min(1, (now - start) / duration)
+      // Замедление к концу: цифра «приезжает», а не обрывается
+      const eased = 1 - Math.pow(1 - progress, 3)
+      element.textContent = (target * eased).toFixed(decimals)
+      if (progress < 1) requestAnimationFrame(step)
+      else element.textContent = target.toFixed(decimals)
+    }
+    requestAnimationFrame(step)
+  }
+
+  if ("IntersectionObserver" in window && !reduced) {
+    const counterObserver = new IntersectionObserver(entries => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          runCounter(entry.target)
+          counterObserver.unobserve(entry.target)
+        }
+      }
+    }, { threshold: 0.6 })
+    counters.forEach(element => counterObserver.observe(element))
+  } else {
+    counters.forEach(element => {
+      element.textContent = parseFloat(element.dataset.count).toFixed(element.dataset.count.includes(".") ? 1 : 0)
+    })
+  }
+
+  /* ---------- живое демо контраста ----------
+     Расчёт настоящий, по формуле относительной яркости из WCAG 2.1 —
+     тот же, что внутри плагина. Порог 0.03928 взят из текста спецификации. */
+  const LIGHT_BG = { r: 247, g: 248, b: 250 }
+  const DARK_BG = { r: 20, g: 24, b: 33 }
+
+  function luminance({ r, g, b }) {
+    const channel = raw => {
+      const srgb = raw / 255
+      return srgb <= 0.03928 ? srgb / 12.92 : Math.pow((srgb + 0.055) / 1.055, 2.4)
+    }
+    return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
+  }
+
+  function ratio(a, b) {
+    const first = luminance(a)
+    const second = luminance(b)
+    return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05)
+  }
+
+  const tone = document.getElementById("tone")
+  const hex = document.getElementById("hex")
+  const sampleLight = document.getElementById("s-light")
+  const sampleDark = document.getElementById("s-dark")
+  const badgeLight = document.getElementById("b-light")
+  const badgeDark = document.getElementById("b-dark")
+
+  function updateDemo() {
+    const value = Number(tone.value)
+    const color = { r: value, g: value, b: value }
+    const asHex = "#" + value.toString(16).padStart(2, "0").repeat(3)
+
+    hex.textContent = asHex
+    sampleLight.style.color = asHex
+    sampleDark.style.color = asHex
+
+    const onLight = ratio(color, LIGHT_BG)
+    const onDark = ratio(color, DARK_BG)
+
+    const apply = (badge, value) => {
+      const passes = value >= 4.5
+      badge.textContent = (passes ? "PASSES " : "FAILS ") + value.toFixed(2) + ":1"
+      badge.className = "badge " + (passes ? "pass" : "fail")
+    }
+
+    apply(badgeLight, onLight)
+    apply(badgeDark, onDark)
+  }
+
+  tone.addEventListener("input", updateDemo)
+  updateDemo()
+})()
+</script>
+
+</body>
+</html>

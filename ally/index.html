@@ -135,6 +135,8 @@
   .btn-primary:hover{transform:translateY(-2px);box-shadow:0 0 34px rgba(76,125,255,.5), 0 10px 28px rgba(76,125,255,.34)}
   .btn-primary:hover::after{opacity:1}
   .btn-ghost{color:var(--ink);background:rgba(168,176,196,.05);border-color:var(--line)}
+  .btn-soon{cursor:default;opacity:.82}
+  .plans-note{margin-top:22px;font-family:var(--mono);font-size:12px;color:#757F96;text-align:center}
   .btn-ghost:hover{transform:translateY(-2px);border-color:rgba(76,125,255,.55);box-shadow:0 0 26px rgba(76,125,255,.18);background:rgba(76,125,255,.07)}
   .btn-sm{padding:9px 17px;font-size:14px;border-radius:9px}
   @property --angle{syntax:"<angle>";inherits:false;initial-value:0deg}
@@ -287,6 +289,9 @@
   .check:hover{transform:translateX(5px);background:rgba(76,125,255,.045)}
   .check .wcag{font-family:var(--mono);font-size:12.5px;color:var(--blue);transition:text-shadow .22s}
   .check:hover .wcag{text-shadow:0 0 12px rgba(76,125,255,.85)}
+  /* Обёртка была строчной, из-за чего заголовок и пояснение слипались
+     в одну строку, а margin-top у .desc не работал вовсе. */
+  .check > span:last-child{display:flex;flex-direction:column}
   .check .name{color:var(--ink);font-weight:500;font-size:16.5px}
   .check .desc{font-size:14.5px;color:var(--muted);margin-top:3px}
 
@@ -388,8 +393,7 @@
       <a href="#why">How it works</a>
       <a href="#checks">Checks</a>
       <a href="#pricing">Pricing</a>
-      <a href="#">Docs</a>
-      <a class="btn btn-primary btn-sm" href="#pricing">Install free</a>
+            <a class="btn btn-primary btn-sm" href="#pricing">Install free</a>
     </nav>
   </div>
 </header>
@@ -571,21 +575,21 @@
           <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Jump straight to the layer on canvas</li>
           <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Light and dark theme reported separately</li>
         </ul>
-        <a class="btn btn-ghost" href="#">Install free</a>
+        <span class="btn btn-ghost btn-soon">Free in the Framer Marketplace</span>
       </div>
       <div class="plan pro">
         <span class="pname">Pro · one-time</span>
-        <div class="price">$—<small> once</small></div>
+        <div class="price">$24<small> once</small></div>
         <ul>
           <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>One-click fixes for alt text and headings</li>
           <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Suggested passing color for every contrast failure</li>
-          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Scan the whole site, or only unpublished changes</li>
-          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Exportable report for the client</li>
-        </ul>
-        <a class="btn btn-primary" href="#">Buy Pro</a>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Scan the whole site in one run</li>
+                  </ul>
+        <span class="btn btn-primary btn-soon">$24 one-time licence</span>
         <p class="note">One-time payment. Not a subscription.</p>
       </div>
     </div>
+    <p class="plans-note">Ally is finished and in review for the Framer Marketplace. Install and purchase open the day it ships.</p>
   </div>
 </section>
 
@@ -607,10 +611,7 @@
         Ally
       </div>
       <div class="flinks">
-        <a href="#">Docs</a>
-        <a href="#">Support</a>
-        <a href="#">Changelog</a>
-        <a href="#">Privacy</a>
+                                <a href="privacy.html">Privacy</a>
       </div>
     </div>
     <p class="fnote">A plugin for Framer. Not affiliated with Framer B.V.</p>

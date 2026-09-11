@@ -4,12 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Ally — Accessibility Audit for Framer</title>
-<meta name="description" content="Ally scans your Framer site for contrast failures, missing image descriptions and broken heading structure — and fixes most of them in one click.">
+<meta name="description" content="Ally scans your Framer site for contrast failures, missing image descriptions and broken heading structure — and writes the missing descriptions for you.">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Ally">
 <meta property="og:title" content="Ally — Accessibility Audit for Framer">
-<meta property="og:description" content="Contrast, alt text and heading order, checked in light theme and dark theme. Most of it fixed in one click.">
+<meta property="og:description" content="Contrast, alt text and heading order, checked in light theme and dark theme. Reported in both, with a passing colour for every failure.">
 <meta property="og:url" content="https://naha11.github.io/ally/">
 <meta property="og:image" content="https://naha11.github.io/ally/og.jpg">
 <meta property="og:image:width" content="1200">
@@ -410,12 +410,12 @@
   <div class="wrap inner">
     <p class="label">21:1 — <span class="hi">white on black</span>. the highest contrast there is.</p>
     <h1>Most sites fail<br><span class="dim">long before that.</span></h1>
-    <p class="lead">Ally scans your Framer site for the contrast failures, missing image descriptions and broken heading structure that make pages unreadable — and fixes most of them in one click.</p>
+    <p class="lead">Ally scans your Framer site for the contrast failures, missing image descriptions and broken heading structure that make pages unreadable — and writes the missing descriptions for you.</p>
     <div class="cta-row">
       <a class="btn btn-primary" href="#pricing">Install free</a>
       <a class="btn btn-ghost" href="#checks">See the seven checks</a>
     </div>
-    <p class="fineprint">Free forever to scan. Pro unlocks one-click fixes.</p>
+    <p class="fineprint">Free forever to scan. Pro unlocks the rest.</p>
   </div>
 </section>
 
@@ -588,7 +588,7 @@
         <span class="pname">Pro · one-time</span>
         <div class="price">$24<small> once</small></div>
         <ul>
-          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>One-click fixes for alt text and headings</li>
+          <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>One-click image descriptions, written into the document</li>
           <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Suggested passing color for every contrast failure</li>
           <li><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Scan the whole site in one run</li>
                   </ul>
@@ -606,6 +606,7 @@
     <div class="wrap rise">
       <h2>What Ally does not do.</h2>
       <p>No automated tool can certify full WCAG compliance, and any tool claiming otherwise is selling you a false sense of safety. Ally covers the static, checkable part: contrast, alternative text, heading structure and target sizes. It does not test screen reader behaviour, keyboard navigation order, or text placed over images and gradients. Those still need a human, and Ally is built to make that human's job smaller — not to replace it.</p>
+      <p style="margin-top:18px">Two limits come from Framer itself, and they are worth knowing before you buy. Colour, size and heading level reach a plugin through Framer's text styles: where a layer uses one, Ally reads all of it; where someone typed a colour straight onto a single layer, Framer keeps that inside the text where no plugin can see it, and Ally stays quiet rather than guess. And a heading tag can be reported but not changed — Framer does not let plugins rewrite one yet — so Ally points at the layer and you change it in the text panel.</p>
     </div>
   </section>
 </div>

@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="icon" href="../favicon.png">
+<style>*{box-sizing:border-box}img{max-width:100%}body{margin:0;font:14px system-ui}</style>
+<title>Olympus OS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500&display=swap">
+<style>
+/* ============================================================
+   OLYMPUS OS — design tokens
+   One committed visual world: obsidian night, marble, aged gold.
+   ============================================================ */
+:root{
+  --obsidian:#0A0C11;
+  --graphite:#151A23;
+  --slate:#1E2531;
+  --midnight:#16233D;
+  --marble:#F3EEE4;
+  --marble-dim:#C8C0B1;
+  --marble-mute:#8E8878;
+  --gold:#C9A24B;
+  --gold-bright:#E7C877;
+  --bronze:#8A6A3B;
+  --amber:#F0B963;
+
+  --glass:rgba(12,15,21,.62);
+  --glass-hi:rgba(28,34,46,.72);
+  --hairline:rgba(201,162,75,.34);
+  --hairline-soft:rgba(201,162,75,.16);
+  --marble-veil:rgba(243,238,228,.08);
+
+  --shadow-lift:0 18px 46px -18px rgba(0,0,0,.82);
+  --shadow-window:0 42px 90px -30px rgba(0,0,0,.9), 0 2px 0 rgba(243,238,228,.05) inset;
+  --glow-gold:0 0 22px rgba(201,162,75,.30);
+
+  --blur:18px;
+  --r-sm:6px; --r-md:12px; --r-lg:16px;
+
+  --s1:4px; --s2:8px; --s3:12px; --s4:18px; --s5:26px; --s6:40px; --s7:64px;
+
+  --ease-spring:cubic-bezier(.22,.96,.3,1.04);
+  --ease-calm:cubic-bezier(.4,0,.2,1);
+
+  --meander:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='11' viewBox='0 0 22 11'%3E%3Cpath d='M0.5 10.5V2.5h7v5h-4v-3' fill='none' stroke='%23C9A24B' stroke-width='1'/%3E%3Cpath d='M11.5 10.5V2.5h7v5h-4v-3' fill='none' stroke='%23C9A24B' stroke-width='1'/%3E%3C/svg%3E");
+  --taskbar-h:62px;
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--obsidian);
+  color:var(--marble);
+  font-family:"Jost","Avenir Next",system-ui,sans-serif;
+  font-weight:300;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+:focus-visible{outline:1px solid var(--gold-bright);outline-offset:3px}
+
+/* ============================================================
+   WALLPAPER — the world the UI lives inside
+   ============================================================ */
+#desktop{position:fixed;inset:0;overflow:hidden;isolation:isolate}
+
+.wall{position:absolute;inset:0;z-index:0}
+.wall img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:52% 42%;
+  filter:saturate(.88) contrast(1.04) brightness(.82);
+}
+/* atmospheric grading so UI chrome always has a ground to sit on */
+.wall::after{
+  content:"";position:absolute;inset:0;
+  background:
+    radial-gradient(120% 70% at 50% 6%, rgba(10,12,17,.72) 0%, rgba(10,12,17,0) 55%),
+    radial-gradient(90% 60% at 50% 100%, rgba(10,12,17,.88) 0%, rgba(10,12,17,0) 62%),
+    linear-gradient(90deg, rgba(10,12,17,.55) 0%, rgba(10,12,17,0) 26%, rgba(10,12,17,0) 74%, rgba(10,12,17,.5) 100%),
+    linear-gradient(180deg, rgba(22,35,61,.22), rgba(10,12,17,.18));
+}
+/* very cheap god-rays: one transform-only layer */
+.rays{
+  position:absolute;inset:-20% -10% 0;z-index:1;pointer-events:none;
+  background:conic-gradient(from 196deg at 72% 34%,
+    rgba(240,185,99,0) 0deg, rgba(240,185,99,.10) 6deg, rgba(240,185,99,0) 12deg,
+    rgba(240,185,99,0) 20deg, rgba(240,185,99,.07) 25deg, rgba(240,185,99,0) 31deg,
+    rgba(240,185,99,0) 360deg);
+  mix-blend-mode:screen;opacity:.75;
+  animation:drift 42s var(--ease-calm) infinite alternate;
+  will-change:transform;
+}
+@keyframes drift{from{transform:translate3d(0,0,0) rotate(-.5deg)}to{transform:translate3d(-1.2%,.6%,0) rotate(.6deg)}}
+
+/* ============================================================
+   DESKTOP LAYOUT
+   ============================================================ */
+.stage{
+  position:absolute;inset:0 0 var(--taskbar-h) 0;z-index:2;
+  display:grid;
+  grid-template-columns:minmax(210px,250px) 1fr minmax(230px,270px);
+  grid-template-rows:auto 1fr;
+  gap:var(--s5);
+  padding:var(--s5) var(--s5) 0;
+}
+
+/* ---------- desktop icons on marble pedestals ---------- */
+.shelf{grid-column:1;grid-row:1/3;display:flex;flex-direction:column;gap:var(--s3);align-content:start}
+
+.icon{
+  position:relative;display:grid;grid-template-columns:58px 1fr;align-items:center;gap:var(--s3);
+  padding:10px 14px 12px 10px;border:1px solid rgba(243,238,228,.05);border-radius:var(--r-md);
+  text-align:left;color:var(--marble);
+  background:linear-gradient(100deg, rgba(10,12,17,.42), rgba(10,12,17,.12));
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  transition:transform .28s var(--ease-spring), border-color .28s var(--ease-calm), background .28s var(--ease-calm);
+}
+/* pedestal: the icon stands ON the world, it is not pasted over it */
+.icon::before{
+  content:"";position:absolute;left:12px;bottom:6px;width:54px;height:9px;border-radius:50%;
+  background:radial-gradient(ellipse at 50% 50%, rgba(0,0,0,.62), rgba(0,0,0,0) 70%);
+  filter:blur(1px);transition:transform .28s var(--ease-spring),opacity .28s;
+}
+.icon::after{
+  content:"";position:absolute;inset:auto 0 0 0;height:1px;
+  background:var(--meander);background-repeat:repeat-x;
+  opacity:0;transform:scaleX(.5);transform-origin:left;
+  height:11px;bottom:-2px;
+  transition:opacity .3s var(--ease-calm),transform .45s var(--ease-spring);
+}
+.icon:hover,.icon:focus-visible{
+  transform:scale(1.03);
+  background:linear-gradient(100deg, rgba(201,162,75,.12), rgba(20,25,34,.42));
+  border-color:var(--hairline);
+}
+.icon:hover::after,.icon:focus-visible::after{opacity:.85;transform:scaleX(1)}
+.icon:hover .glyph{filter:drop-shadow(0 0 10px rgba(231,200,119,.45))}
+.icon:active{transform:scale(.985)}
+
+.glyph{width:58px;height:58px;display:block;filter:drop-shadow(0 3px 6px rgba(0,0,0,.75));
+  transition:filter .3s var(--ease-calm),transform .3s var(--ease-spring)}
+.icon .label{
+  font-family:"Jost",sans-serif;font-weight:400;font-size:13.5px;letter-spacing:.06em;
+  color:var(--marble);text-shadow:0 1px 6px rgba(0,0,0,.9);
+}
+.icon .sub{
+  display:block;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;
+  color:var(--marble-dim);opacity:.78;letter-spacing:.02em;margin-top:1px;text-shadow:0 1px 5px rgba(0,0,0,.95);
+}
+
+/* ---------- clock ---------- */
+.oracle{
+  grid-column:2;grid-row:1;justify-self:center;text-align:center;
+  padding-top:var(--s4);max-width:560px;
+}
+.oracle .sunmark{display:block;margin:0 auto var(--s3);width:26px;height:26px;opacity:.85}
+.time{
+  font-family:"Cinzel",serif;font-weight:500;
+  font-size:clamp(56px,7.4vw,104px);line-height:.92;letter-spacing:.06em;
+  color:var(--marble);
+  font-variant-numeric:tabular-nums;
+  text-shadow:0 2px 30px rgba(0,0,0,.75), 0 0 60px rgba(240,185,99,.10);
+  position:relative;
+}
+/* one warm sunlight bloom on the glyphs, once per minute */
+.time{animation:bloom 60s linear infinite}
+@keyframes bloom{
+  0%{text-shadow:0 2px 30px rgba(0,0,0,.75), 0 0 60px rgba(240,185,99,.10)}
+  4%{text-shadow:0 2px 30px rgba(0,0,0,.75), 0 0 26px rgba(255,228,170,.55), 0 0 90px rgba(240,185,99,.30)}
+  12%,100%{text-shadow:0 2px 30px rgba(0,0,0,.75), 0 0 60px rgba(240,185,99,.10)}
+}
+
+.minute-rule{
+  width:min(360px,72%);height:1px;margin:var(--s4) auto var(--s3);
+  background:linear-gradient(90deg,rgba(201,162,75,0),var(--hairline),rgba(201,162,75,0));
+  position:relative;
+}
+.minute-rule i{
+  position:absolute;left:0;top:-1px;height:3px;width:100%;
+  background:linear-gradient(90deg,rgba(231,200,119,0),var(--gold-bright));
+  transform-origin:left;transform:scaleX(0);
+  animation:minute 60s linear infinite;
+  box-shadow:var(--glow-gold);
+}
+@keyframes minute{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+
+.datum{
+  font-family:"Cinzel",serif;font-size:13px;letter-spacing:.34em;text-transform:uppercase;
+  color:var(--gold-bright);opacity:.9;
+}
+.maxim{
+  margin:var(--s4) auto 0;max-width:44ch;
+  font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:300;
+  font-size:19px;line-height:1.5;color:var(--marble-dim);
+  text-wrap:balance;text-shadow:0 1px 12px rgba(0,0,0,.85);
+}
+.maxim span{display:block;margin-top:6px;font-style:normal;font-family:"Cinzel",serif;font-size:10.5px;letter-spacing:.3em;color:var(--gold);opacity:.75;text-shadow:0 1px 8px rgba(0,0,0,.9)}
+
+/* ---------- right HUD: weather + system ---------- */
+.hud{grid-column:3;grid-row:1;display:flex;flex-direction:column;gap:var(--s4);padding-top:var(--s2)}
+
+.tablet{
+  position:relative;
+  background:linear-gradient(160deg, rgba(243,238,228,.10), rgba(12,15,21,.55) 46%), var(--glass);
+  -webkit-backdrop-filter:blur(var(--blur)) saturate(1.15);
+  backdrop-filter:blur(var(--blur)) saturate(1.15);
+  border:1px solid var(--hairline-soft);
+  border-radius:var(--r-md);
+  box-shadow:var(--shadow-lift);
+  padding:var(--s4);
+}
+/* engraved top edge */
+.tablet::before{
+  content:"";position:absolute;left:var(--s4);right:var(--s4);top:0;height:1px;
+  background:linear-gradient(90deg,rgba(201,162,75,0),var(--gold),rgba(201,162,75,0));opacity:.7;
+}
+.tablet h3{
+  margin:0 0 var(--s3);font-family:"Cinzel",serif;font-weight:400;font-size:10.5px;
+  letter-spacing:.3em;text-transform:uppercase;color:var(--marble-mute);
+}
+
+.weather{display:grid;grid-template-columns:1fr auto;align-items:center;gap:var(--s3)}
+.temp{font-family:"Cinzel",serif;font-size:42px;line-height:1;color:var(--marble);font-variant-numeric:tabular-nums}
+.temp sup{font-size:18px;top:-.7em;color:var(--gold)}
+.sky{font-family:"Cormorant Garamond",serif;font-size:17px;color:var(--marble-dim);margin-top:4px}
+.where{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--marble-mute);margin-top:7px}
+.weather svg{width:54px;height:54px;opacity:.95}
+
+.meters{display:flex;flex-direction:column;gap:var(--s3)}
+.meter{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:var(--s3);font-size:12.5px}
+.meter svg{width:22px;height:22px;opacity:.9}
+.meter .name{grid-column:2;letter-spacing:.12em;text-transform:uppercase;font-size:10.5px;color:var(--marble-mute)}
+.meter .val{font-variant-numeric:tabular-nums;color:var(--marble);font-size:12.5px}
+.meter .track{
+  grid-column:2/4;height:2px;border-radius:2px;background:rgba(243,238,228,.13);overflow:hidden;margin-top:-4px;
+}
+.meter .track i{
+  display:block;height:100%;width:0;
+  background:linear-gradient(90deg,var(--bronze),var(--gold-bright));
+  box-shadow:0 0 8px rgba(201,162,75,.5);
+  transition:width 1.2s var(--ease-calm);
+}
+
+/* ============================================================
+   WINDOWS — obsidian glass + marble + gold
+   ============================================================ */
+.win{
+  position:absolute;z-index:40;
+  width:min(620px,86vw);
+  background:
+    linear-gradient(180deg, rgba(243,238,228,.09), rgba(243,238,228,0) 120px),
+    var(--glass-hi);
+  -webkit-backdrop-filter:blur(26px) saturate(1.2);
+  backdrop-filter:blur(26px) saturate(1.2);
+  border:1px solid var(--hairline);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-window);
+  overflow:hidden;
+  animation:raise .42s var(--ease-spring) both;
+  transform-origin:var(--ox,20%) var(--oy,60%);
+}
+@keyframes raise{
+  from{opacity:0;transform:translateY(14px) scale(.94)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.win.closing{animation:lower .2s var(--ease-calm) both}
+@keyframes lower{to{opacity:0;transform:translateY(10px) scale(.96)}}
+.win.min{display:none}
+
+.bar{
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--s3);
+  padding:12px var(--s4);cursor:grab;
+  border-bottom:1px solid var(--hairline-soft);
+  background:linear-gradient(180deg, rgba(22,35,61,.42), rgba(10,12,17,.2));
+}
+.bar:active{cursor:grabbing}
+.bar .crest{width:22px;height:22px}
+.bar h2{
+  margin:0;font-family:"Cinzel",serif;font-weight:500;font-size:13px;
+  letter-spacing:.22em;text-transform:uppercase;color:var(--marble);
+}
+.bar h2 em{
+  display:block;font-family:"Cormorant Garamond",serif;font-style:italic;text-transform:none;
+  letter-spacing:.01em;font-size:12.5px;color:var(--marble-mute);margin-top:2px;
+}
+.ctrls{display:flex;gap:6px}
+.ctrls button{
+  width:13px;height:13px;border-radius:50%;border:1px solid var(--hairline);
+  background:rgba(243,238,228,.06);transition:background .2s,box-shadow .2s,transform .2s var(--ease-spring);
+}
+.ctrls button:hover{background:var(--gold);box-shadow:var(--glow-gold);transform:scale(1.12)}
+.ctrls .x:hover{background:#B4542F}
+
+.body{padding:var(--s4) var(--s5) var(--s5);max-height:min(420px,52vh);overflow:auto}
+.body::-webkit-scrollbar{width:8px}
+.body::-webkit-scrollbar-thumb{background:rgba(201,162,75,.3);border-radius:8px}
+
+/* window content primitives */
+.rows{display:flex;flex-direction:column}
+.row{
+  display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:var(--s3);
+  padding:11px 8px;border-bottom:1px solid rgba(243,238,228,.06);
+  transition:background .2s var(--ease-calm),padding-left .24s var(--ease-spring);
+}
+.row:last-child{border-bottom:0}
+.row:hover{background:linear-gradient(90deg, rgba(201,162,75,.13), rgba(201,162,75,0));padding-left:14px}
+.row svg{width:26px;height:26px;opacity:.92}
+.row .t{font-size:14px;color:var(--marble)}
+.row .d{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:13px;color:var(--marble-mute);margin-top:1px}
+.row .m{font-size:11.5px;letter-spacing:.1em;color:var(--marble-mute);font-variant-numeric:tabular-nums;text-align:right}
+
+.drives{display:flex;flex-direction:column;gap:var(--s4)}
+.drive{display:grid;grid-template-columns:34px 1fr;gap:var(--s3);align-items:center}
+.drive svg{width:34px;height:34px}
+.drive .hd{display:flex;justify-content:space-between;align-items:baseline;gap:var(--s3)}
+.drive .hd b{font-weight:400;font-size:14px;letter-spacing:.04em}
+.drive .hd span{font-size:11.5px;color:var(--marble-mute);font-variant-numeric:tabular-nums}
+.drive .track{height:3px;background:rgba(243,238,228,.12);border-radius:3px;margin-top:8px;overflow:hidden}
+.drive .track i{display:block;height:100%;background:linear-gradient(90deg,var(--bronze),var(--gold-bright));box-shadow:0 0 10px rgba(201,162,75,.45)}
+
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:var(--s3)}
+.tile{
+  border:1px solid var(--hairline-soft);border-radius:var(--r-sm);
+  padding:var(--s3);background:rgba(243,238,228,.045);
+  transition:transform .26s var(--ease-spring),border-color .26s,background .26s;
+}
+.tile:hover{transform:translateY(-3px);border-color:var(--hairline);background:rgba(201,162,75,.09)}
+.tile b{display:block;font-weight:400;font-size:13.5px;letter-spacing:.03em}
+.tile span{display:block;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12.5px;color:var(--marble-mute);margin-top:3px}
+.tile em{display:block;font-style:normal;font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-top:10px}
+
+.empty{text-align:center;padding:var(--s6) var(--s4)}
+.empty svg{width:56px;height:56px;opacity:.5}
+.empty p{font-family:"Cormorant Garamond",serif;font-style:italic;font-size:16px;color:var(--marble-mute);margin:var(--s3) 0 0}
+
+/* ============================================================
+   TASKBAR — obsidian plinth
+   ============================================================ */
+.taskbar{
+  position:absolute;left:0;right:0;bottom:0;height:var(--taskbar-h);z-index:60;
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:var(--s4);
+  padding:0 var(--s4);
+  background:linear-gradient(180deg, rgba(14,18,25,.74), rgba(8,10,14,.9));
+  -webkit-backdrop-filter:blur(22px) saturate(1.2);
+  backdrop-filter:blur(22px) saturate(1.2);
+  border-top:1px solid var(--hairline);
+}
+.taskbar::before{
+  content:"";position:absolute;left:0;right:0;top:-11px;height:11px;
+  background:var(--meander);background-repeat:repeat-x;opacity:.3;pointer-events:none;
+}
+.start{
+  display:flex;align-items:center;gap:10px;padding:7px 14px 7px 10px;border-radius:var(--r-sm);
+  border:1px solid var(--hairline-soft);background:rgba(243,238,228,.05);
+  transition:background .24s,border-color .24s,transform .24s var(--ease-spring);
+}
+.start:hover{background:rgba(201,162,75,.16);border-color:var(--hairline);transform:translateY(-1px)}
+.start svg{width:26px;height:26px}
+.start b{font-family:"Cinzel",serif;font-weight:500;font-size:11.5px;letter-spacing:.26em;color:var(--marble)}
+
+.dock{display:flex;justify-content:center;align-items:center;gap:var(--s2)}
+.app{
+  position:relative;width:46px;height:46px;display:grid;place-items:center;border-radius:10px;
+  transition:transform .26s var(--ease-spring),background .26s var(--ease-calm);
+}
+.app svg{width:28px;height:28px;transition:filter .26s}
+.app:hover{transform:translateY(-4px) scale(1.06);background:rgba(243,238,228,.06)}
+.app:hover svg{filter:drop-shadow(0 0 9px rgba(231,200,119,.5))}
+.app i{
+  position:absolute;bottom:5px;left:50%;translate:-50% 0;height:2px;width:6px;border-radius:2px;
+  background:var(--gold);opacity:0;transition:width .3s var(--ease-spring),opacity .25s;
+}
+.app:hover i{opacity:.9;width:20px}
+.app.on i{opacity:1;width:22px;box-shadow:var(--glow-gold)}
+.app .tip{
+  position:absolute;bottom:calc(100% + 10px);left:50%;translate:-50% 0;
+  white-space:nowrap;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  padding:6px 10px;border-radius:var(--r-sm);border:1px solid var(--hairline-soft);
+  background:var(--glass);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
+  color:var(--marble-dim);opacity:0;transform:translateY(4px);pointer-events:none;
+  transition:opacity .22s,transform .22s var(--ease-spring);
+}
+.app:hover .tip{opacity:1;transform:translateY(0)}
+.divider{width:1px;height:26px;background:linear-gradient(180deg,rgba(243,238,228,0),var(--marble-veil),rgba(243,238,228,0));margin:0 6px}
+
+.tray{display:flex;align-items:center;gap:var(--s3);color:var(--marble-dim)}
+.tray svg{width:17px;height:17px;opacity:.8;transition:opacity .2s}
+.tray button:hover svg{opacity:1}
+.tray .mini{
+  text-align:right;font-variant-numeric:tabular-nums;line-height:1.25;padding-left:var(--s2);
+  border-left:1px solid var(--marble-veil);
+}
+.tray .mini b{display:block;font-weight:400;font-size:13px;letter-spacing:.08em;color:var(--marble)}
+.tray .mini span{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--marble-mute)}
+
+/* ---------- context menu ---------- */
+.menu{
+  position:absolute;z-index:80;min-width:210px;padding:6px;
+  background:var(--glass-hi);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);
+  border:1px solid var(--hairline);border-radius:var(--r-md);box-shadow:var(--shadow-window);
+  animation:raise .22s var(--ease-spring) both;
+}
+.menu button{
+  display:flex;justify-content:space-between;width:100%;padding:9px 12px;border-radius:var(--r-sm);
+  font-size:13px;letter-spacing:.04em;color:var(--marble-dim);transition:background .18s,color .18s;
+}
+.menu button:hover{background:rgba(201,162,75,.16);color:var(--marble)}
+.menu button span{color:var(--marble-mute);font-size:11px}
+.menu hr{border:0;border-top:1px solid var(--marble-veil);margin:5px 8px}
+
+/* ============================================================
+   PEEK — one key clears every element off the world
+   ============================================================ */
+.stage,.taskbar,.win,.menu{transition:opacity .5s var(--ease-calm),transform .6s var(--ease-spring),filter .5s var(--ease-calm)}
+body.peek .stage{opacity:0;transform:scale(1.02);pointer-events:none}
+body.peek .taskbar{opacity:0;transform:translateY(100%);pointer-events:none}
+body.peek .win{opacity:0;transform:scale(.97);pointer-events:none}
+body.peek .menu{display:none}
+/* the sky opens up once the chrome is gone */
+body.peek .wall img{filter:saturate(.98) contrast(1.06) brightness(.97)}
+body.peek .wall::after{opacity:.45}
+.wall img,.wall::after{transition:filter 1.1s var(--ease-calm),opacity 1.1s var(--ease-calm)}
+
+.peek-hint{
+  position:absolute;left:50%;bottom:30px;translate:-50% 0;z-index:70;
+  display:flex;align-items:center;gap:10px;padding:9px 16px;border-radius:999px;
+  border:1px solid var(--hairline-soft);background:rgba(10,12,17,.42);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  font-family:"Cinzel",serif;font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--marble-dim);opacity:0;pointer-events:none;
+  transition:opacity .6s var(--ease-calm) .25s;
+}
+body.peek .peek-hint{opacity:.9;pointer-events:auto;cursor:pointer}
+.peek-hint svg{width:15px;height:15px;color:var(--gold)}
+
+/* ============================================================
+   LOCK SCREEN — the gate of Olympus
+   ============================================================ */
+.lock{
+  position:absolute;inset:0;z-index:120;display:grid;
+  grid-template-rows:auto 1fr auto;
+  padding:var(--s6) var(--s6) var(--s5);
+  background:rgba(8,10,14,.5);
+  -webkit-backdrop-filter:blur(26px) saturate(1.1) brightness(.7);
+  backdrop-filter:blur(26px) saturate(1.1) brightness(.7);
+  opacity:0;visibility:hidden;transform:translateY(0);
+  transition:opacity .7s var(--ease-calm),visibility .7s,transform .8s var(--ease-spring),backdrop-filter .7s;
+}
+body.locked .lock{opacity:1;visibility:visible}
+.lock.lifting{opacity:0;transform:translateY(-9%) scale(1.04)}
+
+.lock-top{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--s4)}
+.lock-brand{display:flex;align-items:center;gap:10px;font-family:"Cinzel",serif;font-size:11px;letter-spacing:.32em;text-transform:uppercase;color:var(--marble-dim)}
+.lock-brand svg{width:22px;height:22px}
+.lock-sky{display:flex;align-items:center;gap:10px;color:var(--marble-dim)}
+.lock-sky svg{width:30px;height:30px}
+.lock-sky b{font-family:"Cinzel",serif;font-weight:400;font-size:19px;font-variant-numeric:tabular-nums}
+.lock-sky span{display:block;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:13px;color:var(--marble-mute)}
+
+.lock-center{display:grid;place-content:center;text-align:center;gap:var(--s3)}
+.lock-time{
+  font-family:"Cinzel",serif;font-weight:400;
+  font-size:clamp(72px,11vw,168px);line-height:.9;letter-spacing:.05em;
+  color:var(--marble);font-variant-numeric:tabular-nums;
+  text-shadow:0 4px 44px rgba(0,0,0,.7),0 0 90px rgba(240,185,99,.12);
+}
+.lock-date{font-family:"Cinzel",serif;font-size:13px;letter-spacing:.4em;text-transform:uppercase;color:var(--gold-bright);opacity:.92}
+.lock-quote{
+  margin:var(--s4) auto 0;max-width:40ch;
+  font-family:"Cormorant Garamond",serif;font-style:italic;font-weight:300;font-size:20px;
+  color:var(--marble-dim);text-wrap:balance;
+}
+.lock-rule{width:180px;height:1px;margin:var(--s4) auto 0;background:linear-gradient(90deg,rgba(201,162,75,0),var(--gold),rgba(201,162,75,0))}
+
+.lock-gate{justify-self:center;display:grid;justify-items:center;gap:var(--s3);padding-bottom:var(--s4)}
+.medallion{
+  width:78px;height:78px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 34% 28%,#F7F3EA,#B4AB99);
+  border:1px solid var(--hairline);box-shadow:0 10px 30px -10px rgba(0,0,0,.9),0 0 0 6px rgba(201,162,75,.10);
+}
+.medallion svg{width:44px;height:44px}
+.lock-name{font-family:"Cinzel",serif;font-size:17px;letter-spacing:.2em;color:var(--marble)}
+.lock-form{display:flex;align-items:center;gap:8px;margin-top:var(--s1)}
+.lock-form input{
+  width:230px;padding:11px 16px;border-radius:999px;
+  border:1px solid var(--hairline-soft);background:rgba(10,12,17,.55);
+  color:var(--marble);font-family:"Jost",sans-serif;font-size:13.5px;letter-spacing:.12em;
+  transition:border-color .3s,box-shadow .3s;
+}
+.lock-form input::placeholder{color:var(--marble-mute);letter-spacing:.1em}
+.lock-form input:focus{outline:none;border-color:var(--gold);box-shadow:var(--glow-gold)}
+.lock-form button{
+  width:40px;height:40px;border-radius:50%;display:grid;place-items:center;
+  border:1px solid var(--hairline);background:rgba(201,162,75,.14);
+  transition:background .25s,transform .25s var(--ease-spring);
+}
+.lock-form button:hover{background:var(--gold);transform:scale(1.06)}
+.lock-form button:hover svg{color:var(--obsidian)}
+.lock-form button svg{width:17px;height:17px;color:var(--gold-bright)}
+.lock-hint{font-family:"Cinzel",serif;font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--marble-mute)}
+.lock-hint.wrong{color:#D1794E;animation:shake .4s var(--ease-calm)}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+
+@media (max-width:720px){
+  .lock{padding:var(--s5) var(--s4) var(--s4)}
+  .lock-form input{width:170px}
+}
+
+/* ---------- responsive: narrow screens stack the HUD away ---------- */
+@media (max-width:1080px){
+  .stage{grid-template-columns:minmax(190px,1fr) minmax(0,1.4fr);gap:var(--s4)}
+  .oracle{grid-column:2;grid-row:1}
+  .hud{grid-column:2;grid-row:2;flex-direction:row;align-items:flex-start;justify-self:end}
+  .hud .tablet{width:240px}
+}
+@media (max-width:720px){
+  .stage{grid-template-columns:1fr;grid-template-rows:auto auto 1fr;padding:var(--s4) var(--s4) 0;gap:var(--s4)}
+  .oracle{grid-column:1;grid-row:1;padding-top:0}
+  .hud{grid-column:1;grid-row:2;flex-direction:column;justify-self:stretch}
+  .hud .tablet{width:auto}
+  .shelf{grid-column:1;grid-row:3;flex-direction:row;flex-wrap:wrap;gap:var(--s2)}
+  .icon{grid-template-columns:44px 1fr;padding:8px 10px}
+  .glyph{width:44px;height:44px}
+  .icon::before{left:8px;width:42px}
+  .dock .app:nth-child(n+6){display:none}
+  .tray .mini{display:none}
+  .win{width:92vw;left:4vw!important}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}
+}
+</style>
+
+<div id="desktop">
+  <!-- ===================== WALLPAPER ===================== -->
+  <div class="wall"><img src="olympus-bg.jpg" alt="The temple complex of Olympus at sunset, seen between the thrones of Zeus and Athena"></div>
+  <div class="rays" aria-hidden="true"></div>
+
+  <!-- ===================== SVG LIBRARY ===================== -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+    <linearGradient id="marbleG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F7F3EA"/><stop offset=".55" stop-color="#DED6C7"/><stop offset="1" stop-color="#B4AB99"/>
+    </linearGradient>
+    <linearGradient id="goldG" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E7C877"/><stop offset=".5" stop-color="#C9A24B"/><stop offset="1" stop-color="#8A6A3B"/>
+    </linearGradient>
+    <linearGradient id="stoneG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6E7686"/><stop offset="1" stop-color="#3A4150"/>
+    </linearGradient>
+
+    <!-- THIS PC — marble temple -->
+    <symbol id="i-temple" viewBox="0 0 64 64">
+      <path d="M32 6 58 19H6z" fill="url(#marbleG)" stroke="url(#goldG)" stroke-width="1.4" stroke-linejoin="round"/>
+      <path d="M9 19h46v4H9z" fill="url(#marbleG)" stroke="url(#goldG)" stroke-width="1.1"/>
+      <g fill="url(#marbleG)" stroke="#9C937F" stroke-width=".7">
+        <rect x="13" y="23" width="6" height="24" rx="1"/><rect x="23" y="23" width="6" height="24" rx="1"/>
+        <rect x="35" y="23" width="6" height="24" rx="1"/><rect x="45" y="23" width="6" height="24" rx="1"/>
+      </g>
+      <path d="M7 47h50v5H7z" fill="url(#marbleG)" stroke="url(#goldG)" stroke-width="1.1"/>
+      <path d="M4 52h56v5H4z" fill="#C8C0B1" stroke="url(#goldG)" stroke-width="1.1"/>
+      <path d="M26 14h12" stroke="url(#goldG)" stroke-width="1.6" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- DOCUMENTS — scroll -->
+    <symbol id="i-scroll" viewBox="0 0 64 64">
+      <path d="M16 14h34v36H16z" fill="url(#marbleG)" stroke="#9C937F" stroke-width=".8"/>
+      <g stroke="#A89C83" stroke-width="1.4" stroke-linecap="round">
+        <path d="M23 24h20"/><path d="M23 30h20"/><path d="M23 36h14"/>
+      </g>
+      <rect x="8" y="10" width="10" height="44" rx="5" fill="url(#goldG)" stroke="#6E5227" stroke-width="1"/>
+      <rect x="48" y="10" width="10" height="44" rx="5" fill="url(#goldG)" stroke="#6E5227" stroke-width="1"/>
+      <path d="M13 10v44M53 10v44" stroke="#F5E3B6" stroke-width=".8" opacity=".55"/>
+    </symbol>
+
+    <!-- DOWNLOADS — amphora with descending arrow -->
+    <symbol id="i-amphora" viewBox="0 0 64 64">
+      <path d="M24 20c-6 5-8 11-8 17 0 9 7 16 16 16s16-7 16-16c0-6-2-12-8-17z" fill="url(#goldG)" stroke="#6E5227" stroke-width="1.2"/>
+      <path d="M24 20h16l-2-6H26z" fill="#DFC07A" stroke="#6E5227" stroke-width="1.1"/>
+      <path d="M22 22c-6 1-9 5-8 10M42 22c6 1 9 5 8 10" fill="none" stroke="#6E5227" stroke-width="2" stroke-linecap="round"/>
+      <path d="M32 28v13M27 37l5 5 5-5" fill="none" stroke="#231A0C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" opacity=".8"/>
+      <path d="M26 53h12" stroke="#6E5227" stroke-width="2.4" stroke-linecap="round"/>
+    </symbol>
+
+    <!-- GAMES — bronze helm -->
+    <symbol id="i-helm" viewBox="0 0 64 64">
+      <path d="M32 10c-11 0-18 8-18 19v13l6 4v8h24v-8l6-4V29c0-11-7-19-18-19z" fill="url(#goldG)" stroke="#5E4620" stroke-width="1.2"/>
+      <path d="M26 28v10M38 28v10" stroke="#3B2C13" stroke-width="2.6" stroke-linecap="round"/>
+      <path d="M31 26h2v22h-2z" fill="#3B2C13" opacity=".75"/>
+      <path d="M32 4c-4 2-5 5-5 8h10c0-3-1-6-5-8z" fill="#B4322C" stroke="#5E4620" stroke-width="1"/>
+      <path d="M22 45h20" stroke="#5E4620" stroke-width="1.4"/>
+    </symbol>
+
+    <!-- PROJECTS — column bearing a folder -->
+    <symbol id="i-column" viewBox="0 0 64 64">
+      <path d="M14 50h36v6H14z" fill="url(#marbleG)" stroke="url(#goldG)" stroke-width="1.1"/>
+      <rect x="21" y="24" width="22" height="26" fill="url(#marbleG)" stroke="#9C937F" stroke-width=".8"/>
+      <path d="M25 24v26M32 24v26M39 24v26" stroke="#ADA491" stroke-width=".9"/>
+      <path d="M18 18h28v6H18z" fill="url(#marbleG)" stroke="url(#goldG)" stroke-width="1.1"/>
+      <path d="M20 18c2-6 8-8 12-8s10 2 12 8" fill="none" stroke="url(#goldG)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M24 6h16l3 6H21z" fill="url(#goldG)" stroke="#6E5227" stroke-width="1"/>
+    </symbol>
+
+    <!-- RECYCLE BIN — stone urn -->
+    <symbol id="i-urn" viewBox="0 0 64 64">
+      <path d="M20 20h24l-3 32H23z" fill="url(#stoneG)" stroke="#2A303B" stroke-width="1.2"/>
+      <path d="M17 14h30v6H17z" fill="#7C8494" stroke="#2A303B" stroke-width="1.1"/>
+      <path d="M27 27l2 18M35 27l-2 18" stroke="#20252E" stroke-width="1.6" stroke-linecap="round" opacity=".7"/>
+      <path d="M22 52h20v4H22z" fill="#69707E" stroke="#2A303B" stroke-width="1"/>
+      <path d="M24 14c1-5 4-7 8-7s7 2 8 7" fill="none" stroke="url(#goldG)" stroke-width="1.6"/>
+    </symbol>
+
+    <!-- tray + hud glyphs -->
+    <symbol id="i-sun" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="5" fill="url(#goldG)"/>
+      <g stroke="url(#goldG)" stroke-width="1.4" stroke-linecap="round">
+        <path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M19.4 4.6l-2.1 2.1M6.7 17.3l-2.1 2.1"/>
+      </g>
+    </symbol>
+    <symbol id="i-partly" viewBox="0 0 24 24">
+      <circle cx="9" cy="9" r="4.4" fill="url(#goldG)"/>
+      <g stroke="url(#goldG)" stroke-width="1.2" stroke-linecap="round"><path d="M9 1.6v2.2M1.6 9h2.2M3.8 3.8l1.6 1.6M14.2 3.8l-1.6 1.6"/></g>
+      <path d="M8.5 20a4 4 0 0 1 .4-8 5.4 5.4 0 0 1 10 1.4 3.3 3.3 0 0 1-.6 6.6z" fill="url(#marbleG)" stroke="#9C937F" stroke-width=".9"/>
+    </symbol>
+    <symbol id="i-cpu" viewBox="0 0 24 24">
+      <path d="M12 3c-3.4 0-5.6 2.4-5.6 5.6 0 1.7.7 3 .7 4.6 0 1.2-.7 1.7-.7 3 0 2.6 2.4 4.8 5.6 4.8" fill="url(#marbleG)" stroke="#9C937F" stroke-width=".9"/>
+      <path d="M12 3c3.4 0 5.6 2.4 5.6 5.6 0 3.4-1.4 4.6-1.4 7 0 2.4-1.6 4.4-4.2 5" fill="none" stroke="url(#goldG)" stroke-width="1.2"/>
+      <circle cx="10" cy="9" r="1.3" fill="url(#goldG)"/><path d="M9 13.5h5" stroke="url(#goldG)" stroke-width="1.2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-ram" viewBox="0 0 24 24">
+      <path d="M7 20h10v2H7z" fill="url(#marbleG)" stroke="#9C937F" stroke-width=".8"/>
+      <rect x="9" y="6" width="6" height="14" fill="url(#marbleG)" stroke="#9C937F" stroke-width=".8"/>
+      <path d="M10.5 6v14M13.5 6v14" stroke="#ADA491" stroke-width=".8"/>
+      <path d="M7.5 3h9v3h-9z" fill="url(#marbleG)" stroke="url(#goldG)" stroke-width="1"/>
+    </symbol>
+    <symbol id="i-disk" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="9" fill="url(#stoneG)" stroke="#2A303B" stroke-width="1"/>
+      <circle cx="12" cy="12" r="3" fill="#0E1219" stroke="url(#goldG)" stroke-width="1"/>
+      <path d="M12 3v3M12 18v3M3 12h3M18 12h3" stroke="url(#goldG)" stroke-width="1.1" opacity=".8"/>
+    </symbol>
+    <symbol id="i-owl" viewBox="0 0 24 24">
+      <path d="M12 3c-4.4 0-7 3-7 7.4 0 5.4 3.2 10.6 7 10.6s7-5.2 7-10.6C19 6 16.4 3 12 3z" fill="url(#marbleG)" stroke="#9C937F" stroke-width=".9"/>
+      <circle cx="9.2" cy="9.4" r="2.1" fill="#0E1219"/><circle cx="14.8" cy="9.4" r="2.1" fill="#0E1219"/>
+      <circle cx="9.2" cy="9.4" r=".8" fill="url(#goldG)"/><circle cx="14.8" cy="9.4" r=".8" fill="url(#goldG)"/>
+      <path d="M12 11.8l-1.6 2h3.2z" fill="url(#goldG)"/>
+    </symbol>
+
+    <!-- taskbar apps, antique-tempered -->
+    <symbol id="a-chrome" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="none" stroke="url(#goldG)" stroke-width="2"/>
+      <circle cx="16" cy="16" r="5.6" fill="url(#marbleG)" stroke="url(#goldG)" stroke-width="1.4"/>
+      <path d="M16 3a13 13 0 0 1 11.3 6.6H16" fill="none" stroke="url(#goldG)" stroke-width="2.4" stroke-linecap="round"/>
+      <path d="M4.7 9.6l5.8 10" fill="none" stroke="url(#goldG)" stroke-width="2.4" stroke-linecap="round" opacity=".75"/>
+      <path d="M27.3 9.6L21.5 19.6" fill="none" stroke="url(#goldG)" stroke-width="2.4" stroke-linecap="round" opacity=".5"/>
+    </symbol>
+    <symbol id="a-discord" viewBox="0 0 32 32">
+      <path d="M11 7c-3.6.7-6.2 2.6-6.2 2.6C2.4 14 2 19.4 2.4 23.6c2.6 2 5.2 3 5.2 3l1.6-2.6c-1.4-.5-2.6-1.3-2.6-1.3 3 1.9 6.2 2.5 9.4 2.5s6.4-.6 9.4-2.5c0 0-1.2.8-2.6 1.3l1.6 2.6s2.6-1 5.2-3c.4-4.2 0-9.6-2.4-14 0 0-2.6-1.9-6.2-2.6l-1.2 2.4c-1.4-.3-2.8-.4-3.8-.4s-2.4.1-3.8.4z" fill="url(#marbleG)" stroke="#9C937F" stroke-width=".8"/>
+      <ellipse cx="11.6" cy="17.6" rx="2.5" ry="3" fill="url(#goldG)"/><ellipse cx="20.4" cy="17.6" rx="2.5" ry="3" fill="url(#goldG)"/>
+    </symbol>
+    <symbol id="a-minecraft" viewBox="0 0 32 32">
+      <path d="M5 10l11-5 11 5v12l-11 5-11-5z" fill="url(#stoneG)" stroke="url(#goldG)" stroke-width="1.6" stroke-linejoin="round"/>
+      <path d="M16 5v22M5 10l11 5 11-5" fill="none" stroke="url(#goldG)" stroke-width="1.2" opacity=".85"/>
+      <path d="M9 12.6l4 1.8v4l-4-1.8z" fill="#5C7A3E" opacity=".9"/>
+      <path d="M19 14.4l4-1.8v4l-4 1.8z" fill="#7A6242" opacity=".9"/>
+    </symbol>
+    <symbol id="a-spotify" viewBox="0 0 32 32">
+      <circle cx="16" cy="16" r="13" fill="#0E1219" stroke="url(#goldG)" stroke-width="1.6"/>
+      <g fill="none" stroke="url(#goldG)" stroke-width="2.2" stroke-linecap="round">
+        <path d="M9.4 12.2c4.6-1.4 9.6-1 13.4 1.2"/><path d="M10.4 17c3.6-1 7.6-.7 10.8 1"/><path d="M11.4 21.2c2.8-.7 5.8-.5 8.2.8"/>
+      </g>
+    </symbol>
+    <symbol id="a-code" viewBox="0 0 32 32">
+      <path d="M6 16l7-7M6 16l7 7M26 16l-7-7M26 16l-7 7" fill="none" stroke="url(#goldG)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M17.6 5.5l-3.2 21" stroke="url(#marbleG)" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="a-gear" viewBox="0 0 32 32">
+      <path d="M16 4.5l2.6 2.1 3.3-.6 1.3 3.1 3.1 1.3-.6 3.3 2.1 2.6-2.1 2.6.6 3.3-3.1 1.3-1.3 3.1-3.3-.6-2.6 2.1-2.6-2.1-3.3.6-1.3-3.1-3.1-1.3.6-3.3L4.1 16l2.1-2.6-.6-3.3 3.1-1.3 1.3-3.1 3.3.6z" fill="url(#marbleG)" stroke="url(#goldG)" stroke-width="1.3" stroke-linejoin="round"/>
+      <circle cx="16" cy="16" r="4.6" fill="#0E1219" stroke="url(#goldG)" stroke-width="1.4"/>
+    </symbol>
+    <symbol id="a-laurel" viewBox="0 0 32 32">
+      <path d="M16 27C9 24 6 18 6.5 9c4.6.6 8 3.6 9.5 8" fill="none" stroke="url(#goldG)" stroke-width="2" stroke-linecap="round"/>
+      <path d="M16 27c7-3 10-9 9.5-18-4.6.6-8 3.6-9.5 8" fill="none" stroke="url(#goldG)" stroke-width="2" stroke-linecap="round"/>
+      <g fill="url(#goldG)" opacity=".95">
+        <ellipse cx="9" cy="12" rx="2.4" ry="1.4" transform="rotate(-34 9 12)"/><ellipse cx="11" cy="17" rx="2.4" ry="1.4" transform="rotate(-24 11 17)"/>
+        <ellipse cx="23" cy="12" rx="2.4" ry="1.4" transform="rotate(34 23 12)"/><ellipse cx="21" cy="17" rx="2.4" ry="1.4" transform="rotate(24 21 17)"/>
+      </g>
+      <circle cx="16" cy="6" r="1.8" fill="url(#goldG)"/>
+    </symbol>
+
+    <symbol id="t-wifi" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M3.5 9a13 13 0 0 1 17 0"/><path d="M6.8 12.6a8.4 8.4 0 0 1 10.4 0"/><path d="M10 16.2a3.6 3.6 0 0 1 4 0"/></g><circle cx="12" cy="19.4" r="1.2" fill="currentColor"/></symbol>
+    <symbol id="t-vol" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13L7.5 14.5H4z" fill="currentColor"/><g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M15.4 9.4a4 4 0 0 1 0 5.2"/><path d="M18 7a7.6 7.6 0 0 1 0 10"/></g></symbol>
+    <symbol id="t-eye" viewBox="0 0 24 24">
+      <path d="M1.8 12S5.6 5.6 12 5.6 22.2 12 22.2 12 18.4 18.4 12 18.4 1.8 12 1.8 12z" fill="none" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="12" cy="12" r="3.2" fill="currentColor"/>
+    </symbol>
+    <symbol id="t-lock" viewBox="0 0 24 24">
+      <rect x="4.6" y="10.4" width="14.8" height="10.4" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M8 10.4V7.8a4 4 0 0 1 8 0v2.6" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <circle cx="12" cy="15.4" r="1.5" fill="currentColor"/>
+    </symbol>
+    <symbol id="t-enter" viewBox="0 0 24 24">
+      <path d="M4 12h15M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-bust" viewBox="0 0 64 64">
+      <path d="M32 8c-8 0-13 5.6-13 13.4 0 5 1.6 8.4 3.4 11l-1.6 5.2C15 40 10 45.6 10 54h44c0-8.4-5-14-10.8-16.4l-1.6-5.2c1.8-2.6 3.4-6 3.4-11C45 13.6 40 8 32 8z" fill="url(#marbleG)" stroke="#9C937F" stroke-width="1"/>
+      <path d="M22 21c2-6 6-8 10-8s8 2 10 8" fill="none" stroke="url(#goldG)" stroke-width="1.8"/>
+      <path d="M26 26.5c1.6-1 3-1 4.4 0M33.6 26.5c1.4-1 2.8-1 4.4 0" fill="none" stroke="#8E8878" stroke-width="1.4" stroke-linecap="round"/>
+      <path d="M32 30v4M29.4 37c1.8 1.2 3.4 1.2 5.2 0" fill="none" stroke="#8E8878" stroke-width="1.4" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="t-flame" viewBox="0 0 24 24"><path d="M12 2.5c1.6 4-3.4 5.2-3.4 9.2 0 1.6.8 2.8 1.8 3.4-.4-2.4 1-4 2.6-5.2-.3 2.6 3.4 3.4 3.4 6.4a5.4 5.4 0 1 1-10.8 0C5.6 9.5 12 8.6 12 2.5z" fill="currentColor"/></symbol>
+  </defs></svg>
+
+  <!-- ===================== STAGE ===================== -->
+  <div class="stage">
+    <!-- desktop icons -->
+    <div class="shelf" role="list">
+      <button class="icon" role="listitem" data-win="pc">
+        <svg class="glyph"><use href="#i-temple"/></svg>
+        <span class="label">This PC<span class="sub">the house of the machine</span></span>
+      </button>
+      <button class="icon" role="listitem" data-win="docs">
+        <svg class="glyph"><use href="#i-scroll"/></svg>
+        <span class="label">Documents<span class="sub">scrolls &amp; records</span></span>
+      </button>
+      <button class="icon" role="listitem" data-win="dl">
+        <svg class="glyph"><use href="#i-amphora"/></svg>
+        <span class="label">Downloads<span class="sub">the amphora</span></span>
+      </button>
+      <button class="icon" role="listitem" data-win="games">
+        <svg class="glyph"><use href="#i-helm"/></svg>
+        <span class="label">Games<span class="sub">the arena</span></span>
+      </button>
+      <button class="icon" role="listitem" data-win="proj">
+        <svg class="glyph"><use href="#i-column"/></svg>
+        <span class="label">Projects<span class="sub">works in the making</span></span>
+      </button>
+      <button class="icon" role="listitem" data-win="bin">
+        <svg class="glyph"><use href="#i-urn"/></svg>
+        <span class="label">Recycle Bin<span class="sub">the urn</span></span>
+      </button>
+    </div>
+
+    <!-- clock -->
+    <div class="oracle">
+      <svg class="sunmark" aria-hidden="true"><use href="#i-sun"/></svg>
+      <div class="time" id="time">00:00</div>
+      <div class="minute-rule"><i></i></div>
+      <div class="datum" id="date">—</div>
+      <p class="maxim">“The greatest victory is the victory over oneself.”<span>Plato</span></p>
+    </div>
+
+    <!-- weather + system -->
+    <div class="hud">
+      <section class="tablet" aria-label="Weather">
+        <h3>Sky over the city</h3>
+        <div class="weather">
+          <div>
+            <div class="temp">24<sup>°C</sup></div>
+            <div class="sky">Partly cloudy</div>
+            <div class="where">Istanbul, Türkiye</div>
+          </div>
+          <svg aria-hidden="true"><use href="#i-partly"/></svg>
+        </div>
+      </section>
+
+      <section class="tablet" aria-label="System">
+        <h3>The mechanism</h3>
+        <div class="meters">
+          <div class="meter">
+            <svg aria-hidden="true"><use href="#i-cpu"/></svg>
+            <span class="name">CPU</span><span class="val" data-val="cpu">12%</span>
+            <span class="track"><i data-bar="cpu"></i></span>
+          </div>
+          <div class="meter">
+            <svg aria-hidden="true"><use href="#i-ram"/></svg>
+            <span class="name">RAM</span><span class="val" data-val="ram">38%</span>
+            <span class="track"><i data-bar="ram"></i></span>
+          </div>
+          <div class="meter">
+            <svg aria-hidden="true"><use href="#i-disk"/></svg>
+            <span class="name">Disk (C:)</span><span class="val" data-val="disk">54%</span>
+            <span class="track"><i data-bar="disk"></i></span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ===================== TASKBAR ===================== -->
+  <nav class="taskbar" aria-label="Taskbar">
+    <button class="start" id="start"><svg aria-hidden="true"><use href="#a-laurel"/></svg><b>Olympus</b></button>
+
+    <div class="dock" id="dock">
+      <button class="app" data-app="Chrome"><svg><use href="#a-chrome"/></svg><i></i><span class="tip">Chrome</span></button>
+      <button class="app" data-app="Discord"><svg><use href="#a-discord"/></svg><i></i><span class="tip">Discord</span></button>
+      <button class="app" data-app="Minecraft"><svg><use href="#a-minecraft"/></svg><i></i><span class="tip">Minecraft</span></button>
+      <button class="app" data-app="Spotify"><svg><use href="#a-spotify"/></svg><i></i><span class="tip">Spotify</span></button>
+      <span class="divider" aria-hidden="true"></span>
+      <button class="app" data-app="Code"><svg><use href="#a-code"/></svg><i></i><span class="tip">Code</span></button>
+      <button class="app" data-app="Settings" data-win="pc"><svg><use href="#a-gear"/></svg><i></i><span class="tip">Settings</span></button>
+    </div>
+
+    <div class="tray">
+      <button id="peek" aria-label="Clear the desktop" title="Clear everything — H"><svg><use href="#t-eye"/></svg></button>
+      <button id="lock" aria-label="Lock" title="Lock — L"><svg><use href="#t-lock"/></svg></button>
+      <button aria-label="Network"><svg><use href="#t-wifi"/></svg></button>
+      <button aria-label="Volume"><svg><use href="#t-vol"/></svg></button>
+      <button aria-label="Hearth"><svg><use href="#t-flame"/></svg></button>
+      <div class="mini"><b id="mini-time">00:00</b><span id="mini-date">—</span></div>
+    </div>
+  </nav>
+
+  <!-- ===================== PEEK HINT ===================== -->
+  <button class="peek-hint" id="peek-back"><svg aria-hidden="true"><use href="#t-eye"/></svg>Click or press H to bring Olympus back</button>
+
+  <!-- ===================== LOCK SCREEN ===================== -->
+  <div class="lock" id="lockscreen" role="dialog" aria-label="Lock screen" aria-modal="true">
+    <div class="lock-top">
+      <div class="lock-brand"><svg aria-hidden="true"><use href="#a-laurel"/></svg>Olympus OS</div>
+      <div class="lock-sky">
+        <svg aria-hidden="true"><use href="#i-partly"/></svg>
+        <div><b>24°C</b><span>Partly cloudy · Istanbul</span></div>
+      </div>
+    </div>
+
+    <div class="lock-center">
+      <div class="lock-time" id="lock-time">00:00</div>
+      <div class="lock-date" id="lock-date">—</div>
+      <div class="lock-rule"></div>
+      <p class="lock-quote">“The greatest victory is the victory over oneself.”</p>
+    </div>
+
+    <div class="lock-gate">
+      <div class="medallion"><svg aria-hidden="true"><use href="#i-bust"/></svg></div>
+      <div class="lock-name">Akhan</div>
+      <form class="lock-form" id="lock-form">
+        <input id="passphrase" type="password" placeholder="Word of passage" autocomplete="off" aria-label="Word of passage">
+        <button type="submit" aria-label="Enter"><svg><use href="#t-enter"/></svg></button>
+      </form>
+      <div class="lock-hint" id="lock-hint">Press Enter to pass the gate</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Clock — one tick per second, CSS carries the smooth motion
+   ============================================================ */
+const timeEl=document.getElementById('time'),dateEl=document.getElementById('date'),
+      mTime=document.getElementById('mini-time'),mDate=document.getElementById('mini-date'),
+      rule=document.querySelector('.minute-rule i'),sweep=document.querySelector('.time'),
+      lockTime=document.getElementById('lock-time'),lockDate=document.getElementById('lock-date');
+
+function paintClock(){
+  const d=new Date();
+  const hh=String(d.getHours()).padStart(2,'0'),mm=String(d.getMinutes()).padStart(2,'0');
+  timeEl.textContent=hh+':'+mm;
+  mTime.textContent=hh+':'+mm;
+  const long=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  dateEl.textContent=long;
+  mDate.textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'2-digit',month:'short'});
+  lockTime.textContent=hh+':'+mm;
+  lockDate.textContent=long;
+}
+/* sync the 60s CSS animations with the real clock via negative delay */
+function syncMinute(){
+  const off=-(new Date().getSeconds()+new Date().getMilliseconds()/1000);
+  [rule,sweep].forEach(el=>{el.style.animationDelay=off+'s'});
+}
+paintClock();syncMinute();
+setInterval(paintClock,1000);
+
+/* ============================================================
+   System monitor — a slow, believable drift
+   ============================================================ */
+const state={cpu:12,ram:38,disk:54};
+function paintMeters(){
+  for(const k in state){
+    const v=Math.round(state[k]);
+    document.querySelector('[data-val="'+k+'"]').textContent=v+'%';
+    document.querySelector('[data-bar="'+k+'"]').style.width=v+'%';
+  }
+}
+paintMeters();
+setInterval(()=>{
+  state.cpu=Math.min(74,Math.max(4,state.cpu+(Math.random()*14-7)));
+  state.ram=Math.min(88,Math.max(28,state.ram+(Math.random()*4-2)));
+  paintMeters();
+},2600);
+
+/* ============================================================
+   Windows
+   ============================================================ */
+const CONTENT={
+  pc:{title:'This PC',sub:'the house of the machine',crest:'#i-temple',html:`
+    <div class="drives">
+      <div class="drive"><svg><use href="#i-disk"/></svg><div>
+        <div class="hd"><b>Local Disk (C:)</b><span>431 GB free of 931 GB</span></div>
+        <div class="track"><i style="width:54%"></i></div></div></div>
+      <div class="drive"><svg><use href="#i-disk"/></svg><div>
+        <div class="hd"><b>Archive (D:)</b><span>1.4 TB free of 2 TB</span></div>
+        <div class="track"><i style="width:30%"></i></div></div></div>
+      <div class="drive"><svg><use href="#i-amphora"/></svg><div>
+        <div class="hd"><b>Olympus Vault</b><span>18 GB free of 64 GB</span></div>
+        <div class="track"><i style="width:72%"></i></div></div></div>
+    </div>`},
+  docs:{title:'Documents',sub:'scrolls & records',crest:'#i-scroll',html:`
+    <div class="rows">
+      <div class="row"><svg><use href="#i-scroll"/></svg><div><div class="t">Isekai Craft — Game Design Document</div><div class="d">races, classes, dungeons, the final ascent</div></div><div class="m">2.4 MB</div></div>
+      <div class="row"><svg><use href="#i-scroll"/></svg><div><div class="t">Crop &amp; Kettle — bugfix ledger</div><div class="d">thirteen sessions of sharpened edges</div></div><div class="m">318 KB</div></div>
+      <div class="row"><svg><use href="#i-scroll"/></svg><div><div class="t">Waypoints v1.0.0 — release notes</div><div class="d">banner, compass, guarded ground</div></div><div class="m">96 KB</div></div>
+      <div class="row"><svg><use href="#i-scroll"/></svg><div><div class="t">Portfolio — naha11.github.io</div><div class="d">the works, kept current</div></div><div class="m">54 KB</div></div>
+    </div>`},
+  dl:{title:'Downloads',sub:'the amphora',crest:'#i-amphora',html:`
+    <div class="rows">
+      <div class="row"><svg><use href="#i-amphora"/></svg><div><div class="t">olympus-wallpaper.png</div><div class="d">3.4 MB · today, 01:07</div></div><div class="m">PNG</div></div>
+      <div class="row"><svg><use href="#i-amphora"/></svg><div><div class="t">fabric-server-1.21.4.jar</div><div class="d">the forge of worlds</div></div><div class="m">JAR</div></div>
+      <div class="row"><svg><use href="#i-amphora"/></svg><div><div class="t">sodium-lithium-iris.zip</div><div class="d">frames, sharpened</div></div><div class="m">ZIP</div></div>
+      <div class="row"><svg><use href="#i-amphora"/></svg><div><div class="t">cormorant-cinzel.woff2</div><div class="d">letters cut in marble</div></div><div class="m">FONT</div></div>
+    </div>`},
+  games:{title:'Games',sub:'the arena',crest:'#i-helm',html:`
+    <div class="tiles">
+      <div class="tile"><b>Minecraft</b><span>1.21.11 · Purpur</span><em>Played today</em></div>
+      <div class="tile"><b>Isekai Craft</b><span>private test realm</span><em>Building</em></div>
+      <div class="tile"><b>Hearthstone</b><span>deck tracker armed</span><em>2 days ago</em></div>
+      <div class="tile"><b>Ubisoft Connect</b><span>library idle</span><em>Last week</em></div>
+    </div>`},
+  proj:{title:'Projects',sub:'works in the making',crest:'#i-column',html:`
+    <div class="rows">
+      <div class="row"><svg><use href="#i-column"/></svg><div><div class="t">Isekai Craft</div><div class="d">25 modules · core, races, world</div></div><div class="m">ACTIVE</div></div>
+      <div class="row"><svg><use href="#i-column"/></svg><div><div class="t">Crop &amp; Kettle</div><div class="d">222 items · kitchen, cellar, field</div></div><div class="m">SHIPPED</div></div>
+      <div class="row"><svg><use href="#i-column"/></svg><div><div class="t">Waypoints</div><div class="d">banners, compass, Xaero sync</div></div><div class="m">v1.0.0</div></div>
+      <div class="row"><svg><use href="#i-column"/></svg><div><div class="t">Olympus OS</div><div class="d">this desktop, as a design system</div></div><div class="m">TODAY</div></div>
+    </div>`},
+  bin:{title:'Recycle Bin',sub:'the urn',crest:'#i-urn',html:`
+    <div class="empty"><svg><use href="#i-urn"/></svg><p>The urn is empty.<br>Nothing here awaits the river.</p></div>`}
+};
+
+const desk=document.getElementById('desktop');
+let z=40,open={};
+
+function openWindow(key,origin){
+  if(open[key]){focusWin(open[key]);return}
+  const c=CONTENT[key];if(!c)return;
+  const w=document.createElement('section');
+  w.className='win';w.setAttribute('role','dialog');w.setAttribute('aria-label',c.title);
+  const r=origin?origin.getBoundingClientRect():null;
+  const x=r?Math.min(innerWidth-660,r.right+28):innerWidth/2-310;
+  const y=r?Math.max(28,Math.min(innerHeight-360,r.top-40)):120;
+  w.style.left=Math.max(20,x)+'px';w.style.top=y+'px';w.style.zIndex=++z;
+  w.innerHTML=`
+    <header class="bar">
+      <svg class="crest" aria-hidden="true"><use href="${c.crest}"/></svg>
+      <h2>${c.title}<em>${c.sub}</em></h2>
+      <span class="ctrls">
+        <button class="min" aria-label="Minimize"></button>
+        <button class="x" aria-label="Close"></button>
+      </span>
+    </header>
+    <div class="body">${c.html}</div>`;
+  desk.appendChild(w);
+  open[key]=w;w.dataset.key=key;
+  markApp(key,true);
+  w.addEventListener('pointerdown',()=>focusWin(w));
+  w.querySelector('.x').addEventListener('click',e=>{e.stopPropagation();closeWin(key)});
+  w.querySelector('.min').addEventListener('click',e=>{e.stopPropagation();w.classList.toggle('min')});
+  drag(w,w.querySelector('.bar'));
+  return w;
+}
+function focusWin(w){w.style.zIndex=++z;w.classList.remove('min')}
+function closeWin(key){
+  const w=open[key];if(!w)return;
+  w.classList.add('closing');
+  setTimeout(()=>{w.remove()},190);
+  delete open[key];markApp(key,false);
+}
+function markApp(key,on){
+  const btn=document.querySelector('.app[data-win="'+key+'"]');
+  if(btn)btn.classList.toggle('on',on);
+}
+
+/* drag by title bar, transform-only */
+function drag(w,handle){
+  let sx,sy,ox,oy,dragging=false;
+  handle.addEventListener('pointerdown',e=>{
+    if(e.target.closest('.ctrls'))return;
+    dragging=true;handle.setPointerCapture(e.pointerId);
+    sx=e.clientX;sy=e.clientY;ox=w.offsetLeft;oy=w.offsetTop;
+    w.style.animation='none';focusWin(w);
+  });
+  handle.addEventListener('pointermove',e=>{
+    if(!dragging)return;
+    w.style.left=Math.max(-40,Math.min(innerWidth-120,ox+e.clientX-sx))+'px';
+    w.style.top=Math.max(0,Math.min(innerHeight-90,oy+e.clientY-sy))+'px';
+  });
+  const stop=e=>{dragging=false;try{handle.releasePointerCapture(e.pointerId)}catch(_){}};
+  handle.addEventListener('pointerup',stop);handle.addEventListener('pointercancel',stop);
+}
+
+document.querySelectorAll('.icon').forEach(b=>{
+  b.addEventListener('click',()=>openWindow(b.dataset.win,b));
+});
+document.querySelectorAll('.app').forEach(b=>{
+  b.addEventListener('click',()=>{
+    if(b.dataset.win){
+      open[b.dataset.win]?closeWin(b.dataset.win):openWindow(b.dataset.win,b);
+    }else{
+      b.classList.toggle('on');
+    }
+  });
+});
+document.getElementById('start').addEventListener('click',()=>openWindow('proj',document.getElementById('start')));
+
+/* ============================================================
+   Peek — clear every element off the world, keep the sky
+   ============================================================ */
+const peekBtn=document.getElementById('peek'),peekBack=document.getElementById('peek-back');
+function setPeek(on){
+  document.body.classList.toggle('peek',on);
+  peekBtn.setAttribute('aria-pressed',String(on));
+  if(on)closeMenu();
+}
+const togglePeek=()=>setPeek(!document.body.classList.contains('peek'));
+peekBtn.addEventListener('click',togglePeek);
+peekBack.addEventListener('click',()=>setPeek(false));
+
+/* ============================================================
+   Lock screen — the gate of Olympus
+   ============================================================ */
+const lockEl=document.getElementById('lockscreen'),lockBtn=document.getElementById('lock'),
+      lockForm=document.getElementById('lock-form'),pass=document.getElementById('passphrase'),
+      lockHint=document.getElementById('lock-hint');
+
+function lock(){
+  closeMenu();
+  document.body.classList.add('locked');
+  lockEl.classList.remove('lifting');
+  lockHint.classList.remove('wrong');
+  lockHint.textContent='Press Enter to pass the gate';
+  pass.value='';
+  setTimeout(()=>pass.focus(),420);
+}
+function unlock(){
+  lockEl.classList.add('lifting');
+  setTimeout(()=>{
+    document.body.classList.remove('locked');
+    lockEl.classList.remove('lifting');
+  },620);
+}
+lockBtn.addEventListener('click',lock);
+lockForm.addEventListener('submit',e=>{e.preventDefault();unlock()});
+lockEl.addEventListener('dblclick',e=>{if(!e.target.closest('.lock-gate'))unlock()});
+
+addEventListener('keydown',e=>{
+  const typing=e.target.matches('input,textarea');
+  if(document.body.classList.contains('locked')){
+    if(e.key==='Escape'){e.preventDefault();unlock()}
+    return;
+  }
+  if(!typing&&(e.key==='h'||e.key==='H'||e.key==='р'||e.key==='Р')){e.preventDefault();togglePeek();return}
+  if(!typing&&(e.key==='l'||e.key==='L'||e.key==='д'||e.key==='Д')){e.preventDefault();lock();return}
+  if(e.key==='Escape'){
+    if(document.body.classList.contains('peek')){setPeek(false);return}
+    const keys=Object.keys(open);
+    if(keys.length)closeWin(keys[keys.length-1]);
+    closeMenu();
+  }
+});
+
+/* ============================================================
+   Context menu
+   ============================================================ */
+let menu=null;
+function closeMenu(){if(menu){menu.remove();menu=null}}
+desk.addEventListener('contextmenu',e=>{
+  if(e.target.closest('.win'))return;
+  e.preventDefault();closeMenu();
+  menu=document.createElement('div');
+  menu.className='menu';
+  menu.innerHTML=`
+    <button data-act="peek">Clear the desktop<span>H</span></button>
+    <button data-act="lock">Lock the gate<span>L</span></button>
+    <hr>
+    <button data-open="pc">This PC</button>
+    <button data-open="proj">Projects</button>
+    <hr>
+    <button>Display settings</button>
+    <button>Personalize Olympus</button>`;
+  menu.style.left=Math.min(e.clientX,innerWidth-230)+'px';
+  menu.style.top=Math.min(e.clientY,innerHeight-280)+'px';
+  desk.appendChild(menu);
+  menu.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>{openWindow(b.dataset.open);closeMenu()}));
+  menu.querySelectorAll('[data-act]').forEach(b=>b.addEventListener('click',()=>{
+    closeMenu();
+    b.dataset.act==='peek'?setPeek(true):lock();
+  }));
+});
+addEventListener('pointerdown',e=>{if(menu&&!e.target.closest('.menu'))closeMenu()});
+
+/* open one window at rest so the desktop shows what it does */
+openWindow('proj',document.querySelector('.icon[data-win="proj"]'));
+</script>
+
+</body>
+</html>

@@ -413,6 +413,82 @@ button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:poin
 .menu hr{border:0;border-top:1px solid var(--marble-veil);margin:5px 8px}
 
 /* ============================================================
+   START — the hall of Olympus
+   ============================================================ */
+.hall{
+  position:absolute;left:var(--s4);bottom:calc(var(--taskbar-h) + 12px);z-index:90;
+  width:min(520px,92vw);padding:var(--s5) var(--s5) var(--s4);
+  background:linear-gradient(180deg, rgba(243,238,228,.10), rgba(243,238,228,0) 160px), var(--glass-hi);
+  -webkit-backdrop-filter:blur(28px) saturate(1.2);backdrop-filter:blur(28px) saturate(1.2);
+  border:1px solid var(--hairline);border-radius:var(--r-lg);box-shadow:var(--shadow-window);
+  opacity:0;visibility:hidden;transform:translateY(16px) scale(.97);transform-origin:12% 100%;
+  transition:opacity .3s var(--ease-calm),transform .42s var(--ease-spring),visibility .3s;
+}
+body.hall-open .hall{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+body.peek .hall{opacity:0;visibility:hidden}
+.hall::before{
+  content:"";position:absolute;left:var(--s5);right:var(--s5);top:0;height:11px;
+  background:var(--meander);background-repeat:repeat-x;opacity:.4;
+}
+.hall-seek{
+  display:flex;align-items:center;gap:10px;margin-bottom:var(--s4);
+  padding:11px 16px;border-radius:999px;border:1px solid var(--hairline-soft);
+  background:rgba(10,12,17,.5);transition:border-color .3s,box-shadow .3s;
+}
+.hall-seek:focus-within{border-color:var(--gold);box-shadow:var(--glow-gold)}
+.hall-seek svg{width:16px;height:16px;color:var(--gold);flex:none}
+.hall-seek input{flex:1;border:0;background:none;color:var(--marble);font-family:"Jost",sans-serif;font-size:13.5px;letter-spacing:.08em}
+.hall-seek input:focus{outline:none}
+.hall-seek input::placeholder{color:var(--marble-mute)}
+
+.hall h4{
+  margin:0 0 var(--s3);font-family:"Cinzel",serif;font-weight:400;font-size:10.5px;
+  letter-spacing:.3em;text-transform:uppercase;color:var(--marble-mute);
+}
+.pinned{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--s2)}
+.pin{
+  display:grid;justify-items:center;gap:8px;padding:14px 6px 12px;border-radius:var(--r-md);
+  border:1px solid transparent;text-align:center;
+  transition:transform .26s var(--ease-spring),background .26s,border-color .26s;
+}
+.pin svg{width:30px;height:30px;transition:filter .26s}
+.pin span{font-size:11.5px;letter-spacing:.06em;color:var(--marble-dim)}
+.pin:hover{transform:translateY(-3px);background:rgba(201,162,75,.13);border-color:var(--hairline-soft)}
+.pin:hover svg{filter:drop-shadow(0 0 9px rgba(231,200,119,.5))}
+.pin[hidden]{display:none}
+.hall-none{
+  display:none;padding:var(--s5) 0;text-align:center;
+  font-family:"Cormorant Garamond",serif;font-style:italic;font-size:16px;color:var(--marble-mute);
+}
+body.hall-empty .hall-none{display:block}
+
+.hall-foot{
+  display:flex;justify-content:space-between;align-items:center;gap:var(--s3);
+  margin-top:var(--s4);padding-top:var(--s3);border-top:1px solid var(--marble-veil);
+}
+.who{display:flex;align-items:center;gap:10px}
+.who .chip{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:radial-gradient(circle at 34% 28%,#F7F3EA,#B4AB99);border:1px solid var(--hairline);
+}
+.who .chip svg{width:22px;height:22px}
+.who b{font-family:"Cinzel",serif;font-weight:400;font-size:13px;letter-spacing:.16em}
+.who span{display:block;font-family:"Cormorant Garamond",serif;font-style:italic;font-size:12px;color:var(--marble-mute)}
+.hall-power{display:flex;gap:var(--s1)}
+.hall-power button{
+  display:flex;align-items:center;gap:7px;padding:8px 13px;border-radius:999px;
+  border:1px solid var(--hairline-soft);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--marble-dim);transition:background .24s,color .24s,border-color .24s;
+}
+.hall-power button:hover{background:rgba(201,162,75,.16);color:var(--marble);border-color:var(--hairline)}
+.hall-power svg{width:14px;height:14px}
+
+@media (max-width:720px){
+  .hall{left:var(--s3);right:var(--s3);width:auto}
+  .pinned{grid-template-columns:repeat(3,1fr)}
+}
+
+/* ============================================================
    PEEK — one key clears every element off the world
    ============================================================ */
 .stage,.taskbar,.win,.menu{transition:opacity .5s var(--ease-calm),transform .6s var(--ease-spring),filter .5s var(--ease-calm)}
@@ -696,6 +772,10 @@ body.locked .lock{opacity:1;visibility:visible}
       <path d="M1.8 12S5.6 5.6 12 5.6 22.2 12 22.2 12 18.4 18.4 12 18.4 1.8 12 1.8 12z" fill="none" stroke="currentColor" stroke-width="1.5"/>
       <circle cx="12" cy="12" r="3.2" fill="currentColor"/>
     </symbol>
+    <symbol id="t-seek" viewBox="0 0 24 24">
+      <circle cx="10.6" cy="10.6" r="6.4" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M15.4 15.4L20 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
     <symbol id="t-lock" viewBox="0 0 24 24">
       <rect x="4.6" y="10.4" width="14.8" height="10.4" rx="2" fill="none" stroke="currentColor" stroke-width="1.6"/>
       <path d="M8 10.4V7.8a4 4 0 0 1 8 0v2.6" fill="none" stroke="currentColor" stroke-width="1.6"/>
@@ -760,7 +840,7 @@ body.locked .lock{opacity:1;visibility:visible}
           <div>
             <div class="temp">24<sup>°C</sup></div>
             <div class="sky">Partly cloudy</div>
-            <div class="where">Istanbul, Türkiye</div>
+            <div class="where">Mersin, Türkiye</div>
           </div>
           <svg aria-hidden="true"><use href="#i-partly"/></svg>
         </div>
@@ -813,6 +893,42 @@ body.locked .lock{opacity:1;visibility:visible}
     </div>
   </nav>
 
+  <!-- ===================== START MENU ===================== -->
+  <div class="hall" id="hall" role="menu" aria-label="Start">
+    <label class="hall-seek">
+      <svg aria-hidden="true"><use href="#t-seek"/></svg>
+      <input id="seek" type="search" placeholder="Seek within the halls" autocomplete="off" aria-label="Search">
+    </label>
+
+    <h4>Pinned to the colonnade</h4>
+    <div class="pinned" id="pinned">
+      <button class="pin" data-name="Chrome"><svg><use href="#a-chrome"/></svg><span>Chrome</span></button>
+      <button class="pin" data-name="Discord"><svg><use href="#a-discord"/></svg><span>Discord</span></button>
+      <button class="pin" data-name="Minecraft"><svg><use href="#a-minecraft"/></svg><span>Minecraft</span></button>
+      <button class="pin" data-name="Spotify"><svg><use href="#a-spotify"/></svg><span>Spotify</span></button>
+      <button class="pin" data-name="Code"><svg><use href="#a-code"/></svg><span>Code</span></button>
+      <button class="pin" data-name="Settings" data-win="pc"><svg><use href="#a-gear"/></svg><span>Settings</span></button>
+      <button class="pin" data-name="Projects" data-win="proj"><svg><use href="#i-column"/></svg><span>Projects</span></button>
+      <button class="pin" data-name="Documents" data-win="docs"><svg><use href="#i-scroll"/></svg><span>Documents</span></button>
+      <button class="pin" data-name="Downloads" data-win="dl"><svg><use href="#i-amphora"/></svg><span>Downloads</span></button>
+      <button class="pin" data-name="Games" data-win="games"><svg><use href="#i-helm"/></svg><span>Games</span></button>
+      <button class="pin" data-name="This PC" data-win="pc"><svg><use href="#i-temple"/></svg><span>This PC</span></button>
+      <button class="pin" data-name="Recycle Bin" data-win="bin"><svg><use href="#i-urn"/></svg><span>Recycle Bin</span></button>
+    </div>
+    <p class="hall-none">No such hall on this mountain.</p>
+
+    <div class="hall-foot">
+      <div class="who">
+        <span class="chip"><svg aria-hidden="true"><use href="#i-bust"/></svg></span>
+        <div><b>Akhan</b><span>keeper of the mountain</span></div>
+      </div>
+      <div class="hall-power">
+        <button id="hall-lock"><svg><use href="#t-lock"/></svg>Lock</button>
+        <button id="hall-peek"><svg><use href="#t-eye"/></svg>Clear</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================== PEEK HINT ===================== -->
   <button class="peek-hint" id="peek-back"><svg aria-hidden="true"><use href="#t-eye"/></svg>Click or press H to bring Olympus back</button>
 
@@ -822,7 +938,7 @@ body.locked .lock{opacity:1;visibility:visible}
       <div class="lock-brand"><svg aria-hidden="true"><use href="#a-laurel"/></svg>Olympus OS</div>
       <div class="lock-sky">
         <svg aria-hidden="true"><use href="#i-partly"/></svg>
-        <div><b>24°C</b><span>Partly cloudy · Istanbul</span></div>
+        <div><b>24°C</b><span>Partly cloudy · Mersin</span></div>
       </div>
     </div>
 
@@ -1012,7 +1128,52 @@ document.querySelectorAll('.app').forEach(b=>{
     }
   });
 });
-document.getElementById('start').addEventListener('click',()=>openWindow('proj',document.getElementById('start')));
+
+/* ============================================================
+   Start menu — the hall, its search, its pinned colonnade
+   ============================================================ */
+const startBtn=document.getElementById('start'),hall=document.getElementById('hall'),
+      seek=document.getElementById('seek'),pins=[...document.querySelectorAll('.pin')];
+
+function setHall(on){
+  document.body.classList.toggle('hall-open',on);
+  startBtn.setAttribute('aria-expanded',String(on));
+  if(on){closeMenu();setTimeout(()=>seek.focus(),260)}
+  else{seek.value='';filterPins()}
+}
+const toggleHall=()=>setHall(!document.body.classList.contains('hall-open'));
+
+function filterPins(){
+  const q=seek.value.trim().toLowerCase();
+  let shown=0;
+  pins.forEach(p=>{
+    const hit=!q||p.dataset.name.toLowerCase().includes(q);
+    p.hidden=!hit;if(hit)shown++;
+  });
+  document.body.classList.toggle('hall-empty',shown===0);
+}
+seek.addEventListener('input',filterPins);
+seek.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    e.preventDefault();
+    const first=pins.find(p=>!p.hidden);
+    if(first)first.click();
+  }
+});
+
+pins.forEach(p=>p.addEventListener('click',()=>{
+  setHall(false);
+  if(p.dataset.win){openWindow(p.dataset.win,startBtn);return}
+  const app=document.querySelector('.app[data-app="'+p.dataset.name+'"]');
+  if(app)app.classList.add('on');
+}));
+
+startBtn.addEventListener('click',e=>{e.stopPropagation();toggleHall()});
+document.getElementById('hall-lock').addEventListener('click',()=>{setHall(false);lock()});
+document.getElementById('hall-peek').addEventListener('click',()=>{setHall(false);setPeek(true)});
+addEventListener('pointerdown',e=>{
+  if(document.body.classList.contains('hall-open')&&!e.target.closest('.hall')&&!e.target.closest('.start'))setHall(false);
+});
 
 /* ============================================================
    Peek — clear every element off the world, keep the sky
@@ -1063,6 +1224,7 @@ addEventListener('keydown',e=>{
   if(!typing&&(e.key==='h'||e.key==='H'||e.key==='р'||e.key==='Р')){e.preventDefault();togglePeek();return}
   if(!typing&&(e.key==='l'||e.key==='L'||e.key==='д'||e.key==='Д')){e.preventDefault();lock();return}
   if(e.key==='Escape'){
+    if(document.body.classList.contains('hall-open')){setHall(false);return}
     if(document.body.classList.contains('peek')){setPeek(false);return}
     const keys=Object.keys(open);
     if(keys.length)closeWin(keys[keys.length-1]);

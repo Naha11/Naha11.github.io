@@ -55,6 +55,7 @@ const I18N = {
     s5_title: 'Discord bot', s5_desc: 'A bot for your Discord server: welcomes, slash commands, auto-replies. Turnkey.',
     s5_l1: 'Slash commands', s5_l2: 'Welcomes', s5_l3: 'Custom logic',
     work_title: 'Work', f_all: 'All', f_bot: 'Bots', f_auto: 'Automation', f_web: 'Sites & UI',
+    plug_art: 'plugins for your server', plug_title: 'Plugins to spec', plug_desc: 'I build Minecraft server plugins to your technical spec.', plug_link: 'Discuss the task →',
     open: 'Open →', download: 'Download ZIP ↓', cnk_art: 'dishes', isekai_art: 'dungeon rank',
     p18_desc: 'Accessibility audit for Framer, published in their marketplace. Checks contrast, alt text and headings against WCAG 2.1 AA — separately in light and dark themes. React + TypeScript, 180 tests.',
     p17_desc: 'A Windows desktop reimagined as the interface of Olympus: artifact icons, clock, weather, system monitor, obsidian windows and a lock screen. HTML/CSS/JS, SVG.',
@@ -127,6 +128,7 @@ const I18N = {
     s5_title: 'Discord боты', s5_desc: 'Discord серверіне бот: қарсы алу, слэш-командалар, автожауаптар.',
     s5_l1: 'Слэш-командалар', s5_l2: 'Қарсы алу', s5_l3: 'Өз логикасы',
     work_title: 'Жұмыстар', f_all: 'Барлығы', f_bot: 'Боттар', f_auto: 'Автоматтандыру', f_web: 'Сайттар мен UI',
+    plug_art: 'серверіңізге плагиндер', plug_title: 'ТТ бойынша плагиндер', plug_desc: 'Minecraft серверлеріне техникалық тапсырмаңыз бойынша плагиндер жасаймын.', plug_link: 'Тапсырманы талқылау →',
     open: 'Ашу →', download: 'ZIP жүктеу ↓', cnk_art: 'тағам', isekai_art: 'данж рангі',
     p1_title: 'Визитка боты', p2_title: 'Жазылым боты', p3_title: 'Тапсырыс боты', p8_title: 'Discord боты',
     t_parser: 'Парсер', t_auto: 'Автоматтандыру', t_db: 'Дерекқор', t_web: 'Беттеу', t_site: 'Сайт',
@@ -849,55 +851,31 @@ const Forest = (() => {
       layer(small ? 120 : 220, .35, .75, 'rgba(232,160,112,A)', .74);
       layer(small ? 90 : 160, .25, .6, 'rgba(176,96,96,A)', .45);
     }
+    let trailGrad, trailEdgeGrad, sunGlow, camZ = 0;
+    const TRAIL_ZS = []; for (let z = .3; z < FAR * 1.6; z *= 1.06) TRAIL_ZS.push(z);
     function bakeGround() {
       const gh = H - Math.floor(hy);
       ground = newCv(W, gh);
       const c = ground.getContext('2d'), g = c.createLinearGradient(0, 0, 0, gh);
       g.addColorStop(0, '#b0714a'); g.addColorStop(.16, '#6e4128'); g.addColorStop(.55, '#3e2419'); g.addColorStop(1, '#1d1219');
       c.fillStyle = g; c.fillRect(0, 0, W, gh);
-      const r = srand(77), R = (a, b) => a + r() * (b - a);
-      const pathAt = y => 1.05 * y / CAM;
-      for (let i = 0; i < (small ? 1200 : 2400); i++) {
-        const v = Math.pow(r(), 1.6), y = v * gh, x = R(0, W);
-        if (Math.abs(x - cx) < pathAt(y) * .8 && r() < .7) continue;
-        const s = .5 + v * (small ? 5 : 7), pal = LEAF_PAL[(r() * LEAF_PAL.length) | 0];
-        c.fillStyle = pal[(r() * 3) | 0]; c.globalAlpha = R(.2, .4) * (.5 + v * .5);
-        c.beginPath(); c.ellipse(x, y, s, s * .45, R(0, 3), 0, 6.28); c.fill();
-      }
-      c.globalAlpha = 1;
-      // лесная тропа: утоптанная земля с неровными краями
-      const edge = trailEdge, mid = trailMid;
-      const zs = []; for (let z = .3; z < FAR * 1.6; z *= 1.045) zs.push(z);
-      const trailPath = grow => {
-        c.beginPath();
-        zs.forEach((z, i) => { const q = proj(mid(z) + edge(-1, z) - grow, 0, z); i ? c.lineTo(q.x, q.y - hy) : c.moveTo(q.x, q.y - hy); });
-        for (let i = zs.length - 1; i >= 0; i--) { const z = zs[i], q = proj(mid(z) + edge(1, z) + grow, 0, z); c.lineTo(q.x, q.y - hy); }
-        c.closePath();
-      };
-      c.fillStyle = 'rgba(70,42,24,.35)'; trailPath(.14); c.fill(); // переход к лесной подстилке
-      const tg = c.createLinearGradient(0, 0, 0, gh);
-      tg.addColorStop(0, '#caa27e'); tg.addColorStop(.12, '#a47552'); tg.addColorStop(.45, '#7a5236'); tg.addColorStop(1, '#4e3322');
-      c.fillStyle = tg; trailPath(0); c.fill();
-      c.save(); trailPath(0); c.clip();
-      for (const z of zs) { // светлая протоптанная середина, мягко
-        const q = proj(mid(z), 0, z), rx = q.s * .42, ry = Math.max(1, q.s * .05);
-        const g2 = c.createRadialGradient(q.x, q.y - hy, 0, q.x, q.y - hy, rx);
-        g2.addColorStop(0, 'rgba(232,196,148,.2)'); g2.addColorStop(1, 'rgba(232,196,148,0)');
-        c.fillStyle = g2; c.beginPath(); c.ellipse(q.x, q.y - hy, rx, ry * 2.2, 0, 0, 6.28); c.fill();
-      }
-      const sunGl = c.createRadialGradient(cx, 0, 0, cx, 0, gh * .5);
-      sunGl.addColorStop(0, 'rgba(255,225,165,.28)'); sunGl.addColorStop(1, 'rgba(255,200,130,0)');
-      c.fillStyle = sunGl; c.fillRect(0, 0, W, gh);
-      c.restore();
-      c.lineCap = 'round'; // трава заходит на края тропы
-      for (let i = 0; i < (small ? 900 : 1800); i++) {
-        const z = .3 + Math.pow(r(), 2) * FAR * 1.2, side = r() < .5 ? -1 : 1;
-        const q = proj(mid(z) + edge(side, z) + R(-.08, .05) * side, 0, z), h = q.s * R(.02, .06);
-        if (h < .8) continue;
-        c.strokeStyle = ['#6b7a2a', '#8a8a34', '#a2873c', '#5a5a22', '#b59a4c'][(r() * 5) | 0];
-        c.lineWidth = Math.max(.5, q.s * .004);
-        c.beginPath(); c.moveTo(q.x, q.y - hy); c.quadraticCurveTo(q.x + R(-2, 2), q.y - hy - h * .6, q.x + R(-h * .4, h * .4), q.y - hy - h); c.stroke();
-      }
+      trailGrad = ctx.createLinearGradient(0, hy, 0, H);
+      trailGrad.addColorStop(0, '#caa27e'); trailGrad.addColorStop(.12, '#a47552'); trailGrad.addColorStop(.45, '#7a5236'); trailGrad.addColorStop(1, '#4e3322');
+      trailEdgeGrad = 'rgba(70,42,24,.35)';
+      sunGlow = ctx.createRadialGradient(cx, hy, 0, cx, hy, gh * .5);
+      sunGlow.addColorStop(0, 'rgba(255,225,165,.28)'); sunGlow.addColorStop(1, 'rgba(255,200,130,0)');
+    }
+    function trailPath(grow, off) {
+      const zs = TRAIL_ZS;
+      ctx.beginPath();
+      for (let i = 0; i < zs.length; i++) { const z = zs[i], w = off != null ? -off : trailEdge(-1, z + camZ) - grow, q = proj(trailMid(z + camZ) + w, 0, z); i ? ctx.lineTo(q.x, q.y) : ctx.moveTo(q.x, q.y); }
+      for (let i = zs.length - 1; i >= 0; i--) { const z = zs[i], w = off != null ? off : trailEdge(1, z + camZ) + grow, q = proj(trailMid(z + camZ) + w, 0, z); ctx.lineTo(q.x, q.y); }
+      ctx.closePath();
+    }
+    function drawTrail() {
+      ctx.fillStyle = trailEdgeGrad; trailPath(.14); ctx.fill();
+      ctx.fillStyle = trailGrad; trailPath(0); ctx.fill();
+      ctx.fillStyle = sunGlow; ctx.fillRect(cx - H * .6, hy, H * 1.2, H * .6);
     }
 
     /* ── объекты мира ── */
@@ -909,7 +887,7 @@ const Forest = (() => {
       ['log', -1, 1.9, 3.6, 4.2], ['rock', -1, 1.25, 3.2, 3.1], ['rock', 1, 1.5, 1.8, 5.5], ['mush', -1, 1.3, 2.6, 3.4],
       ['lamp', -1, 1.2, 1.24, 4.4], ['reed', 1, 1.84, 2.0, 1.15], ['reed', 1, 7.25, 7.45, .6],
       ['house', -1, 5.6, 6.6, 9.5], ['house', 1, 9.2, 10.5, 12],
-      ['tuft', -1, 1.02, 4, .22], ['tuft', 1, 1.02, 1.75, .35],
+      ['tuft', -1, 1.02, 4, .22], ['tuft', 1, 1.02, 1.75, .35], ['tuft', -1, .8, .95, .28], ['tuft', 1, .8, .95, .3],
       ['stone', -1, .05, .8, 1.5], ['stone', 1, .05, .8, 1.7], ['stone', -1, .82, 1.02, 1.1], ['stone', 1, .82, 1.02, 1.3],
     ];
     const mk = (type, side, x0, x1, z) => ({ type, side, x: side * rand(x0, x1), z, v: (Math.random() * A[type].length) | 0, sc: rand(.85, 1.15), ph: rand(0, 6.28), lane: [x0, x1] });
@@ -918,15 +896,15 @@ const Forest = (() => {
     }
     const mkGrit = z => {
       const kind = Math.random(), onTrail = Math.random() < .85;
-      const x = trailMid(z) + (onTrail ? rand(-.8, .8) : rand(-1.1, 1.1));
-      return kind < .6 ? { z, x, spr: pick(A.gravel), w: rand(.04, .085), h: .7 }
-        : kind < .85 ? { z, x, spr: pick(A.clod), w: rand(.07, .16), h: .5 }
-        : { z, x, spr: pick(A.flat), w: rand(.06, .09), h: .5 };
+      const u = onTrail ? rand(-.8, .8) : rand(-1.1, 1.1);
+      return kind < .6 ? { z, u, spr: pick(A.gravel), w: rand(.04, .085), h: .7 }
+        : kind < .85 ? { z, u, spr: pick(A.clod), w: rand(.07, .16), h: .5 }
+        : { z, u, spr: pick(A.flat), w: rand(.06, .09), h: .5 };
     };
     const grit = Array.from({ length: opt.lite ? (small ? 260 : 520) : (small ? 650 : 1300) }, () => mkGrit(rand(.3, FAR)));
     const gLeaves = Array.from({ length: opt.lite ? (small ? 140 : 260) : (small ? 300 : 600) }, () => ({ x: rand(-4.5, 1.85), z: rand(.3, FAR), spr: pick(A.flat) }));
     const lakeLeaves = Array.from({ length: small ? 18 : 34 }, () => ({ x: rand(LAKE_X0 + .2, LAKE_X1 - .2), z: rand(.4, FAR), spr: pick(leafSprites).sharp, rot: rand(0, 6.28), sp: rand(-.1, .1) }));
-    const stream = { z: 9 };
+    const stream = { z: -999 }; // ручей с мостом убран
     const motes = Array.from({ length: small ? 30 : 60 }, () => ({ x: rand(-.5, .5), y: rand(-.4, .5), s: rand(.6, 2.2), ph: rand(0, 6.28), v: rand(.005, .02) }));
     const rays = Array.from({ length: 9 }, (_, i) => ({ a: (i - 4) * .3 + rand(-.08, .08), w: rand(.02, .05), al: rand(.03, .07), ph: rand(0, 6.28) }));
     const air = opt.air ? [
@@ -1100,6 +1078,7 @@ const Forest = (() => {
 
     function frame(t, dz, o = {}) {
       if (dz) {
+        camZ += dz;
         for (const th of things) {
           th.z -= dz;
           if (th.z < .3) { const n = mk(th.type, th.side, th.lane[0], th.lane[1], th.z + FAR); Object.assign(th, n); }
@@ -1107,7 +1086,7 @@ const Forest = (() => {
         for (const l of gLeaves) { l.z -= dz; if (l.z < .3) { l.z += FAR; l.x = rand(-4.5, 1.85); } }
         for (let i = 0; i < grit.length; i++) { const g = grit[i]; g.z -= dz; if (g.z < .3) grit[i] = mkGrit(g.z + FAR); }
         for (const l of lakeLeaves) { l.z -= dz; l.x += l.sp * dz * .1; if (l.z < .4) { l.z += FAR; l.x = rand(LAKE_X0 + .2, LAKE_X1 - .2); } }
-        stream.z -= dz; if (stream.z < -1) stream.z += FAR + 4;
+        
       }
       things.sort((a, b) => b.z - a.z);
       const bob = o.bob ? Math.sin(t * 5.4) * H * .0028 : 0;
@@ -1121,6 +1100,7 @@ const Forest = (() => {
       ctx.globalCompositeOperation = 'source-over';
       ctx.drawImage(far, 0, hy - far.height + 1);
       ctx.drawImage(ground, 0, Math.floor(hy));
+      drawTrail();
       ctx.globalCompositeOperation = 'lighter';
       sg = ctx.createRadialGradient(cx, hy, 0, cx, hy, W * .22);
       sg.addColorStop(0, 'rgba(255,215,150,.55)'); sg.addColorStop(1, 'rgba(255,170,90,0)');
@@ -1130,7 +1110,7 @@ const Forest = (() => {
       for (const th of things) drawShadow(th);
       ctx.globalAlpha = 1;
       for (const g of grit) { // гравий, комья и листья на тропе едут навстречу
-        const q = proj(g.x, 0, g.z), w = g.w * q.s;
+        const q = proj(trailMid(g.z + camZ) + g.u, 0, g.z), w = g.w * q.s;
         if (w < .9 || q.y > H + 20) continue;
         const hh = w * g.h;
         ctx.globalAlpha = 1 - clamp((g.z - 4) / (FAR - 4), 0, 1) * .75;
@@ -1239,20 +1219,10 @@ function runIntro(done) {
 function startHeroScene() {
   const cv = $('#hero-scene'); if (!cv) return;
   let scene;
-  try { scene = Forest.create(cv, { horizon: .56, maxDpr: isMobile ? .8 : .75, strip: 3, lite: true }); } catch (e) { console.error(e); return; }
-  let visible = true, last = performance.now(), acc = 0;
-  const t0 = last;
-  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) { last = performance.now(); requestAnimationFrame(frame); } }).observe(cv);
-  addEventListener('resize', () => scene.resize());
-  const step = 1 / 20;
-  function frame(now) {
-    if (!visible || document.hidden) return;
-    const dt = Math.min(.1, (now - last) / 1000); last = now; acc += dt;
-    if (acc >= step && now > scrollingUntil) { scene.frame(Math.max(0, now - t0) / 1000, reduceMotion ? 0 : .12 * acc); acc = 0; }
-    requestAnimationFrame(frame);
-  }
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) { last = performance.now(); requestAnimationFrame(frame); } });
-  scene.frame(0, 0);
+  try { scene = Forest.create(cv, { horizon: .56, maxDpr: isMobile ? 1 : 1.25, lite: true }); } catch (e) { console.error(e); return; }
+  scene.frame(2.5, 0);
+  let tm;
+  addEventListener('resize', () => { clearTimeout(tm); tm = setTimeout(() => { scene.resize(); scene.frame(2.5, 0); }, 200); });
 }
 
 /* ─── HERO: ЖИВОЙ ЧАТ ──────────────────────────────────────────────────── */

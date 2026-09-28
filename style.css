@@ -290,7 +290,7 @@ main, .topbar, .footer { position: relative; z-index: 2; }
   border: 1px solid var(--line); border-radius: 99px; background: color-mix(in srgb, var(--surface) 70%, transparent);
   font-size: 14px; color: var(--muted); backdrop-filter: blur(8px);
 }
-.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf-g); box-shadow: 0 0 0 0 var(--leaf-g); animation: pulse 2.2s infinite; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf-g); box-shadow: 0 0 0 4px rgba(122, 154, 60, .18); }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(122, 154, 60, .6); } 70% { box-shadow: 0 0 0 10px rgba(122, 154, 60, 0); } 100% { box-shadow: 0 0 0 0 rgba(122, 154, 60, 0); } }
 .hero-title {
   margin: 28px 0 24px; font: 600 clamp(52px, 8.2vw, 112px)/.92 var(--f-display); letter-spacing: -.02em;
@@ -301,7 +301,6 @@ main, .topbar, .footer { position: relative; z-index: 2; }
   background: linear-gradient(100deg, var(--leaf-y) 0%, var(--accent) 35%, var(--leaf-r) 65%, var(--leaf-y) 100%);
   background-size: 250% 100%;
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  animation: foliage 9s ease-in-out infinite alternate;
   padding-right: .08em;
 }
 @keyframes foliage { from { background-position: 0% 50%; } to { background-position: 100% 50%; } }
@@ -319,7 +318,7 @@ main, .topbar, .footer { position: relative; z-index: 2; }
 .hero-title-accent.split .w > i {
   background: linear-gradient(100deg, var(--leaf-y) 0%, var(--accent) 35%, var(--leaf-r) 65%, var(--leaf-y) 100%);
   background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
-  animation: foliage 9s ease-in-out infinite alternate; padding-right: .06em;
+  padding-right: .06em;
 }
 
 /* телефон-демо */
@@ -446,8 +445,9 @@ main, .topbar, .footer { position: relative; z-index: 2; }
 }
 .feat:nth-child(1) { grid-column: span 7; }
 .feat:nth-child(2) { grid-column: span 5; }
-.feat:nth-child(3) { grid-column: span 5; }
-.feat:nth-child(4) { grid-column: span 7; }
+.feat:nth-child(3) { grid-column: span 12; min-height: 0; flex-direction: row; }
+.feat:nth-child(3) .feat-art { width: 42%; height: auto; min-height: 260px; }
+@media (max-width: 900px) { .feat:nth-child(3) { flex-direction: column; } .feat:nth-child(3) .feat-art { width: 100%; min-height: 0; height: 200px; } }
 .feat:hover { box-shadow: var(--shadow); }
 .feat img, .feat-art { height: 250px; width: 100%; object-fit: cover; transition: transform 1.2s var(--ease); }
 .feat:hover img, .feat:hover .feat-art { transform: scale(1.06); }
@@ -456,7 +456,7 @@ main, .topbar, .footer { position: relative; z-index: 2; }
   font: 600 110px/1 var(--f-display); position: relative; overflow: hidden;
 }
 .feat-art small { font: 500 12px/1 var(--f-mono); letter-spacing: .15em; text-transform: uppercase; opacity: .8; margin-top: 6px; }
-.feat--cnk .feat-art { background: radial-gradient(circle at 30% 30%, #e8b632, transparent 55%), radial-gradient(circle at 80% 70%, #c0392b, transparent 50%), #8a4a1c; }
+.feat--plugins .feat-art, .feat--cnk .feat-art { background: radial-gradient(circle at 30% 30%, #e8b632, transparent 55%), radial-gradient(circle at 80% 70%, #c0392b, transparent 50%), #8a4a1c; }
 .feat--isekai .feat-art { background: radial-gradient(circle at 70% 20%, #9ab84a, transparent 50%), radial-gradient(circle at 20% 90%, #e0812f, transparent 55%), #2f3a1a; }
 .feat-body { padding: 26px 28px 28px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
 .feat h3 { font: 600 36px/1 var(--f-display); }

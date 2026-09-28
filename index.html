@@ -3,665 +3,393 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NAHA_AI // Рост продаж через Telegram-ботов</title>
-  <meta name="description" content="Telegram-боты для бизнеса: автоматизация продаж, запись клиентов, приём заказов 24/7. Готовый бот за 1-2 дня от 1000₽." />
-  <meta property="og:title" content="NAHA_AI // Рост продаж через Telegram-ботов" />
-  <meta property="og:description" content="Автоматизируй продажи: бот принимает заказы, записывает клиентов и продвигает бизнес 24/7. От 1500₽." />
+  <title>NAHA — Telegram-боты и автоматизация</title>
+  <meta name="description" content="Telegram-боты для бизнеса: запись клиентов, приём заказов, оплата. Python-автоматизация, парсинг, сайты. Готовый бот за 1–2 дня от 1 000 ₽." />
+  <meta name="theme-color" content="#16120d" />
+  <script>try{var t=localStorage.getItem("naha_theme");if(t)document.documentElement.dataset.theme=t;if(sessionStorage.getItem("naha_intro")||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("no-intro");}catch(e){}</script>
+  <meta property="og:title" content="NAHA — Telegram-боты и автоматизация" />
+  <meta property="og:description" content="Бот принимает заказы, записывает клиентов и отвечает 24/7. Готов за 1–2 дня, от 1 000 ₽." />
   <meta property="og:url" content="https://naha11.github.io" />
   <meta property="og:type" content="website" />
   <meta property="og:image" content="https://naha11.github.io/favicon.png" />
   <meta name="twitter:card" content="summary_large_image" />
   <link rel="icon" type="image/png" href="favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap&subset=cyrillic,cyrillic-ext" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <a class="skip" href="#main">К содержанию</a>
 
-  <!-- PROGRESS BAR -->
-  <div id="progress-bar"></div>
-
-  <!-- SCANLINES OVERLAY -->
-  <div class="scanlines"></div>
-
-  <!-- НАВИГАЦИЯ -->
-  <nav>
-    <div class="nav-logo">NAHA<span class="accent">_</span>AI</div>
-    <ul class="nav-links" id="nav-links">
-      <li><a href="#services" data-i18n="nav_services">УСЛУГИ</a></li>
-      <li><a href="#stack" data-i18n="nav_stack">СТЕК</a></li>
-      <li><a href="#portfolio" data-i18n="nav_portfolio">РАБОТЫ</a></li>
-      <li><a href="#payment" data-i18n="nav_payment">ОПЛАТА</a></li>
-      <li><a href="#about" data-i18n="nav_about">ОБО МНЕ</a></li>
-      <li><a href="#contact" data-i18n="nav_contact">КОНТАКТ</a></li>
-    </ul>
-    <div class="nav-right">
-      <div class="lang-switcher">
-        <button class="lang-btn active" data-lang="ru">RU</button>
-        <button class="lang-btn" data-lang="en">EN</button>
-        <button class="lang-btn" data-lang="kz">KZ</button>
-      </div>
-      <button class="hamburger" id="hamburger" aria-label="Меню">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- МОБИЛЬНОЕ МЕНЮ -->
-  <div class="mobile-nav" id="mobile-nav">
-    <ul>
-      <li><a href="#services" onclick="closeMobileNav()" data-i18n="nav_services">УСЛУГИ</a></li>
-      <li><a href="#stack" onclick="closeMobileNav()" data-i18n="nav_stack">СТЕК</a></li>
-      <li><a href="#portfolio" onclick="closeMobileNav()" data-i18n="nav_portfolio">РАБОТЫ</a></li>
-      <li><a href="#payment" onclick="closeMobileNav()" data-i18n="nav_payment">ОПЛАТА</a></li>
-      <li><a href="#about" onclick="closeMobileNav()" data-i18n="nav_about">ОБО МНЕ</a></li>
-      <li><a href="#contact" onclick="closeMobileNav()" data-i18n="nav_contact">КОНТАКТ</a></li>
-    </ul>
+  <div class="loader" id="loader" aria-hidden="true">
+    <canvas id="loader-canvas"></canvas>
+    <div class="loader-brand">naha<span>/</span></div>
+    <button class="loader-skip" id="loader-skip" type="button" data-i18n="skip">Пропустить</button>
   </div>
 
-  <!-- HERO -->
-  <section id="hero">
-    <canvas id="particles-canvas"></canvas>
-    <div class="hero-bg-grid"></div>
-    <div class="container hero-content">
-      <div class="available-badge">
-        <span class="available-dot"></span>
-        <span data-i18n="available">Доступен для заказов</span>
-      </div>
-      <div class="hero-label">// БОЛЬШЕ ПРОДАЖ. МЕНЬШЕ РУТИНЫ.</div>
-      <h1 class="hero-title">
-        <span class="glitch" data-text="РОСТ ПРОДАЖ">РОСТ ПРОДАЖ</span><br/>
-        <span class="hero-sub" data-i18n="hero_sub">через <span class="accent">Telegram-ботов</span> и автоматизацию</span>
-      </h1>
-      <p class="hero-desc" data-i18n="hero_desc">
-        Клиенты записываются, заказы оформляются, данные собираются —<br/>
-        всё <span class="accent">автоматически</span>, пока вы занимаетесь бизнесом.<br/>
-        Готовый бот за 1–2 дня. От 1 000 ₽.
-      </p>
-      <div class="hero-btns">
-        <a href="https://t.me/akhnnoname" class="btn btn-neon" target="_blank">
-          <span class="btn-icon">▶</span> <span data-i18n="btn_telegram">Получить бота за 1-2 дня</span>
-        </a>
-        <a href="#services" class="btn btn-outline">
-          <span data-i18n="btn_kwork">Смотреть услуги</span>
-        </a>
-      </div>
-      <div class="hero-stats">
-        <div class="stat"><span class="stat-num">+40%</span><span class="stat-label" data-i18n="stat1">к продажам клиентов</span></div>
-        <div class="stat-divider">//</div>
-        <div class="stat"><span class="stat-num">1-2</span><span class="stat-label" data-i18n="stat2">дня — и бот работает</span></div>
-        <div class="stat-divider">//</div>
-        <div class="stat"><span class="stat-num">24/7</span><span class="stat-label" data-i18n="stat3">бот продаёт за вас</span></div>
-      </div>
-    </div>
-  </section>
+  <canvas class="leaves" id="leaves" aria-hidden="true"></canvas>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+  <div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
+  <div class="preview" id="preview" aria-hidden="true"><span class="preview-tag"></span><span class="preview-title"></span></div>
 
-  <!-- УСЛУГИ -->
-  <section id="services">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">01</span>
-        <h2 data-i18n="nav_services">УСЛУГИ<span class="accent">.</span></h2>
-        <div class="section-line"></div>
-      </div>
-      <div class="services-grid">
-
-        <div class="service-card tilt-card">
-          <div class="card-corner"></div>
-          <div class="card-num">01</div>
-          <div class="card-icon">🤖</div>
-          <h3 data-i18n="s1_title">Telegram-бот</h3>
-          <p data-i18n="s1_desc">Запись клиентов, приём заказов, рассылки, оплата через ЮKassa. Любая логика — под ваш бизнес.</p>
-          <ul class="card-list">
-            <li data-i18n="s1_l1">Простой бот</li>
-            <li data-i18n="s1_l2">Бот с логикой</li>
-            <li data-i18n="s1_l3">Бот с оплатой</li>
-          </ul>
-          <div class="card-price">от <span>1 000 ₽</span><span class="price-alt"> / $10 / 5 000 ₸</span></div>
+  <header class="topbar" id="topbar">
+    <div class="wrap topbar-inner">
+      <a href="#top" class="logo" aria-label="NAHA — наверх">naha<span>/</span></a>
+      <nav class="nav" id="nav" aria-label="Основная навигация">
+        <a href="#services" data-i18n="nav_services">Услуги</a>
+        <a href="#work" data-i18n="nav_portfolio">Работы</a>
+        <a href="#process" data-i18n="nav_process">Процесс</a>
+        <a href="#payment" data-i18n="nav_payment">Оплата</a>
+        <a href="#faq" data-i18n="nav_faq">Вопросы</a>
+      </nav>
+      <div class="topbar-right">
+        <div class="lang" role="group" aria-label="Язык">
+          <button class="lang-btn active" data-lang="ru">RU</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="kz">KZ</button>
         </div>
-
-        <div class="service-card featured tilt-card">
-          <div class="card-corner"></div>
-          <div class="card-badge" data-i18n="badge_hit">ХИТ</div>
-          <div class="card-num">02</div>
-          <div class="card-icon">⚡</div>
-          <h3 data-i18n="s2_title">Автоматизация</h3>
-          <p data-i18n="s2_desc">Python-скрипты для Excel и Google Sheets. Автозаполнение, формулы, интеграции с API.</p>
-          <ul class="card-list">
-            <li>Excel / Google Sheets</li>
-            <li data-i18n="s2_l2">Авто-отчёты</li>
-            <li data-i18n="s2_l3">Интеграция с Telegram</li>
-          </ul>
-          <div class="card-price">от <span>1 000 ₽</span><span class="price-alt"> / $10 / 5 000 ₸</span></div>
-        </div>
-
-        <div class="service-card tilt-card">
-          <div class="card-corner"></div>
-          <div class="card-num">03</div>
-          <div class="card-icon">🔍</div>
-          <h3 data-i18n="s3_title">Парсинг данных</h3>
-          <p data-i18n="s3_desc">Соберу данные с любого сайта — товары, цены, контакты. Выдам в Excel или Google Sheets.</p>
-          <ul class="card-list">
-            <li>WB / Ozon</li>
-            <li data-i18n="s3_l2">Любой сайт</li>
-            <li data-i18n="s3_l3">Регулярный сбор</li>
-          </ul>
-          <div class="card-price">от <span>1 000 ₽</span><span class="price-alt"> / $10 / 5 000 ₸</span></div>
-        </div>
-
-        <div class="service-card tilt-card">
-          <div class="card-corner"></div>
-          <div class="card-num">04</div>
-          <div class="card-icon">🌐</div>
-          <h3 data-i18n="s4_title">Сайт-визитка</h3>
-          <p data-i18n="s4_desc">Одностраничный сайт для бизнеса или фрилансера. Имя, услуги, кнопки связи. Быстро.</p>
-          <ul class="card-list">
-            <li>HTML / CSS</li>
-            <li data-i18n="s4_l2">GitHub Pages (бесплатно)</li>
-            <li data-i18n="s4_l3">Любой дизайн</li>
-          </ul>
-          <div class="card-price">от <span>1 000 ₽</span><span class="price-alt"> / $10 / 5 000 ₸</span></div>
-        </div>
-
-        <div class="service-card tilt-card">
-          <div class="card-corner"></div>
-          <div class="card-num">05</div>
-          <div class="card-icon">🎮</div>
-          <h3 data-i18n="s5_title">Discord-бот</h3>
-          <p data-i18n="s5_desc">Бот для вашего Discord-сервера: приветствие, слэш-команды, автоответы. Под ключ.</p>
-          <ul class="card-list">
-            <li data-i18n="s5_l1">Слэш-команды</li>
-            <li data-i18n="s5_l2">Приветствие участников</li>
-            <li data-i18n="s5_l3">Кастомная логика</li>
-          </ul>
-          <div class="card-price">от <span>1 000 ₽</span><span class="price-alt"> / $10 / 5 000 ₸</span></div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- СТЕК -->
-  <section id="stack">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">02</span>
-        <h2 data-i18n="nav_stack">СТЕК<span class="accent">.</span></h2>
-        <div class="section-line"></div>
-      </div>
-      <div class="stack-grid">
-        <div class="stack-item"><span>Python</span></div>
-        <div class="stack-item"><span>aiogram 3.x</span></div>
-        <div class="stack-item"><span>BeautifulSoup</span></div>
-        <div class="stack-item"><span>Google Sheets API</span></div>
-        <div class="stack-item"><span>ЮKassa</span></div>
-        <div class="stack-item"><span>Robokassa</span></div>
-        <div class="stack-item"><span>GitHub</span></div>
-        <div class="stack-item"><span>HTML / CSS</span></div>
-        <div class="stack-item"><span>SQLite</span></div>
-        <div class="stack-item"><span>discord.py</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ПОРТФОЛИО -->
-  <section id="portfolio">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">03</span>
-        <h2 data-i18n="nav_portfolio">РАБОТЫ<span class="accent">.</span></h2>
-        <div class="section-line"></div>
-      </div>
-      <div class="portfolio-grid">
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Telegram-бот</div>
-          <h3 data-i18n="p1_title">Бот-визитка</h3>
-          <p data-i18n="p1_desc">Telegram-бот для бизнеса: меню, кнопки, контакты, описание услуг. aiogram 3.x.</p>
-          <a href="https://github.com/Naha11/telegram-bot-vizitka" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Telegram-бот</div>
-          <h3 data-i18n="p2_title">Бот записи клиентов</h3>
-          <p data-i18n="p2_desc">Бот для онлайн-записи: выбор услуги, дата/время, уведомление администратору. aiogram 3.x.</p>
-          <a href="https://github.com/Naha11/telegram-bot-booking" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Telegram-бот</div>
-          <h3 data-i18n="p3_title">Бот приёма заказов</h3>
-          <p data-i18n="p3_desc">Бот для магазина: каталог, корзина, оформление заказа, уведомления. aiogram 3.x.</p>
-          <a href="https://github.com/Naha11/telegram-bot-orders" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Сайт</div>
-          <h3 data-i18n="p4_title">Сайт-визитка</h3>
-          <p data-i18n="p4_desc">Одностраничный сайт в стиле киберпанк+самурай. HTML/CSS/JS, GitHub Pages.</p>
-          <a href="https://naha11.github.io" target="_blank" class="portfolio-link">Открыть →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Excel</div>
-          <h3 data-i18n="p5_title">Генератор отчётов</h3>
-          <p data-i18n="p5_desc">Автоматический Excel-отчёт с графиками, форматированием и сводным листом. Python + openpyxl.</p>
-          <a href="https://github.com/Naha11" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Excel</div>
-          <h3 data-i18n="p6_title">Парсинг в Excel</h3>
-          <p data-i18n="p6_desc">Сбор данных с любого сайта и сохранение в красивую Excel таблицу. Python + BeautifulSoup.</p>
-          <a href="https://github.com/Naha11" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Excel</div>
-          <h3 data-i18n="p7_title">Шаблон учёта бизнеса</h3>
-          <p data-i18n="p7_desc">Готовый Excel шаблон: доходы/расходы, 12 месяцев, годовой отчёт, выпадающие списки.</p>
-          <a href="https://github.com/Naha11" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Discord-бот</div>
-          <h3 data-i18n="p8_title">Discord-бот</h3>
-          <p data-i18n="p8_desc">Бот для Discord-сервера: слэш-команды /ping /info /help, автоприветствие участников. discord.py.</p>
-          <a href="https://github.com/Naha11/discord-bot" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Парсер</div>
-          <h3 data-i18n="p9_title">Kwork Monitor</h3>
-          <p data-i18n="p9_desc">Мониторинг заявок на Kwork.ru по ключевым словам. Playwright + Telegram-уведомления. Работает в фоне 24/7.</p>
-          <a href="https://github.com/Naha11/bot-business" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Парсер</div>
-          <h3 data-i18n="p10_title">Business Finder</h3>
-          <p data-i18n="p10_desc">Сбор контактов бизнесов через OpenStreetMap API. Кафе, салоны, автосервисы и др. → Excel с телефонами и адресами.</p>
-          <a href="https://github.com/Naha11/bot-business" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Автоматизация</div>
-          <h3 data-i18n="p11_title">Мониторинг цен</h3>
-          <p data-i18n="p11_desc">Скрипт мониторинга цен конкурентов. Сравнение, история изменений, уведомления в Telegram. Python + aiohttp.</p>
-          <a href="https://github.com/Naha11/bot-business" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Google Sheets</div>
-          <h3 data-i18n="p12_title">Дашборд продаж</h3>
-          <p data-i18n="p12_desc">Автоматический дашборд в Google Таблицах: импорт данных, графики, триггеры, уведомления. Apps Script.</p>
-          <a href="https://github.com/Naha11/bot-business" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">База данных</div>
-          <h3 data-i18n="p13_title">CRM-база клиентов</h3>
-          <p data-i18n="p13_desc">Проектирование БД для CRM: клиенты, заказы, платежи, аналитика. PostgreSQL + миграции.</p>
-          <a href="https://github.com/Naha11/bot-business" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Вёрстка</div>
-          <h3 data-i18n="p14_title">Лендинг TechFlow</h3>
-          <p data-i18n="p14_desc">Адаптивный лендинг для IT-компании: современный UI, анимации, адаптив. HTML/CSS/JS.</p>
-          <a href="https://github.com/Naha11/bot-business" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Minecraft</div>
-          <h3 data-i18n="p15_title">Isekai Craft</h3>
-          <p data-i18n="p15_desc">MMO RPG сервер Minecraft в стиле isekai: 7 рас, 13+ классов, данжи F-SS, войны рас, политика и экономика. Paper 1.21+, Java.</p>
-          <a href="https://github.com/Naha11/isekai-craft" target="_blank" class="portfolio-link">GitHub →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Minecraft</div>
-          <h3 data-i18n="p16_title">CnK Foods Plugin</h3>
-          <p data-i18n="p16_desc">Paper-плагин 1.21.11 — самостоятельная замена датапака Crop &amp; Kettle: 175 предметов еды, 19 декор-блоков (3D через ItemDisplay), distiller с hopper-GUI, wine_rack с фильтром, 140 рецептов.</p>
-          <a href="CnkFoods-1.0.0.zip" class="portfolio-link">Скачать ZIP →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">UI/UX</div>
-          <h3 data-i18n="p17_title">Olympus OS</h3>
-          <p data-i18n="p17_desc">Рабочий стол Windows, переосмысленный как интерфейс Олимпа: единая дизайн-система — иконки-артефакты, часы, погода, системный монитор, обсидиановые окна, taskbar, режим «скрыть всё» и экран блокировки. HTML/CSS/JS, SVG, backdrop-filter.</p>
-          <a href="olympus/" target="_blank" class="portfolio-link">Открыть →</a>
-        </div>
-
-        <div class="portfolio-card tilt-card">
-          <div class="portfolio-tag">Framer-плагин</div>
-          <h3 data-i18n="p18_title">Ally</h3>
-          <p data-i18n="p18_desc">Аудит доступности для Framer, опубликован в их каталоге. Проверяет контраст, описания картинок и структуру заголовков по WCAG 2.1 AA — и читает светлую и тёмную темы раздельно, потому что стиль Framer хранит два значения цвета, и проверяльщик одной темы пропускает половину сайта. Описания картинок пишет в документ одним нажатием; цвет не меняет никогда. React + TypeScript, 180 тестов, лицензии через Lemon Squeezy.</p>
-          <a href="ally/" target="_blank" class="portfolio-link">Открыть →</a>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- СЧЁТЧИКИ -->
-  <section id="stats">
-    <div class="container">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-number" data-target="18">0</div>
-          <div class="stat-label" data-i18n="cnt1">выполненных проекта</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" data-target="1">0</div>
-          <div class="stat-label" data-i18n="cnt2">час — время ответа</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" data-target="2">0</div>
-          <div class="stat-label" data-i18n="cnt3">дня на простую задачу</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-number" data-target="100">0</div>
-          <div class="stat-label" data-i18n="cnt4">% поддержка после сдачи</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ПРОЦЕСС РАБОТЫ -->
-  <section id="process">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">04</span>
-        <h2 data-i18n="process_title">КАК РАБОТАЕМ<span class="accent">.</span></h2>
-        <div class="section-line"></div>
-      </div>
-      <div class="process-grid">
-        <div class="process-step">
-          <div class="step-num">01</div>
-          <div class="step-icon">💬</div>
-          <h3 data-i18n="ps1_title">Обсуждение</h3>
-          <p data-i18n="ps1_desc">Пишете в Telegram, описываете задачу. Отвечаю в течение часа, задаю вопросы и называю цену.</p>
-        </div>
-        <div class="process-arrow">▶</div>
-        <div class="process-step">
-          <div class="step-num">02</div>
-          <div class="step-icon">⚙️</div>
-          <h3 data-i18n="ps2_title">Разработка</h3>
-          <p data-i18n="ps2_desc">Начинаю работу после предоплаты 50%. Информирую вас по ходу разработки.</p>
-        </div>
-        <div class="process-arrow">▶</div>
-        <div class="process-step">
-          <div class="step-num">03</div>
-          <div class="step-icon">🧪</div>
-          <h3 data-i18n="ps3_title">Тестирование</h3>
-          <p data-i18n="ps3_desc">Проверяю всё самостоятельно перед сдачей. Показываю демо — вы тестируете и сообщаете правки.</p>
-        </div>
-        <div class="process-arrow">▶</div>
-        <div class="process-step">
-          <div class="step-num">04</div>
-          <div class="step-icon">🚀</div>
-          <h3 data-i18n="ps4_title">Сдача</h3>
-          <p data-i18n="ps4_desc">Передаю исходный код и объясняю, как им пользоваться. Остаюсь на связи после сдачи.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ГАРАНТИИ -->
-  <section id="guarantees">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">05</span>
-        <h2 data-i18n="guar_title">ГАРАНТИИ<span class="accent">.</span></h2>
-        <div class="section-line"></div>
-      </div>
-      <div class="guarantees-grid">
-        <div class="guarantee-card tilt-card">
-          <div class="g-icon">🛡</div>
-          <h3 data-i18n="g1_title">Исходный код</h3>
-          <p data-i18n="g1_desc">Весь код передаю вам. Он ваш — можете изменять, передавать кому угодно.</p>
-        </div>
-        <div class="guarantee-card tilt-card">
-          <div class="g-icon">🔧</div>
-          <h3 data-i18n="g2_title">Правки бесплатно</h3>
-          <p data-i18n="g2_desc">Если что-то работает не так, как договорились, — исправлю бесплатно.</p>
-        </div>
-        <div class="guarantee-card tilt-card">
-          <div class="g-icon">📞</div>
-          <h3 data-i18n="g3_title">Поддержка 14 дней</h3>
-          <p data-i18n="g3_desc">После сдачи 14 дней отвечаю на вопросы и помогаю с настройкой.</p>
-        </div>
-        <div class="guarantee-card tilt-card">
-          <div class="g-icon">⏱</div>
-          <h3 data-i18n="g4_title">Сдача в срок</h3>
-          <p data-i18n="g4_desc">Называю реальные сроки и придерживаюсь их. Предупреждаю заранее, если что-то меняется.</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ОТЗЫВЫ -->
-  <section id="reviews">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">06</span>
-        <h2 data-i18n="rev_title">ОТЗЫВЫ<span class="accent">.</span></h2>
-        <div class="section-line"></div>
-      </div>
-      <div id="reviews-list" class="reviews-grid">
-        <!-- Отзывы загружаются из localStorage -->
-      </div>
-      <div class="review-form-wrap">
-        <p class="review-empty" id="review-empty" data-i18n="rev_empty">Пока отзывов нет. Будьте первым!</p>
-        <div class="review-form">
-          <input type="text" id="review-name" data-i18n-ph="ph_rev_name" placeholder="Ваше имя" class="form-input" maxlength="50" />
-          <textarea id="review-text" data-i18n-ph="ph_rev_text" placeholder="Ваш отзыв..." class="form-input review-textarea" maxlength="300" rows="3"></textarea>
-          <div class="review-stars-input" id="review-stars-input">
-            <span class="star-btn" data-star="1">★</span>
-            <span class="star-btn" data-star="2">★</span>
-            <span class="star-btn" data-star="3">★</span>
-            <span class="star-btn" data-star="4">★</span>
-            <span class="star-btn" data-star="5">★</span>
-          </div>
-          <button class="btn btn-neon" onclick="submitReview()">
-            <span class="btn-icon">✎</span> <span data-i18n="btn_review">Оставить отзыв</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ФОРМА ЗАЯВКИ -->
-  <section id="order">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">07</span>
-        <h2 data-i18n="order_title">ЗАЯВКА<span class="accent">.</span></h2>
-        <div class="section-line"></div>
-      </div>
-      <p class="order-desc" data-i18n="order_desc">Опишите задачу — отвечу в течение часа и сообщу точную цену</p>
-      <div class="order-form">
-        <input type="text" id="order-name" data-i18n-ph="ph_name" placeholder="Ваше имя" class="form-input" />
-        <input type="text" id="order-task" data-i18n-ph="ph_task" placeholder="Опишите задачу (бот, сайт, парсинг...)" class="form-input" />
-        <button class="btn btn-neon" onclick="sendToTelegram()">
-          <span class="btn-icon">▶</span> <span data-i18n="btn_send">Отправить в Telegram</span>
+        <button class="icon-btn" id="sound-toggle" type="button" aria-label="Звук" aria-pressed="false" title="Звук">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="snd-on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path class="snd-off" d="M16 9l5 6M21 9l-5 6"/></svg>
         </button>
-      </div>
-      <p class="order-note" data-i18n="order_note">// Нажимая кнопку, вы перейдёте в Telegram с готовым сообщением</p>
-    </div>
-  </section>
-
-  <!-- FAQ -->
-  <section id="faq">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">08</span>
-        <h2>FAQ<span class="accent">.</span></h2>
-        <div class="section-line"></div>
-      </div>
-      <div class="faq-list">
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-i18n="faq1_q">Какой срок выполнения?</span>
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p data-i18n="faq1_a">Простые задачи — 1–2 дня. Боты со сложной логикой — до 5 дней. Сроки обговариваем заранее и фиксируем.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-i18n="faq2_q">Нужна ли предоплата?</span>
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p data-i18n="faq2_a">Да, 50% до начала работы. Остаток — после сдачи и вашего одобрения результата.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-i18n="faq3_q">Что если результат не понравится?</span>
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p data-i18n="faq3_a">Дорабатываю до результата бесплатно, если задача не изменилась по сравнению с изначальной договорённостью.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-i18n="faq4_q">Можно ли добавить функции позже?</span>
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p data-i18n="faq4_a">Да, я всегда на связи. Доработки обсуждаем отдельно — объём и стоимость зависят от задачи.</p>
-          </div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-question" onclick="toggleFaq(this)">
-            <span data-i18n="faq5_q">Работаете с зарубежными клиентами?</span>
-            <span class="faq-icon">+</span>
-          </button>
-          <div class="faq-answer">
-            <p data-i18n="faq5_a">Да, принимаю оплату в USDT (TRC20). Работаю полностью удалённо — для вас нет разницы где вы находитесь.</p>
-          </div>
-        </div>
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Тема" title="Тема">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
+        </button>
+        <a href="https://t.me/akhnnoname" target="_blank" rel="noopener" class="btn btn-sm btn-accent topbar-cta" data-i18n="btn_write">Написать</a>
+        <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="nav"><span></span><span></span></button>
       </div>
     </div>
-  </section>
+  </header>
 
-  <!-- ОПЛАТА -->
-  <section id="payment">
-    <div class="container">
-      <div class="section-header">
-        <span class="section-tag">09</span>
-        <h2 data-i18n="nav_payment">ОПЛАТА<span class="accent">.</span></h2>
-        <div class="section-line"></div>
-      </div>
-      <p class="payment-desc" data-i18n="payment_desc">Принимаю оплату удобным для вас способом</p>
-      <div class="payment-grid">
+  <main id="main">
 
-        <div class="payment-card tilt-card">
-          <div class="payment-icon">💳</div>
-          <h3>Kaspi Pay</h3>
-          <p data-i18n="kaspi_desc">Перевод на Kaspi Gold — быстро и без комиссии</p>
-          <div class="payment-val" id="kaspi-num">+7 705 743 1166</div>
-          <button class="copy-btn" onclick="copyText('kaspi-num', this)" data-i18n="copy_num">Скопировать номер</button>
+    <!-- HERO -->
+    <section class="hero" id="top">
+      <canvas class="aura" id="aura" aria-hidden="true"></canvas>
+      <div class="hero-land" id="hero-land" aria-hidden="true"></div>
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="status"><span class="status-dot"></span><span data-i18n="available">Беру заказы — отвечаю в течение часа</span></p>
+          <h1 class="hero-title">
+            <span data-i18n="hero_t1">Бот, который</span>
+            <span class="hero-title-accent" data-i18n="hero_t2">продаёт за вас</span>
+            <span data-i18n="hero_t3">пока вы спите</span>
+          </h1>
+          <p class="hero-desc" data-i18n="hero_desc">Делаю Telegram-ботов, Python-автоматизацию и сайты для малого бизнеса. Клиенты записываются, заказы оформляются, отчёты собираются — без вашего участия.</p>
+          <div class="hero-actions">
+            <a href="https://t.me/akhnnoname" target="_blank" rel="noopener" class="btn btn-accent">
+              <span data-i18n="btn_telegram">Обсудить задачу в Telegram</span>
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" /></svg>
+            </a>
+            <a href="#work" class="btn btn-ghost" data-i18n="btn_works">Посмотреть работы</a>
+          </div>
+          <dl class="hero-facts">
+            <div><dt>1–2</dt><dd data-i18n="stat2">дня на простого бота</dd></div>
+            <div><dt>1 000 ₽</dt><dd data-i18n="stat1">стартовая цена</dd></div>
+            <div><dt><span class="count" data-target="18">18</span></dt><dd data-i18n="cnt1">проектов в портфолио</dd></div>
+          </dl>
         </div>
 
-        <div class="payment-card tilt-card">
-          <div class="payment-icon">₮</div>
-          <h3>USDT TRC20</h3>
-          <p data-i18n="usdt_desc">Оплата криптовалютой — USDT в сети Tron (TRC20)</p>
-          <div class="payment-val crypto-addr" id="usdt-addr">TV9ah7JaXcjMLWejRrQ4xv8xKnAUs66y9K</div>
-          <button class="copy-btn" onclick="copyText('usdt-addr', this)" data-i18n="copy_addr">Скопировать адрес</button>
+        <div class="hero-demo" aria-hidden="true">
+          <div class="phone">
+            <div class="phone-head">
+              <div class="phone-ava">S</div>
+              <div>
+                <div class="phone-name">Studio Barber</div>
+                <div class="phone-sub" id="chat-status">online</div>
+              </div>
+            </div>
+            <div class="chat" id="chat"></div>
+          </div>
+          <div class="notify" id="notify">
+            <div class="notify-title" data-i18n="notify_title">Новая запись</div>
+            <div class="notify-body" id="notify-body">Айдана · Стрижка · 29.09, 14:30</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="ticker" aria-label="Стек технологий">
+        <div class="ticker-track">
+          <span>Python</span><span>aiogram 3</span><span>discord.py</span><span>Playwright</span><span>BeautifulSoup</span><span>Google Sheets API</span><span>openpyxl</span><span>SQLite</span><span>PostgreSQL</span><span>ЮKassa</span><span>Robokassa</span><span>React</span><span>TypeScript</span><span>Java / Paper</span><span>HTML / CSS / JS</span>
+          <span>Python</span><span>aiogram 3</span><span>discord.py</span><span>Playwright</span><span>BeautifulSoup</span><span>Google Sheets API</span><span>openpyxl</span><span>SQLite</span><span>PostgreSQL</span><span>ЮKassa</span><span>Robokassa</span><span>React</span><span>TypeScript</span><span>Java / Paper</span><span>HTML / CSS / JS</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- УСЛУГИ -->
+    <section class="section" id="services">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-idx">01</span>
+          <h2 data-i18n="services_title">Что я делаю</h2>
+          <p class="sec-lead" data-i18n="services_lead">Цена фиксируется до начала работы. Ниже — стартовые цены за простой вариант.</p>
         </div>
 
+        <ol class="services">
+          <li class="svc svc--hot">
+            <span class="svc-num">01</span>
+            <div class="svc-main">
+              <h3><span data-i18n="s1_title">Telegram-бот</span> <em class="svc-flag" data-i18n="badge_hit">чаще всего заказывают</em></h3>
+              <p data-i18n="s1_desc">Запись клиентов, приём заказов, рассылки, оплата через ЮKassa. Любая логика — под ваш бизнес.</p>
+            </div>
+            <ul class="svc-tags"><li data-i18n="s1_l1">Бот-визитка</li><li data-i18n="s1_l2">Запись и заказы</li><li data-i18n="s1_l3">Приём оплаты</li></ul>
+            <div class="svc-price"><span data-i18n="from">от</span> 1 000 ₽<small>$10 · 5 000 ₸</small></div>
+          </li>
+          <li class="svc">
+            <span class="svc-num">02</span>
+            <div class="svc-main">
+              <h3 data-i18n="s2_title">Автоматизация</h3>
+              <p data-i18n="s2_desc">Python-скрипты для Excel и Google Sheets. Автозаполнение, формулы, интеграции с API.</p>
+            </div>
+            <ul class="svc-tags"><li>Excel / Sheets</li><li data-i18n="s2_l2">Авто-отчёты</li><li data-i18n="s2_l3">Связка с Telegram</li></ul>
+            <div class="svc-price"><span data-i18n="from">от</span> 1 000 ₽<small>$10 · 5 000 ₸</small></div>
+          </li>
+          <li class="svc">
+            <span class="svc-num">03</span>
+            <div class="svc-main">
+              <h3 data-i18n="s3_title">Парсинг данных</h3>
+              <p data-i18n="s3_desc">Соберу данные с любого сайта — товары, цены, контакты. Выдам в Excel или Google Sheets.</p>
+            </div>
+            <ul class="svc-tags"><li>WB / Ozon</li><li data-i18n="s3_l2">Любой сайт</li><li data-i18n="s3_l3">Сбор по расписанию</li></ul>
+            <div class="svc-price"><span data-i18n="from">от</span> 1 000 ₽<small>$10 · 5 000 ₸</small></div>
+          </li>
+          <li class="svc">
+            <span class="svc-num">04</span>
+            <div class="svc-main">
+              <h3 data-i18n="s4_title">Сайт-визитка</h3>
+              <p data-i18n="s4_desc">Одностраничный сайт для бизнеса или фрилансера. Имя, услуги, кнопки связи. Быстро.</p>
+            </div>
+            <ul class="svc-tags"><li>HTML / CSS</li><li data-i18n="s4_l2">Хостинг бесплатно</li><li data-i18n="s4_l3">Адаптив</li></ul>
+            <div class="svc-price"><span data-i18n="from">от</span> 1 000 ₽<small>$10 · 5 000 ₸</small></div>
+          </li>
+          <li class="svc">
+            <span class="svc-num">05</span>
+            <div class="svc-main">
+              <h3 data-i18n="s5_title">Discord-бот</h3>
+              <p data-i18n="s5_desc">Бот для вашего Discord-сервера: приветствие, слэш-команды, автоответы. Под ключ.</p>
+            </div>
+            <ul class="svc-tags"><li data-i18n="s5_l1">Слэш-команды</li><li data-i18n="s5_l2">Приветствие</li><li data-i18n="s5_l3">Своя логика</li></ul>
+            <div class="svc-price"><span data-i18n="from">от</span> 1 000 ₽<small>$10 · 5 000 ₸</small></div>
+          </li>
+        </ol>
       </div>
-      <p class="payment-note">// <span data-i18n="payment_note">После оплаты — скиньте скрин в Telegram</span> <span class="accent">@akhnnoname</span></p>
-    </div>
-  </section>
+    </section>
 
-  <!-- ОБО МНЕ -->
-  <section id="about">
-    <div class="container about-wrap">
-      <div class="section-header">
-        <span class="section-tag">10</span>
-        <h2 data-i18n="nav_about">ОБО МНЕ<span class="accent">.</span></h2>
-        <div class="section-line"></div>
+    <!-- РАБОТЫ -->
+    <section class="section" id="work">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-idx">02</span>
+          <h2 data-i18n="work_title">Работы</h2>
+          <div class="filters" role="group" aria-label="Фильтр работ">
+            <button class="chip active" data-filter="all" data-i18n="f_all">Все</button>
+            <button class="chip" data-filter="bot" data-i18n="f_bot">Боты</button>
+            <button class="chip" data-filter="auto" data-i18n="f_auto">Автоматизация</button>
+            <button class="chip" data-filter="web" data-i18n="f_web">Сайты и UI</button>
+            <button class="chip" data-filter="mc">Minecraft</button>
+          </div>
+        </div>
+
+        <div class="featured">
+          <a class="feat feat--img" data-cat="web" href="ally/" target="_blank" rel="noopener">
+            <img src="img/ally-card.jpg" alt="Обложка плагина Ally: аудит доступности для Framer" loading="lazy" width="960" height="504" />
+            <div class="feat-body">
+              <span class="tag">Framer-плагин</span>
+              <h3>Ally</h3>
+              <p data-i18n="p18_desc">Аудит доступности для Framer, опубликован в их каталоге. Проверяет контраст, описания картинок и заголовки по WCAG 2.1 AA — отдельно в светлой и тёмной теме. React + TypeScript, 180 тестов.</p>
+              <span class="feat-link" data-i18n="open">Открыть →</span>
+            </div>
+          </a>
+          <a class="feat feat--img" data-cat="web" href="olympus/" target="_blank" rel="noopener">
+            <img src="img/olympus-card.jpg" alt="Olympus OS: рабочий стол в стиле Олимпа" loading="lazy" width="960" height="540" />
+            <div class="feat-body">
+              <span class="tag">UI / UX</span>
+              <h3>Olympus OS</h3>
+              <p data-i18n="p17_desc">Рабочий стол Windows как интерфейс Олимпа: иконки-артефакты, часы, погода, системный монитор, обсидиановые окна и экран блокировки. HTML/CSS/JS, SVG.</p>
+              <span class="feat-link" data-i18n="open">Открыть →</span>
+            </div>
+          </a>
+          <a class="feat feat--type feat--cnk" data-cat="mc" href="CnkFoods-1.0.0.zip">
+            <div class="feat-art" aria-hidden="true"><span>175</span><small data-i18n="cnk_art">блюд</small></div>
+            <div class="feat-body">
+              <span class="tag">Minecraft · Paper</span>
+              <h3>CnK Foods Plugin</h3>
+              <p data-i18n="p16_desc">Плагин для Paper 1.21.11 — замена датапака Crop &amp; Kettle: 175 блюд, 19 декор-блоков в 3D через ItemDisplay, дистиллятор, выдержка вин, 140 рецептов.</p>
+              <span class="feat-link" data-i18n="download">Скачать ZIP ↓</span>
+            </div>
+          </a>
+          <a class="feat feat--type feat--isekai" data-cat="mc" href="https://github.com/Naha11/isekai-craft" target="_blank" rel="noopener">
+            <div class="feat-art" aria-hidden="true"><span>SS</span><small data-i18n="isekai_art">ранг данжей</small></div>
+            <div class="feat-body">
+              <span class="tag">Minecraft · MMO RPG</span>
+              <h3>Isekai Craft</h3>
+              <p data-i18n="p15_desc">MMO RPG сервер в стиле isekai: расы, классы, данжи рангов F–SS, войны рас и экономика. Fabric, Kotlin + Java, своя БД на Exposed.</p>
+              <span class="feat-link">GitHub →</span>
+            </div>
+          </a>
+        </div>
+
+        <ul class="works" id="works">
+          <li class="work" data-cat="bot"><a href="https://github.com/Naha11/telegram-bot-vizitka" target="_blank" rel="noopener"><span class="tag">Telegram</span><strong data-i18n="p1_title">Бот-визитка</strong><span class="work-desc" data-i18n="p1_desc">Меню, кнопки, контакты и описание услуг. aiogram 3.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="bot"><a href="https://github.com/Naha11/telegram-bot-booking" target="_blank" rel="noopener"><span class="tag">Telegram</span><strong data-i18n="p2_title">Бот записи клиентов</strong><span class="work-desc" data-i18n="p2_desc">Выбор услуги, дата и время, уведомление администратору. aiogram 3.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="bot"><a href="https://github.com/Naha11/telegram-bot-orders" target="_blank" rel="noopener"><span class="tag">Telegram</span><strong data-i18n="p3_title">Бот приёма заказов</strong><span class="work-desc" data-i18n="p3_desc">Каталог, корзина, оформление заказа, уведомления. aiogram 3.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="bot"><a href="https://github.com/Naha11/discord-bot" target="_blank" rel="noopener"><span class="tag">Discord</span><strong data-i18n="p8_title">Discord-бот</strong><span class="work-desc" data-i18n="p8_desc">Слэш-команды /ping /info /help, приветствие новых участников. discord.py.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="auto"><a href="https://github.com/Naha11/bot-business" target="_blank" rel="noopener"><span class="tag" data-i18n="t_parser">Парсер</span><strong data-i18n="p9_title">Kwork Monitor</strong><span class="work-desc" data-i18n="p9_desc">Следит за заявками на Kwork по ключевым словам и шлёт их в Telegram. Playwright, работает 24/7.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="auto"><a href="https://github.com/Naha11/bot-business" target="_blank" rel="noopener"><span class="tag" data-i18n="t_parser">Парсер</span><strong>Business Finder</strong><span class="work-desc" data-i18n="p10_desc">Контакты кафе, салонов и автосервисов через OpenStreetMap — в Excel с телефонами и адресами.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="auto"><a href="https://github.com/Naha11/bot-business" target="_blank" rel="noopener"><span class="tag" data-i18n="t_auto">Автоматизация</span><strong data-i18n="p11_title">Мониторинг цен</strong><span class="work-desc" data-i18n="p11_desc">Цены конкурентов, история изменений, уведомления в Telegram. Python + aiohttp.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="auto"><a href="https://github.com/Naha11/bot-business" target="_blank" rel="noopener"><span class="tag">Google Sheets</span><strong data-i18n="p12_title">Дашборд продаж</strong><span class="work-desc" data-i18n="p12_desc">Импорт данных, графики, триггеры и уведомления в Google Таблицах. Apps Script.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="auto"><a href="https://github.com/Naha11/bot-business" target="_blank" rel="noopener"><span class="tag" data-i18n="t_db">База данных</span><strong data-i18n="p13_title">CRM-база клиентов</strong><span class="work-desc" data-i18n="p13_desc">Клиенты, заказы, платежи, аналитика. PostgreSQL + миграции.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="auto"><a href="https://github.com/Naha11" target="_blank" rel="noopener"><span class="tag">Excel</span><strong data-i18n="p5_title">Генератор отчётов</strong><span class="work-desc" data-i18n="p5_desc">Excel-отчёт с графиками, форматированием и сводным листом. Python + openpyxl.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="auto"><a href="https://github.com/Naha11" target="_blank" rel="noopener"><span class="tag">Excel</span><strong data-i18n="p6_title">Парсинг в Excel</strong><span class="work-desc" data-i18n="p6_desc">Данные с любого сайта в аккуратную таблицу. Python + BeautifulSoup.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="auto"><a href="https://github.com/Naha11" target="_blank" rel="noopener"><span class="tag">Excel</span><strong data-i18n="p7_title">Шаблон учёта бизнеса</strong><span class="work-desc" data-i18n="p7_desc">Доходы и расходы по 12 месяцам, годовой отчёт, выпадающие списки.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="web"><a href="https://github.com/Naha11/bot-business" target="_blank" rel="noopener"><span class="tag" data-i18n="t_web">Вёрстка</span><strong data-i18n="p14_title">Лендинг TechFlow</strong><span class="work-desc" data-i18n="p14_desc">Адаптивный лендинг для IT-компании с анимациями. HTML/CSS/JS.</span><span class="work-go">↗</span></a></li>
+          <li class="work" data-cat="web"><a href="#top"><span class="tag" data-i18n="t_site">Сайт</span><strong data-i18n="p4_title">Этот сайт</strong><span class="work-desc" data-i18n="p4_desc">Визитка с живым демо бота, фильтром работ и тремя языками. HTML/CSS/JS, GitHub Pages.</span><span class="work-go">↑</span></a></li>
+        </ul>
       </div>
-      <div class="about-content">
+    </section>
+
+    <!-- ПРОЦЕСС -->
+    <section class="section" id="process">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-idx">03</span>
+          <h2 data-i18n="process_title">Как проходит работа</h2>
+        </div>
+        <ol class="steps">
+          <li class="step"><span class="step-n">1</span><h3 data-i18n="ps1_title">Обсуждение</h3><p data-i18n="ps1_desc">Пишете в Telegram, описываете задачу. Отвечаю в течение часа, задаю вопросы и называю цену.</p><span class="step-time" data-i18n="ps1_time">≈ 1 час</span></li>
+          <li class="step"><span class="step-n">2</span><h3 data-i18n="ps2_title">Разработка</h3><p data-i18n="ps2_desc">Начинаю после предоплаты 50%. Показываю промежуточный результат по ходу.</p><span class="step-time" data-i18n="ps2_time">1–5 дней</span></li>
+          <li class="step"><span class="step-n">3</span><h3 data-i18n="ps3_title">Тестирование</h3><p data-i18n="ps3_desc">Проверяю всё сам, затем даю демо — вы тестируете и присылаете правки.</p><span class="step-time" data-i18n="ps3_time">до сдачи</span></li>
+          <li class="step"><span class="step-n">4</span><h3 data-i18n="ps4_title">Сдача</h3><p data-i18n="ps4_desc">Передаю исходный код и объясняю, как им пользоваться. Остаюсь на связи.</p><span class="step-time" data-i18n="ps4_time">+14 дней поддержки</span></li>
+        </ol>
+
+        <div class="guarantees">
+          <div class="g"><h3 data-i18n="g1_title">Код ваш</h3><p data-i18n="g1_desc">Весь исходный код передаю вам. Можете менять его и передавать кому угодно.</p></div>
+          <div class="g"><h3 data-i18n="g2_title">Правки бесплатно</h3><p data-i18n="g2_desc">Если что-то работает не так, как договорились, — исправлю бесплатно.</p></div>
+          <div class="g"><h3 data-i18n="g3_title">Поддержка 14 дней</h3><p data-i18n="g3_desc">После сдачи две недели отвечаю на вопросы и помогаю с настройкой.</p></div>
+          <div class="g"><h3 data-i18n="g4_title">Сроки честно</h3><p data-i18n="g4_desc">Называю реальные сроки и держу их. Если что-то меняется — предупреждаю заранее.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ОБО МНЕ + ОТЗЫВЫ -->
+    <section class="section" id="about">
+      <div class="wrap about">
         <div class="about-text">
-          <p data-i18n="about_p1">Я — <span class="accent">NAHA_AI</span>. Разрабатываю Telegram-ботов и пишу Python-скрипты для автоматизации бизнес-процессов.</p>
-          <p data-i18n="about_p2">Работаю быстро и по делу — без лишних слов и затянутых сроков. После сдачи объясняю, как пользоваться результатом, и остаюсь на связи.</p>
-          <div class="about-points">
-            <div class="point"><span class="point-icon">▸</span> <span data-i18n="ab1">Отвечаю в течение часа</span></div>
-            <div class="point"><span class="point-icon">▸</span> <span data-i18n="ab2">Сдаю в срок, простое — за 1–2 дня</span></div>
-            <div class="point"><span class="point-icon">▸</span> <span data-i18n="ab3">Код публикую на GitHub — можно проверить</span></div>
-            <div class="point"><span class="point-icon">▸</span> <span data-i18n="ab4">Даю инструкцию и поддержку после сдачи</span></div>
+          <span class="sec-idx">04</span>
+          <h2 data-i18n="nav_about">Обо мне</h2>
+          <p class="about-big" data-i18n="about_p1">Я Ахан, разработчик под ником NAHA. Пишу Telegram-ботов и Python-скрипты, которые снимают с бизнеса рутину.</p>
+          <p data-i18n="about_p2">Работаю быстро и по делу. Код публикую на GitHub — его можно проверить до заказа. После сдачи объясняю, как пользоваться результатом, и остаюсь на связи.</p>
+          <div class="about-links">
+            <a href="https://github.com/Naha11" target="_blank" rel="noopener">GitHub · Naha11</a>
+            <a href="https://kwork.ru/user/akhanali" target="_blank" rel="noopener">Kwork · akhanali</a>
           </div>
         </div>
-        <div class="terminal-box">
-          <div class="terminal-header">
-            <span class="dot red"></span>
-            <span class="dot yellow"></span>
-            <span class="dot green"></span>
-            <span class="terminal-title">naha_ai@dev:~$</span>
-          </div>
-          <div class="terminal-body" id="terminal-body">
-            <!-- заполняется JS -->
-          </div>
+
+        <div class="reviews">
+          <h3 class="reviews-title" data-i18n="rev_title">Отзывы</h3>
+          <div id="reviews-list" class="reviews-list"></div>
+          <p class="review-empty" id="review-empty" data-i18n="rev_empty">Отзывов пока нет. Если мы уже работали — буду рад вашему.</p>
+          <form class="review-form" id="review-form" novalidate>
+            <input type="text" id="review-name" class="field" data-i18n-ph="ph_rev_name" placeholder="Ваше имя" maxlength="50" aria-label="Имя" />
+            <textarea id="review-text" class="field" data-i18n-ph="ph_rev_text" placeholder="Ваш отзыв" maxlength="300" rows="3" aria-label="Отзыв"></textarea>
+            <div class="review-row">
+              <div class="stars-input" id="stars-input" role="radiogroup" aria-label="Оценка">
+                <button type="button" class="star-btn" data-star="1" aria-label="1">★</button>
+                <button type="button" class="star-btn" data-star="2" aria-label="2">★</button>
+                <button type="button" class="star-btn" data-star="3" aria-label="3">★</button>
+                <button type="button" class="star-btn" data-star="4" aria-label="4">★</button>
+                <button type="button" class="star-btn" data-star="5" aria-label="5">★</button>
+              </div>
+              <button type="submit" class="btn btn-sm btn-ghost" data-i18n="btn_review">Оставить отзыв</button>
+            </div>
+            <p class="form-error" id="review-error" role="alert"></p>
+          </form>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- КОНТАКТ -->
-  <section id="contact">
-    <div class="container contact-wrap">
-      <div class="section-header">
-        <span class="section-tag">11</span>
-        <h2 data-i18n="nav_contact">КОНТАКТ<span class="accent">.</span></h2>
-        <div class="section-line"></div>
+    <!-- ОПЛАТА -->
+    <section class="section" id="payment">
+      <div class="wrap">
+        <div class="sec-head">
+          <span class="sec-idx">05</span>
+          <h2 data-i18n="nav_payment">Оплата</h2>
+          <p class="sec-lead" data-i18n="payment_desc">50% до начала работы, остаток — после того как вы приняли результат.</p>
+        </div>
+        <div class="pay">
+          <div class="pay-row">
+            <div class="pay-name">Kaspi Gold</div>
+            <div class="pay-note" data-i18n="kaspi_desc">Перевод по номеру, без комиссии</div>
+            <code class="pay-val" id="kaspi-num">+7 705 743 1166</code>
+            <button class="copy-btn" data-copy="kaspi-num" data-i18n="copy_num">Скопировать</button>
+          </div>
+          <div class="pay-row">
+            <div class="pay-name">USDT · TRC20</div>
+            <div class="pay-note" data-i18n="usdt_desc">Криптовалюта в сети Tron</div>
+            <code class="pay-val" id="usdt-addr">TV9ah7JaXcjMLWejRrQ4xv8xKnAUs66y9K</code>
+            <button class="copy-btn" data-copy="usdt-addr" data-i18n="copy_addr">Скопировать</button>
+          </div>
+        </div>
+        <p class="pay-foot"><span data-i18n="payment_note">После оплаты пришлите скриншот в Telegram</span> — <a href="https://t.me/akhnnoname" target="_blank" rel="noopener">@akhnnoname</a></p>
       </div>
-      <p class="contact-desc" data-i18n="contact_desc">Напишите — обсудим задачу и я сообщу точную цену без лишних слов</p>
-      <div class="contact-links">
-        <a href="https://t.me/akhnnoname" class="contact-card" target="_blank">
-          <div class="contact-icon">✈</div>
-          <div>
-            <div class="contact-name">Telegram</div>
-            <div class="contact-val">@akhnnoname</div>
-          </div>
-        </a>
-        <a href="https://kwork.ru/user/akhanali" class="contact-card" target="_blank">
-          <div class="contact-icon">K</div>
-          <div>
-            <div class="contact-name">Kwork</div>
-            <div class="contact-val">akhanali</div>
-          </div>
-        </a>
-        <a href="https://github.com/Naha11" class="contact-card" target="_blank">
-          <div class="contact-icon">⌥</div>
-          <div>
-            <div class="contact-name">GitHub</div>
-            <div class="contact-val">Naha11</div>
-          </div>
-        </a>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <footer>
-    <div class="container footer-inner">
-      <span>© 2026 NAHA_AI</span>
-      <span class="accent">// Telegram-боты &amp; автоматизация</span>
+    <!-- FAQ -->
+    <section class="section" id="faq">
+      <div class="wrap faq">
+        <div class="faq-side">
+          <span class="sec-idx">06</span>
+          <h2 data-i18n="faq_title">Частые вопросы</h2>
+          <p class="sec-lead" data-i18n="faq_lead">Не нашли ответ — спросите в Telegram, это быстрее.</p>
+        </div>
+        <div class="faq-list">
+          <details><summary data-i18n="faq1_q">Какой срок выполнения?</summary><p data-i18n="faq1_a">Простые задачи — 1–2 дня. Боты со сложной логикой — до 5 дней. Сроки обговариваем заранее и фиксируем.</p></details>
+          <details><summary data-i18n="faq2_q">Нужна ли предоплата?</summary><p data-i18n="faq2_a">Да, 50% до начала работы. Остаток — после сдачи и вашего одобрения результата.</p></details>
+          <details><summary data-i18n="faq3_q">Что если результат не понравится?</summary><p data-i18n="faq3_a">Дорабатываю бесплатно, пока результат не совпадёт с тем, о чём договорились в начале.</p></details>
+          <details><summary data-i18n="faq4_q">Можно ли добавить функции позже?</summary><p data-i18n="faq4_a">Да. Доработки обсуждаем отдельно — объём и стоимость зависят от задачи.</p></details>
+          <details><summary data-i18n="faq5_q">Работаете с зарубежными клиентами?</summary><p data-i18n="faq5_a">Да, принимаю USDT (TRC20). Работаю полностью удалённо — ваша страна не важна.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЗАЯВКА -->
+    <section class="section cta" id="contact">
+      <div class="wrap cta-grid">
+        <div>
+          <h2 class="cta-title" data-i18n="order_title">Расскажите, что нужно автоматизировать</h2>
+          <p class="sec-lead" data-i18n="order_desc">Отвечу в течение часа и назову точную цену.</p>
+          <ul class="cta-contacts">
+            <li><a href="https://t.me/akhnnoname" target="_blank" rel="noopener"><span>Telegram</span>@akhnnoname</a></li>
+            <li><a href="https://kwork.ru/user/akhanali" target="_blank" rel="noopener"><span>Kwork</span>akhanali</a></li>
+            <li><a href="https://github.com/Naha11" target="_blank" rel="noopener"><span>GitHub</span>Naha11</a></li>
+          </ul>
+        </div>
+        <form class="order" id="order-form" novalidate>
+          <label for="order-name" data-i18n="l_name">Как вас зовут</label>
+          <input type="text" id="order-name" class="field" data-i18n-ph="ph_name" placeholder="Имя" autocomplete="name" />
+          <label for="order-task" data-i18n="l_task">Задача</label>
+          <textarea id="order-task" class="field" rows="4" data-i18n-ph="ph_task" placeholder="Например: бот для записи в салон, 3 мастера, напоминания клиентам"></textarea>
+          <p class="form-error" id="order-error" role="alert"></p>
+          <button type="submit" class="btn btn-accent btn-block">
+            <span data-i18n="btn_send">Отправить в Telegram</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h11M11 5l5 5-5 5" /></svg>
+          </button>
+          <p class="order-note" data-i18n="order_note">Откроется Telegram с готовым сообщением — останется нажать «Отправить».</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>© 2026 NAHA</span>
+      <span data-i18n="footer">Telegram-боты и автоматизация</span>
+      <a href="#top" data-i18n="to_top">Наверх ↑</a>
     </div>
   </footer>
 
-  <!-- КНОПКА НАВЕРХ -->
-  <button id="scroll-top" aria-label="Наверх">↑</button>
-
   <script src="script.js"></script>
-
-  <!-- TIDIO AI SUPPORT -->
   <script src="//code.tidio.co/hhwno1ahppxm68rvugwnu0ctvgkw2mnr.js" async></script>
 </body>
 </html>

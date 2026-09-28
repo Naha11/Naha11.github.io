@@ -244,35 +244,82 @@ $('#theme-toggle')?.addEventListener('click', () => {
   document.documentElement.dataset.theme = next;
   store.set('naha_theme', next);
   sound.rustle(.06);
-  buildLand();
   leaves.burst(isMobile ? 8 : 16);
 });
 
-/* ─── ЛИСТ (общая отрисовка) ───────────────────────────────────────────── */
+/* ─── РЕАЛИСТИЧНЫЕ ЛИСТЬЯ (спрайты рисуются один раз) ──────────────────── */
+const LEAF_PAL = [
+  ['#f8d85a', '#d69a14', '#8a5a08'], ['#f2c230', '#c47f10', '#7a4a06'],   // жёлтые
+  ['#b8cf62', '#6f8f2a', '#3e5512'], ['#9cbc4a', '#56741c', '#2f440c'],   // зелёные
+  ['#e8563a', '#a8261c', '#5e120b'], ['#d2402a', '#8e1f16', '#4a0d08'],   // красные
+  ['#f3a043', '#c4591c', '#6e2a0a'],                                      // оранжевый
+];
 function leafPath(ctx, shape, s) {
   ctx.beginPath();
-  if (shape === 0) { // овальный
-    ctx.moveTo(0, -s);
-    ctx.bezierCurveTo(s * .75, -s * .45, s * .6, s * .5, 0, s);
-    ctx.bezierCurveTo(-s * .6, s * .5, -s * .75, -s * .45, 0, -s);
-  } else if (shape === 1) { // клён
-    const pts = [[0,-1],[.18,-.55],[.5,-.72],[.42,-.32],[.95,-.3],[.6,.05],[.78,.3],[.3,.25],[.12,.6],[0,.5],[-.12,.6],[-.3,.25],[-.78,.3],[-.6,.05],[-.95,-.3],[-.42,-.32],[-.5,-.72],[-.18,-.55]];
+  if (shape === 0) { // кленовый
+    const pts = [[0,-1],[.13,-.62],[.34,-.8],[.36,-.5],[.62,-.62],[.52,-.34],[.95,-.32],[.72,-.12],[.86,.06],[.56,.12],[.66,.36],[.3,.26],[.14,.52],[.05,.44],[0,.56],[-.05,.44],[-.14,.52],[-.3,.26],[-.66,.36],[-.56,.12],[-.86,.06],[-.72,-.12],[-.95,-.32],[-.52,-.34],[-.62,-.62],[-.36,-.5],[-.34,-.8],[-.13,-.62]];
     pts.forEach(([x, y], i) => i ? ctx.lineTo(x * s, y * s) : ctx.moveTo(x * s, y * s));
     ctx.closePath();
-  } else { // берёзовый
+  } else if (shape === 1) { // дубовый
     ctx.moveTo(0, -s);
-    ctx.quadraticCurveTo(s * .9, -s * .1, 0, s * .8);
-    ctx.quadraticCurveTo(-s * .9, -s * .1, 0, -s);
+    const side = k => {
+      const lobes = 4;
+      for (let i = 1; i <= lobes; i++) {
+        const y0 = -s + (i - .5) * (1.75 * s / lobes), y1 = -s + i * (1.75 * s / lobes);
+        const w = s * (.28 + .22 * Math.sin(i / lobes * Math.PI));
+        ctx.quadraticCurveTo(k * w * 1.25, y0 - s * .08, k * w * .55, y1 - s * .02);
+      }
+      ctx.lineTo(0, s * .8);
+    };
+    side(1); ctx.moveTo(0, -s); side(-1);
+  } else { // берёзовый / липовый
+    ctx.moveTo(0, -s);
+    ctx.bezierCurveTo(s * .72, -s * .55, s * .78, s * .35, 0, s * .78);
+    ctx.bezierCurveTo(-s * .78, s * .35, -s * .72, -s * .55, 0, -s);
   }
 }
-function drawLeaf(ctx, x, y, s, rot, flip, color, shape, alpha = 1) {
+const leafSprites = (() => {
+  const SIZE = 128, list = [];
+  const canBlur = (() => { try { const c = document.createElement('canvas').getContext('2d'); c.filter = 'blur(2px)'; return c.filter === 'blur(2px)'; } catch { return false; } })();
+  for (const pal of LEAF_PAL) for (let shape = 0; shape < 3; shape++) {
+    const cv = document.createElement('canvas'); cv.width = cv.height = SIZE;
+    const c = cv.getContext('2d'), s = SIZE * .42;
+    c.translate(SIZE / 2, SIZE / 2);
+    // черешок
+    c.strokeStyle = pal[2]; c.lineWidth = 2.2; c.lineCap = 'round';
+    c.beginPath(); c.moveTo(0, s * .5); c.quadraticCurveTo(s * .06, s * .8, -s * .04, s * 1.1); c.stroke();
+    c.save(); leafPath(c, shape, s); c.clip();
+    const g = c.createLinearGradient(-s, -s, s, s);
+    g.addColorStop(0, pal[0]); g.addColorStop(.55, pal[1]); g.addColorStop(1, pal[2]);
+    c.fillStyle = g; c.fillRect(-s * 1.2, -s * 1.2, s * 2.4, s * 2.4);
+    for (let i = 0; i < 14; i++) { // пятна и неоднородность
+      c.fillStyle = Math.random() < .5 ? `rgba(80,30,5,${rand(.06, .16)})` : `rgba(255,235,160,${rand(.05, .14)})`;
+      c.beginPath(); c.ellipse(rand(-s, s), rand(-s, s), rand(2, s * .35), rand(2, s * .25), rand(0, 3), 0, 6.28); c.fill();
+    }
+    c.strokeStyle = 'rgba(255,240,190,.35)'; c.lineWidth = 1.4; // прожилки
+    c.beginPath(); c.moveTo(0, s * .55); c.lineTo(0, -s * .92); c.stroke();
+    c.lineWidth = .9;
+    const veins = shape === 0 ? [[-.9, -.3], [.9, -.3], [-.62, .36], [.62, .36], [-.34, -.8], [.34, -.8]] : [[-.55, -.55], [.55, -.55], [-.62, -.15], [.62, -.15], [-.55, .25], [.55, .25]];
+    veins.forEach(([x, y]) => { c.beginPath(); c.moveTo(0, shape === 0 ? s * .2 : y * s + s * .25); c.quadraticCurveTo(x * s * .4, y * s * .9 + s * .1, x * s * .85, y * s); c.stroke(); });
+    const hl = c.createLinearGradient(-s, 0, s, 0); // объём: свет слева, тень справа
+    hl.addColorStop(0, 'rgba(255,255,255,.16)'); hl.addColorStop(.5, 'rgba(255,255,255,0)'); hl.addColorStop(1, 'rgba(40,15,0,.22)');
+    c.fillStyle = hl; c.fillRect(-s * 1.2, -s * 1.2, s * 2.4, s * 2.4);
+    c.restore();
+    c.save(); leafPath(c, shape, s); c.strokeStyle = 'rgba(50,20,5,.45)'; c.lineWidth = 1.2; c.stroke(); c.restore();
+    let blur = cv;
+    if (canBlur) {
+      blur = document.createElement('canvas'); blur.width = blur.height = SIZE;
+      const b = blur.getContext('2d'); b.filter = 'blur(3px)'; b.drawImage(cv, 0, 0);
+    }
+    list.push({ sharp: cv, blur });
+  }
+  return list;
+})();
+function drawLeafSprite(ctx, spr, x, y, size, rot, flip, alpha, blurred) {
   ctx.save();
   ctx.translate(x, y); ctx.rotate(rot); ctx.scale(flip, 1);
-  ctx.globalAlpha = alpha;
-  leafPath(ctx, shape, s);
-  ctx.fillStyle = color; ctx.fill();
-  ctx.strokeStyle = 'rgba(40,20,5,.35)'; ctx.lineWidth = Math.max(.6, s * .06);
-  ctx.beginPath(); ctx.moveTo(0, -s * .8); ctx.lineTo(0, s * (shape === 1 ? .9 : 1.15)); ctx.stroke();
+  ctx.globalAlpha = alpha * (.62 + .38 * Math.abs(flip));
+  ctx.drawImage(blurred ? spr.blur : spr.sharp, -size / 2, -size / 2, size, size);
   ctx.restore();
 }
 
@@ -281,7 +328,7 @@ const leaves = (() => {
   const cv = $('#leaves'); const ctx = cv.getContext('2d');
   let W, H, dpr, list = [], running = false, last = 0, wind = 0, scrollV = 0, lastY = scrollY;
   const mouse = { x: -999, y: -999 };
-  const COUNT = reduceMotion ? 0 : isMobile ? 12 : 24;
+  const COUNT = reduceMotion ? 0 : isMobile ? 12 : 22;
   function resize() {
     dpr = Math.min(devicePixelRatio || 1, 1.5);
     W = innerWidth; H = innerHeight;
@@ -289,12 +336,13 @@ const leaves = (() => {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   function make(top) {
+    const near = Math.random() < .12;
     return {
-      x: rand(-40, W + 40), y: top ? rand(-H * .3, -20) : rand(-H, H),
-      s: rand(7, isMobile ? 13 : 16), c: pick(LEAF_COLORS), shape: (Math.random() * 3) | 0,
-      vy: rand(28, 60), sway: rand(20, 55), ph: rand(0, 6.28), phs: rand(.8, 1.8),
-      rot: rand(0, 6.28), vr: rand(-1.5, 1.5), flipPh: rand(0, 6.28), flipS: rand(1.5, 3.5),
-      vx: 0, a: rand(.65, .95),
+      x: rand(-40, W + 40), y: top ? rand(-H * .3, -30) : rand(-H, H),
+      s: near ? rand(46, 70) : rand(18, isMobile ? 30 : 36), near, spr: pick(leafSprites),
+      vy: near ? rand(70, 110) : rand(30, 62), sway: rand(24, 60), ph: rand(0, 6.28), phs: rand(.7, 1.6),
+      rot: rand(0, 6.28), vr: rand(-1.4, 1.4), flipPh: rand(0, 6.28), flipS: rand(1.4, 3.2),
+      vx: 0, a: near ? .75 : rand(.8, .95),
     };
   }
   function frame(ts) {
@@ -309,12 +357,12 @@ const leaves = (() => {
       if (d2 < 9000) { const d = Math.sqrt(d2) || 1; l.vx += dx / d * 220 * dt; l.vr += (Math.random() - .5) * 6 * dt; }
       l.vx *= .96;
       l.x += (Math.sin(l.ph) * l.sway + wind + l.vx) * dt;
-      l.y += (l.vy + scrollV * -.6) * dt;
+      l.y += (l.vy + scrollV * (l.near ? -1 : -.6)) * dt;
       l.rot += (l.vr + Math.cos(l.ph) * .8) * dt;
-      if (l.y > H + 30) Object.assign(l, make(true), { y: -20 });
-      if (l.y < -H * .4) l.y = H + 20;
-      if (l.x < -60) l.x = W + 50; else if (l.x > W + 60) l.x = -50;
-      drawLeaf(ctx, l.x, l.y, l.s, l.rot, Math.cos(l.flipPh), l.c, l.shape, l.a);
+      if (l.y > H + 60) Object.assign(l, make(true), { y: -40 });
+      if (l.y < -H * .4) l.y = H + 40;
+      if (l.x < -80) l.x = W + 70; else if (l.x > W + 80) l.x = -70;
+      drawLeafSprite(ctx, l.spr, l.x, l.y, l.s, l.rot, Math.cos(l.flipPh), l.a, l.near);
     }
     requestAnimationFrame(frame);
   }
@@ -340,15 +388,16 @@ const leaves = (() => {
   };
 })();
 
-/* ─── ПРЕЛОАДЕР: ПРОХОД ПО ОСЕННЕЙ АЛЛЕЕ ───────────────────────────────── */
+/* ─── ПРЕЛОАДЕР: ШАГ В ОСЕННИЙ ПАРК (фото + WebGL) ─────────────────────── */
 function runIntro(done) {
   const loader = $('#loader');
+  let finished = false;
   const finish = () => {
-    if (!loader || loader.classList.contains('is-done')) return;
+    if (finished) return; finished = true;
     loader.classList.add('is-done');
     document.body.classList.remove('is-loading');
     store.sset('naha_intro', '1');
-    setTimeout(() => loader.remove(), 1200);
+    setTimeout(() => loader.remove(), 1300);
     done();
   };
   if (!loader) return done();
@@ -356,205 +405,132 @@ function runIntro(done) {
   document.body.classList.add('is-loading');
   $('#loader-skip').addEventListener('click', finish);
 
-  const cv = $('#loader-canvas'); const ctx = cv.getContext('2d');
-  let W, H, dpr, hy, cx, K;
+  const glc = $('#loader-gl'), lc = $('#loader-leaves'), lctx = lc.getContext('2d');
+  const gl = glc.getContext('webgl', { antialias: false, premultipliedAlpha: false });
+  const img = new Image();
+  img.src = innerWidth < 900 ? 'img/autumn-sm.jpg' : 'img/autumn.jpg';
+  const bail = setTimeout(finish, 6000); // если фото не загрузилось — сразу на сайт
+
+  let W, H, dpr;
   function resize() {
     dpr = Math.min(devicePixelRatio || 1, 1.5);
     W = innerWidth; H = innerHeight;
-    cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    hy = H * .5; cx = W / 2; K = Math.min(W, H * 1.2) * .55;
+    lc.width = W * dpr; lc.height = H * dpr; lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const q = isMobile ? 1 : Math.min(dpr, 1.25);
+    glc.width = W * q; glc.height = H * q;
+    if (gl) gl.viewport(0, 0, glc.width, glc.height);
   }
   resize(); addEventListener('resize', resize);
 
-  const CAM = .55, FAR = 14;
-  const proj = (x, y, z) => ({ x: cx + x * K / z, y: hy + (CAM - y) * K / z, s: K / z });
+  const vs = 'attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}';
+  const fs = `precision highp float;
+varying vec2 v;uniform sampler2D img;uniform vec2 res;uniform float ia,t,z,e;
+float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
+float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*n(p);p*=2.03;a*=.5;}return s;}
+void main(){
+ float sa=res.x/res.y;vec2 iuv=v;
+ if(sa>ia)iuv.y=.5+(v.y-.5)*ia/sa;else iuv.x=(sa<1.?.72:.5)+(v.x-.5)*sa/ia;
+ vec2 vp=vec2(.31,.74);
+ float d=clamp(distance(iuv,vp)*1.5,0.,1.);
+ iuv=vp+(iuv-vp)/(1.+z*(.16+.8*d*d));
+ iuv.y+=sin(t*5.6)*.0022*(1.-e);iuv.x+=sin(t*2.8)*.0014*(1.-e);
+ float can=smoothstep(.66,.18,iuv.y);
+ iuv+=can*.0018*vec2(n(iuv*16.+t*.9)-.5,n(iuv*16.-t*.7+3.)-.5);
+ float wm=smoothstep(.665,.7,iuv.x)*smoothstep(.975,.94,iuv.x)*smoothstep(.685,.72,iuv.y)*smoothstep(1.,.965,iuv.y);
+ iuv.x+=wm*sin(iuv.y*230.-t*2.3)*.0017;
+ iuv.y+=wm*sin(iuv.x*150.+t*1.7)*.0011;
+ vec3 c=texture2D(img,clamp(iuv,.001,.999)).rgb;
+ float lum=dot(c,vec3(.299,.587,.114));
+ float sp=pow(n(iuv*vec2(170.,560.)+vec2(t*.5,t*1.6)),16.)*wm;
+ c+=vec3(1.,.9,.7)*sp*3.*smoothstep(.35,.85,lum);
+ vec2 sun=vec2(.775,.5);vec2 dv=(iuv-sun)*vec2(ia,1.);float ds=length(dv);float an=atan(dv.y,dv.x);
+ float rays=pow(n(vec2(an*8.,t*.22)),3.)*.9+pow(n(vec2(an*21.+3.,-t*.18)),4.)*.6;
+ c+=vec3(1.,.76,.42)*rays*smoothstep(1.1,0.,ds)*.2;
+ c+=vec3(1.,.8,.5)*smoothstep(.4,0.,ds)*(.1+.04*sin(t*1.3));
+ float fog=fbm(vec2(iuv.x*3.-t*.06,iuv.y*7.+t*.02))*smoothstep(.5,.95,iuv.y);
+ c=mix(c,vec3(1.,.86,.64),fog*.16);
+ c=pow(c,vec3(.96))*vec3(1.05,1.,.93);
+ c*=mix(.5,1.,smoothstep(1.2,.3,distance(v,vec2(.5))));
+ c*=smoothstep(0.,1.1,t);
+ c=mix(c,vec3(1.,.95,.86),e*smoothstep(1.6,0.,ds)*e);
+ gl_FragColor=vec4(c,1.);}`;
 
-  const canopyPalettes = [
-    ['#e8b632', '#f2c230', '#d9a21b', '#c98a18'],
-    ['#c0392b', '#a8261c', '#d4462f', '#e0812f'],
-    ['#e0812f', '#d0681f', '#e8b632', '#c0392b'],
-    ['#7a9a3c', '#8fb043', '#e8b632', '#a3b94c'],
-    ['#d4462f', '#e8b632', '#e0812f', '#8e1f16'],
+  let prog = null, U = {};
+  if (gl) {
+    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
+    prog = gl.createProgram();
+    gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
+    gl.linkProgram(prog);
+    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) prog = null;
+  }
+  if (prog) {
+    gl.useProgram(prog);
+    const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+    ['img', 'res', 'ia', 't', 'z', 'e'].forEach(k => { U[k] = gl.getUniformLocation(prog, k); });
+  }
+
+  // листья сцены: дальние, средние и ближние размытые
+  const VPX = .31, VPY = .7;
+  const mk = layer => ({
+    layer, x: rand(-.1, 1.1), y: rand(-1.1, 1), spr: pick(leafSprites),
+    s: layer === 2 ? rand(70, 110) : layer === 1 ? rand(26, 44) : rand(10, 18),
+    vy: layer === 2 ? rand(.16, .26) : layer === 1 ? rand(.08, .14) : rand(.04, .07),
+    ph: rand(0, 6.28), rot: rand(0, 6.28), vr: rand(-1.8, 1.8), f: rand(0, 6.28), fs: rand(1.6, 3.4),
+  });
+  const air = [
+    ...Array.from({ length: isMobile ? 14 : 26 }, () => mk(0)),
+    ...Array.from({ length: isMobile ? 10 : 18 }, () => mk(1)),
+    ...Array.from({ length: isMobile ? 2 : 4 }, () => mk(2)),
   ];
-  function makeTree(side, z) {
-    const pal = pick(canopyPalettes);
-    const blobs = Array.from({ length: 9 }, (_, i) => ({
-      x: rand(-.75, .75), y: rand(-.45, .55) + (i < 3 ? -.2 : 0), r: rand(.38, .62), c: pick(pal), sh: i < 4,
-    }));
-    return { side, x: side * rand(1.35, 2.2), z, h: rand(2.1, 2.9), w: rand(.09, .14), blobs, lean: rand(-.08, .08) };
-  }
-  const trees = [];
-  for (let z = 1; z < FAR; z += 1.05) { trees.push(makeTree(-1, z + rand(0, .4))); trees.push(makeTree(1, z + rand(.3, .8))); }
-  const ground = Array.from({ length: 180 }, () => ({ x: rand(-3.2, 3.2), z: rand(.4, FAR), c: pick(LEAF_COLORS), r: rand(.03, .07), a: rand(0, 6.28) }));
-  const pond = { x: -3.05, z: 6.5, rw: 1.5, rd: 1.1 };
-  const air = Array.from({ length: isMobile ? 26 : 50 }, () => ({
-    x: rand(0, 1), y: rand(-1, 1), s: rand(5, 16), c: pick(LEAF_COLORS), shape: (Math.random() * 3) | 0,
-    vy: rand(.05, .14), ph: rand(0, 6.28), rot: rand(0, 6.28), vr: rand(-2, 2), f: rand(0, 6.28), fs: rand(2, 4),
-  }));
-  const hills = Array.from({ length: 40 }, (_, i) => ({ u: i / 39, h: rand(.02, .07), c: pick(['#b8652a', '#a4502a', '#8c6a2a', '#9a3a26', '#7d7a35']) }));
 
-  const DUR = 5200;
-  let t0 = performance.now(), last = t0, camZ = 0, alive = true;
-
-  function fog(z) { return clamp((z - 2) / (FAR - 2), 0, 1); }
-  function sky() {
-    const g = ctx.createLinearGradient(0, 0, 0, hy);
-    g.addColorStop(0, '#3a2438'); g.addColorStop(.45, '#a4483a'); g.addColorStop(.8, '#eaa057'); g.addColorStop(1, '#f7d08a');
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, hy + 2);
-    const sun = ctx.createRadialGradient(cx, hy - H * .02, 0, cx, hy - H * .02, H * .5);
-    sun.addColorStop(0, 'rgba(255,240,200,.95)'); sun.addColorStop(.15, 'rgba(255,205,130,.55)'); sun.addColorStop(1, 'rgba(255,170,90,0)');
-    ctx.fillStyle = sun; ctx.fillRect(0, 0, W, H);
-  }
-  function distant() {
-    ctx.fillStyle = 'rgba(150,70,45,.55)';
-    ctx.beginPath(); ctx.moveTo(0, hy);
-    for (const h of hills) { const x = h.u * W; ctx.lineTo(x, hy - h.h * H * (Math.abs(h.u - .5) < .08 ? .3 : 1)); }
-    ctx.lineTo(W, hy); ctx.fill();
-    for (const h of hills) {
-      if (Math.abs(h.u - .5) < .08) continue;
-      ctx.fillStyle = h.c + 'aa';
-      ctx.beginPath(); ctx.arc(h.u * W, hy - h.h * H, h.h * H * .55, 0, 6.28); ctx.fill();
-    }
-  }
-  function groundDraw() {
-    const g = ctx.createLinearGradient(0, hy, 0, H);
-    g.addColorStop(0, '#8a5a30'); g.addColorStop(.25, '#5a3a1e'); g.addColorStop(1, '#2a1a0e');
-    ctx.fillStyle = g; ctx.fillRect(0, hy, W, H - hy);
-    // тропа
-    const a = proj(-.7, 0, FAR), b = proj(.7, 0, FAR), c = proj(1.1, 0, .35), d = proj(-1.1, 0, .35);
-    const pg = ctx.createLinearGradient(0, hy, 0, H);
-    pg.addColorStop(0, 'rgba(240,200,140,.6)'); pg.addColorStop(1, 'rgba(160,110,60,.55)');
-    ctx.fillStyle = pg; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c.x, c.y); ctx.lineTo(d.x, d.y); ctx.fill();
-  }
-  function groundLeaves() {
-    for (const p of ground) {
-      const zz = ((p.z - camZ) % FAR + FAR) % FAR; if (zz < .35) continue;
-      const q = proj(p.x, 0, zz); if (q.y > H + 10) continue;
-      ctx.globalAlpha = 1 - fog(zz) * .8;
-      ctx.fillStyle = p.c;
-      ctx.beginPath(); ctx.ellipse(q.x, q.y, p.r * q.s, p.r * q.s * .45, p.a, 0, 6.28); ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-  }
-  function pondDraw(time) {
-    const z = pond.z - camZ; if (z < .3 || z > FAR) return;
-    const back = proj(pond.x, 0, z + pond.rd), front = proj(pond.x, 0, Math.max(.3, z - pond.rd)), mid = proj(pond.x, 0, z);
-    const rx = pond.rw * mid.s, ry = Math.max(4, (front.y - back.y) / 2), cy = (front.y + back.y) / 2;
-    ctx.save();
-    ctx.globalAlpha = 1 - fog(z) * .7;
-    ctx.beginPath(); ctx.ellipse(mid.x, cy, rx * 1.08, ry * 1.18, 0, 0, 6.28); ctx.fillStyle = '#3b2a17'; ctx.fill();
-    ctx.beginPath(); ctx.ellipse(mid.x, cy, rx, ry, 0, 0, 6.28); ctx.clip();
-    const wg = ctx.createLinearGradient(0, cy - ry, 0, cy + ry);
-    wg.addColorStop(0, '#f3c27a'); wg.addColorStop(.5, '#b8583a'); wg.addColorStop(1, '#3d2638');
-    ctx.fillStyle = wg; ctx.fillRect(mid.x - rx, cy - ry, rx * 2, ry * 2);
-    ctx.strokeStyle = 'rgba(255,235,200,.45)'; ctx.lineWidth = 1.2;
-    for (let i = 0; i < 7; i++) { // блики на воде
-      const yy = cy - ry + (i + .5) / 7 * ry * 2, sh = Math.sin(time / 600 + i * 1.7) * rx * .25;
-      ctx.beginPath(); ctx.moveTo(mid.x - rx * .5 + sh, yy); ctx.lineTo(mid.x - rx * .1 + sh, yy); ctx.stroke();
-    }
-    for (let k = 0; k < 3; k++) { // круги от упавших листьев
-      const ph = ((time / 1800) + k / 3) % 1, px = mid.x + Math.sin(k * 2.3) * rx * .45, py = cy + Math.cos(k * 1.7) * ry * .35;
-      ctx.strokeStyle = `rgba(255,240,215,${.5 * (1 - ph)})`;
-      ctx.beginPath(); ctx.ellipse(px, py, ph * rx * .35, ph * ry * .35, 0, 0, 6.28); ctx.stroke();
-    }
-    ['#e8b632', '#c0392b', '#7a9a3c'].forEach((c, k) => { // листья на воде
-      const px = mid.x + Math.sin(time / 2400 + k * 2) * rx * .5, py = cy + Math.cos(time / 3000 + k) * ry * .4;
-      drawLeaf(ctx, px, py, mid.s * .07, time / 3000 + k, .45, c, k % 3);
-    });
-    ctx.restore();
-  }
-  function treeDraw(tr, time) {
-    const z = tr.z; if (z < .25) return;
-    const base = proj(tr.x, 0, z), top = proj(tr.x + tr.lean, tr.h, z);
-    const f = fog(z), sway = Math.sin(time / 900 + tr.x * 3) * .04;
-    ctx.globalAlpha = 1 - f * .75;
-    ctx.strokeStyle = '#2e1d10'; ctx.lineCap = 'round'; ctx.lineWidth = tr.w * base.s;
-    ctx.beginPath(); ctx.moveTo(base.x, base.y); ctx.quadraticCurveTo(base.x, (base.y + top.y) / 2, top.x, top.y); ctx.stroke();
-    ctx.lineWidth = tr.w * base.s * .4;
-    ctx.beginPath(); ctx.moveTo(lerp(base.x, top.x, .6), lerp(base.y, top.y, .6)); ctx.lineTo(top.x - tr.side * .5 * base.s, top.y - .1 * base.s); ctx.stroke();
-    for (const b of tr.blobs) {
-      const x = top.x + (b.x + sway) * base.s, y = top.y + b.y * base.s;
-      ctx.fillStyle = b.c;
-      ctx.beginPath(); ctx.arc(x, y, b.r * base.s, 0, 6.28); ctx.fill();
-      if (b.sh) { ctx.fillStyle = 'rgba(40,15,5,.22)'; ctx.beginPath(); ctx.arc(x + b.r * base.s * .25, y + b.r * base.s * .3, b.r * base.s * .7, 0, 6.28); ctx.fill(); }
-    }
-    ctx.globalAlpha = 1;
-  }
-  function airDraw(dt) {
-    for (const l of air) {
-      l.ph += dt * 1.3; l.f += l.fs * dt; l.rot += l.vr * dt;
-      l.y += l.vy * dt; l.x += Math.sin(l.ph) * .03 * dt + (l.x - .5) * .12 * dt;
-      if (l.y > 1.1) { l.y = -.1; l.x = rand(0, 1); }
-      drawLeaf(ctx, l.x * W, l.y * H, l.s * (isMobile ? .8 : 1), l.rot, Math.cos(l.f), l.c, l.shape, .95);
-    }
-  }
+  const DUR = 6200;
+  let t0, last, alive = true;
   function frame(now) {
     if (!alive) return;
-    const el = now - t0, dt = Math.min(.05, (now - last) / 1000); last = now;
-    const p = el / DUR;
-    const speed = p < .7 ? 2.2 : 2.2 + Math.pow((p - .7) / .3, 2) * 14;
-    camZ += speed * dt;
-    for (const tr of trees) { tr.z -= speed * dt; if (tr.z < .25) Object.assign(tr, makeTree(tr.side, tr.z + FAR)); }
-    trees.sort((a, b) => b.z - a.z);
-    sky(); distant(); groundDraw(); groundLeaves();
-    const pz = pond.z - camZ;
-    let pondDone = false;
-    for (const tr of trees) {
-      if (!pondDone && tr.z < pz) { pondDraw(now); pondDone = true; }
-      treeDraw(tr, now);
+    const el = now - t0, p = clamp(el / DUR, 0, 1), dt = Math.min(.05, (now - last) / 1000); last = now;
+    const z = p < .72 ? p / .72 * .55 : .55 + Math.pow((p - .72) / .28, 2) * 1.6;
+    const e = clamp((p - .76) / .24, 0, 1);
+    if (prog) {
+      gl.uniform2f(U.res, glc.width, glc.height); gl.uniform1f(U.ia, img.width / img.height);
+      gl.uniform1f(U.t, el / 1000); gl.uniform1f(U.z, z); gl.uniform1f(U.e, e);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
-    if (!pondDone) pondDraw(now);
-    airDraw(dt);
-    // виньетка
-    const v = ctx.createRadialGradient(cx, H * .55, H * .2, cx, H * .55, H * .95);
-    v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(20,8,2,.55)');
-    ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
-    // вход в свет
-    if (p > .72) {
-      const k = clamp((p - .72) / .28, 0, 1);
-      const r = ctx.createRadialGradient(cx, hy, 0, cx, hy, Math.max(W, H) * (.1 + k * 1.2));
-      r.addColorStop(0, `rgba(255,244,220,${k})`); r.addColorStop(1, 'rgba(255,220,160,0)');
-      ctx.fillStyle = r; ctx.fillRect(0, 0, W, H);
+    lctx.clearRect(0, 0, W, H);
+    const push = .08 + z * .5;
+    for (const l of air) {
+      l.ph += dt * 1.2; l.f += l.fs * dt; l.rot += l.vr * dt;
+      l.y += l.vy * dt;
+      l.x += (Math.sin(l.ph) * .04 - .02) * dt + (l.x - VPX) * push * dt * (l.layer + 1) * .5;
+      l.y += (l.y - VPY) * push * dt * (l.layer + 1) * .25;
+      if (l.y > 1.15 || l.x < -.2 || l.x > 1.2) Object.assign(l, mk(l.layer), { y: rand(-.2, -.05) });
+      drawLeafSprite(lctx, l.spr, l.x * W, l.y * H, l.s * (isMobile ? .75 : 1) * (1 + z * .4 * l.layer), l.rot, Math.cos(l.f),
+        l.layer === 0 ? .8 : .95, l.layer === 2);
     }
     if (el >= DUR) { alive = false; finish(); return; }
     requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
-}
-
-/* ─── HERO: ПЕЙЗАЖ ─────────────────────────────────────────────────────── */
-function buildLand() {
-  const host = $('#hero-land'); if (!host) return;
-  const light = isLight();
-  const cs = getComputedStyle(document.documentElement);
-  const L1 = cs.getPropertyValue('--land-1').trim(), L2 = cs.getPropertyValue('--land-2').trim(), L3 = cs.getPropertyValue('--land-3').trim();
-  const W = 1440, H = 400;
-  let seed = 7; const r = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const hill = (base, amp, freq, ph) => {
-    let d = `M0 ${H} L0 ${base}`;
-    for (let x = 0; x <= W; x += 40) d += ` L${x} ${(base + Math.sin(x / freq + ph) * amp + Math.sin(x / (freq * .37) + ph * 2) * amp * .35).toFixed(1)}`;
-    return d + ` L${W} ${H} Z`;
-  };
-  const yAt = (base, amp, freq, ph, x) => base + Math.sin(x / freq + ph) * amp + Math.sin(x / (freq * .37) + ph * 2) * amp * .35;
-  const trees = (base, amp, freq, ph, n, size, op) => {
-    let g = '';
-    for (let i = 0; i < n; i++) {
-      const x = r() * W, y = yAt(base, amp, freq, ph, x) + 4, s = size * (.7 + r() * .6);
-      const c = pick(LEAF_COLORS), c2 = pick(LEAF_COLORS);
-      g += `<g class="tr" style="animation-delay:${(-r() * 5).toFixed(2)}s;opacity:${op}">
-        <rect x="${(x - s * .06).toFixed(1)}" y="${(y - s * 1.1).toFixed(1)}" width="${(s * .12).toFixed(1)}" height="${(s * 1.1).toFixed(1)}" fill="${light ? '#8a6a4a' : '#2a1c10'}"/>
-        <circle cx="${x.toFixed(1)}" cy="${(y - s * 1.35).toFixed(1)}" r="${(s * .55).toFixed(1)}" fill="${c}"/>
-        <circle cx="${(x - s * .3).toFixed(1)}" cy="${(y - s * 1.1).toFixed(1)}" r="${(s * .38).toFixed(1)}" fill="${c2}"/>
-        <circle cx="${(x + s * .32).toFixed(1)}" cy="${(y - s * 1.12).toFixed(1)}" r="${(s * .4).toFixed(1)}" fill="${c}" opacity=".85"/>
-      </g>`;
+  img.onload = () => {
+    clearTimeout(bail);
+    if (prog) {
+      const tex = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, tex);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.uniform1i(U.img, 0);
+    } else {
+      glc.replaceWith(Object.assign(img, { className: 'loader-fallback', alt: '' }));
     }
-    return g;
+    loader.classList.add('is-ready');
+    t0 = last = performance.now();
+    requestAnimationFrame(frame);
   };
-  host.innerHTML = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice">
-    <g class="layer" data-depth=".08">${trees(190, 22, 210, 1, 26, 34, light ? .55 : .5)}<path d="${hill(190, 22, 210, 1)}" fill="${L1}"/></g>
-    <g class="layer" data-depth=".16">${trees(260, 26, 170, 3, 20, 52, light ? .75 : .7)}<path d="${hill(260, 26, 170, 3)}" fill="${L2}"/></g>
-    <g class="layer" data-depth=".26">${trees(335, 18, 260, 5, 9, 78, light ? .9 : .85)}<path d="${hill(335, 18, 260, 5)}" fill="${L3}"/></g>
-  </svg>`;
+  img.onerror = () => { clearTimeout(bail); finish(); };
 }
 
 /* ─── HERO: ШЕЙДЕР-АУРА ────────────────────────────────────────────────── */
@@ -785,12 +761,12 @@ function startPointerFx() {
 /* ─── ПАРАЛЛАКС ПЕЙЗАЖА И ЛИНИЯ ПРОЦЕССА ───────────────────────────────── */
 function startScrollFx() {
   const steps = $('.steps'), stepEls = $$('.step');
-  const topbar = $('#topbar');
+  const topbar = $('#topbar'), heroPhoto = $('.hero-photo');
   let lastY = scrollY, ticking = false;
   function update() {
     ticking = false;
     const y = scrollY;
-    if (!reduceMotion) $$('#hero-land .layer').forEach(l => { l.style.transform = `translateY(${y * parseFloat(l.dataset.depth)}px)`; });
+    if (!reduceMotion && heroPhoto && y < innerHeight * 1.2) heroPhoto.style.transform = `translate3d(0, ${y * .35}px, 0)`;
     if (steps) {
       const b = steps.getBoundingClientRect(), vh = innerHeight;
       const p = clamp((vh * .75 - b.top) / (b.height + vh * .2), 0, 1);
@@ -931,7 +907,6 @@ $('#review-form').addEventListener('submit', e => {
 })();
 
 /* ─── СТАРТ ────────────────────────────────────────────────────────────── */
-buildLand();
 const saved = store.get('naha_lang');
 if (saved && saved !== 'ru' && I18N[saved]) applyLang(saved); else renderReviews();
 

@@ -12,6 +12,8 @@ const rand = (a, b) => a + Math.random() * (b - a);
 const pick = arr => arr[(Math.random() * arr.length) | 0];
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+let scrollingUntil = 0;
+addEventListener('scroll', () => { scrollingUntil = performance.now() + 200; }, { passive: true });
 const finePointer = matchMedia('(pointer: fine)').matches;
 const isMobile = matchMedia('(max-width: 700px)').matches;
 const store = {
@@ -326,12 +328,12 @@ function drawLeafSprite(ctx, spr, x, y, size, rot, flip, alpha, blurred) {
 /* ─── ЛИСТОПАД ПО ВСЕМУ САЙТУ ──────────────────────────────────────────── */
 const leaves = (() => {
   const cv = $('#leaves'); const ctx = cv.getContext('2d');
-  let W, H, dpr, list = [], running = false, last = 0, wind = 0, scrollV = 0, lastY = scrollY;
+  let W, H, dpr, list = [], running = false, visible = true, last = 0, wind = 0;
   const mouse = { x: -999, y: -999 };
   const COUNT = reduceMotion ? 0 : isMobile ? 12 : 22;
   function resize() {
     dpr = Math.min(devicePixelRatio || 1, 1.5);
-    W = innerWidth; H = innerHeight;
+    W = cv.clientWidth; H = cv.clientHeight;
     cv.width = W * dpr; cv.height = H * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
@@ -346,9 +348,8 @@ const leaves = (() => {
     };
   }
   function frame(ts) {
-    if (!running) return;
+    if (!running || !visible) return;
     const dt = Math.min(.05, (ts - last) / 1000 || 0); last = ts;
-    scrollV = lerp(scrollV, 0, .06);
     wind = lerp(wind, Math.sin(ts / 4000) * 18, .02);
     ctx.clearRect(0, 0, W, H);
     for (const l of list) {
@@ -357,7 +358,7 @@ const leaves = (() => {
       if (d2 < 9000) { const d = Math.sqrt(d2) || 1; l.vx += dx / d * 220 * dt; l.vr += (Math.random() - .5) * 6 * dt; }
       l.vx *= .96;
       l.x += (Math.sin(l.ph) * l.sway + wind + l.vx) * dt;
-      l.y += (l.vy + scrollV * (l.near ? -1 : -.6)) * dt;
+      l.y += l.vy * dt;
       l.rot += (l.vr + Math.cos(l.ph) * .8) * dt;
       if (l.y > H + 60) Object.assign(l, make(true), { y: -40 });
       if (l.y < -H * .4) l.y = H + 40;
@@ -372,8 +373,8 @@ const leaves = (() => {
     running = true; last = performance.now(); requestAnimationFrame(frame);
   }
   addEventListener('resize', () => running && resize());
-  addEventListener('scroll', () => { const y = scrollY; scrollV = clamp(lerp(scrollV, (y - lastY) * 30, .3), -900, 900); lastY = y; }, { passive: true });
-  addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { mouse.x = e.clientX; mouse.y = e.clientY; } }, { passive: true });
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible && running) { last = performance.now(); requestAnimationFrame(frame); } }).observe(cv);
+  addEventListener('pointermove', e => { if (e.pointerType === 'mouse' && visible) { const r = cv.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; } }, { passive: true });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden) running = false;
     else if (list.length && !running) { running = true; last = performance.now(); requestAnimationFrame(frame); }
@@ -1149,7 +1150,7 @@ function startHeroScene() {
   function frame(now) {
     if (!visible || document.hidden) return;
     const dt = Math.min(.1, (now - last) / 1000); last = now; acc += dt;
-    if (acc >= step) { scene.frame(Math.max(0, now - t0) / 1000, reduceMotion ? 0 : .12 * acc); acc = 0; }
+    if (acc >= step && now > scrollingUntil) { scene.frame(Math.max(0, now - t0) / 1000, reduceMotion ? 0 : .12 * acc); acc = 0; }
     requestAnimationFrame(frame);
   }
   document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) { last = performance.now(); requestAnimationFrame(frame); } });
@@ -1256,30 +1257,39 @@ function startPointerFx() {
 
   if (!finePointer || reduceMotion) return;
   document.documentElement.classList.add('has-cursor');
-  const dot = $('#cursor-dot'), ring = $('#cursor-ring'), pv = $('#preview');
-  let x = innerWidth / 2, y = innerHeight / 2, rx = x, ry = y, px = x, py = y, shown = false;
+  const dot = $('#cursor-dot'), pv = $('#preview');
+  let x = innerWidth / 2, y = innerHeight / 2, px = x, py = y, shown = false, moved = true;
   addEventListener('pointermove', e => {
-    x = e.clientX; y = e.clientY;
-    if (!shown) { shown = true; rx = x; ry = y; px = x; py = y; }
+    x = e.clientX; y = e.clientY; moved = true;
+    if (!shown) { shown = true; px = x; py = y; }
   }, { passive: true });
   document.addEventListener('pointerover', e => {
-    ring.classList.toggle('is-hover', !!e.target.closest('a, button, summary, .chip, input, textarea, .work'));
+    dot.classList.toggle('is-hover', !!e.target.closest('a, button, summary, .chip, input, textarea, .work'));
   });
-  addEventListener('pointerdown', () => ring.classList.add('is-down'));
-  addEventListener('pointerup', () => ring.classList.remove('is-down'));
-  document.addEventListener('pointerleave', () => { dot.style.opacity = ring.style.opacity = 0; });
-  document.addEventListener('pointerenter', () => { dot.style.opacity = ring.style.opacity = ''; });
+  addEventListener('pointerdown', () => dot.classList.add('is-down'));
+  addEventListener('pointerup', () => dot.classList.remove('is-down'));
+  document.addEventListener('pointerleave', () => { dot.style.opacity = 0; });
+  document.addEventListener('pointerenter', () => { dot.style.opacity = ''; });
 
   // магнитные кнопки
-  const mags = $$('.btn, .icon-btn, .logo');
-  addEventListener('pointermove', e => {
-    for (const m of mags) {
-      const b = m.getBoundingClientRect();
-      const cx = b.left + b.width / 2, cy = b.top + b.height / 2;
-      const dx = e.clientX - cx, dy = e.clientY - cy;
-      const near = Math.abs(dx) < b.width / 2 + 40 && Math.abs(dy) < b.height / 2 + 30;
-      m.style.translate = near ? `${dx * .22}px ${dy * .3}px` : '';
-    }
+  const mags = $$('.btn, .icon-btn, .logo'), off = mags.map(() => [0, 0]);
+  let rects = null, magQueued = false;
+  const dropRects = () => { rects = null; };
+  addEventListener('scroll', dropRects, { passive: true });
+  addEventListener('resize', dropRects);
+  addEventListener('pointermove', () => {
+    if (magQueued) return; magQueued = true;
+    requestAnimationFrame(() => {
+      magQueued = false;
+      if (!rects) rects = mags.map((m, i) => { const b = m.getBoundingClientRect(); return [b.left - off[i][0] + b.width / 2, b.top - off[i][1] + b.height / 2, b.width / 2 + 40, b.height / 2 + 30]; });
+      mags.forEach((m, i) => {
+        const [cx, cy, rw, rh] = rects[i], dx = x - cx, dy = y - cy;
+        const near = Math.abs(dx) < rw && Math.abs(dy) < rh;
+        const tx = near ? dx * .22 : 0, ty = near ? dy * .3 : 0;
+        if (tx === off[i][0] && ty === off[i][1]) return;
+        off[i] = [tx, ty]; m.style.translate = near ? `${tx}px ${ty}px` : '';
+      });
+    });
   }, { passive: true });
 
   // наклон больших карточек
@@ -1308,13 +1318,12 @@ function startPointerFx() {
   });
 
   (function tick() {
-    rx = lerp(rx, x, .18); ry = lerp(ry, y, .18);
-    px = lerp(px, x, .12); py = lerp(py, y, .12);
-    dot.style.transform = `translate(${x}px, ${y}px)`;
-    ring.style.transform = `translate(${rx}px, ${ry}px)`;
-    const vx = clamp((x - px) * .4, -14, 14);
-    pv.style.translate = `${px}px ${py}px`;
-    pv.style.rotate = `${vx}deg`;
+    if (moved) { dot.style.transform = `translate3d(${x}px, ${y}px, 0)`; moved = false; }
+    if (pv.classList.contains('is-on') || Math.abs(px - x) > .5 || Math.abs(py - y) > .5) {
+      px = lerp(px, x, .14); py = lerp(py, y, .14);
+      pv.style.translate = `${px}px ${py}px`;
+      pv.style.rotate = `${clamp((x - px) * .4, -14, 14)}deg`;
+    }
     requestAnimationFrame(tick);
   })();
 }
@@ -1467,11 +1476,27 @@ $('#review-form').addEventListener('submit', e => {
   const iv = setInterval(hide, 400); setTimeout(() => clearInterval(iv), 15000);
 })();
 
+/* ─── ЗАЩИТА ТЕКСТА ОТ КОПИРОВАНИЯ ─────────────────────────────────────── */
+const copyAllowed = el => !!(el && el.closest && el.closest('input, textarea, .pay-val'));
+['copy', 'cut'].forEach(type => document.addEventListener(type, e => {
+  const node = document.getSelection()?.anchorNode;
+  const el = node && (node.nodeType === 1 ? node : node.parentElement);
+  if (!copyAllowed(e.target) && !copyAllowed(el)) e.preventDefault();
+}));
+document.addEventListener('dragstart', e => { if (!copyAllowed(e.target)) e.preventDefault(); });
+
 /* ─── СТАРТ ────────────────────────────────────────────────────────────── */
 const saved = store.get('naha_lang');
 if (saved && saved !== 'ru' && I18N[saved]) applyLang(saved); else renderReviews();
 
+function startSmoothScroll() {
+  if (reduceMotion || !finePointer || !window.Lenis) return;
+  const lenis = new window.Lenis({ lerp: .09, wheelMultiplier: 1, anchors: { offset: -80 } });
+  (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(performance.now());
+}
+
 runIntro(() => {
+  startSmoothScroll();
   startReveal();
   startPointerFx();
   startScrollFx();

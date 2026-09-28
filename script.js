@@ -100,6 +100,7 @@ const I18N = {
     l_name: 'Your name', ph_name: 'Name', l_task: 'Task', ph_task: 'e.g. a booking bot for a salon, 3 stylists, client reminders',
     btn_send: 'Send via Telegram', order_note: 'Telegram opens with a ready message — just press Send.',
     footer: 'Telegram bots & automation', to_top: 'Back to top ↑',
+    on_request: 'code on request',
     copied: 'Copied', err_order: 'Fill in your name and describe the task.', err_review: 'Fill in your name and review.',
   },
   kz: {
@@ -156,6 +157,7 @@ const I18N = {
     l_name: 'Атыңыз', ph_name: 'Аты', l_task: 'Тапсырма', ph_task: 'Мысалы: салонға жазылым боты, 3 шебер, клиенттерге еске салу',
     btn_send: 'Telegram-ға жіберу', order_note: 'Дайын хабармен Telegram ашылады — тек «Жіберу» басыңыз.',
     footer: 'Telegram боттар және автоматтандыру', to_top: 'Жоғары ↑',
+    on_request: 'код сұраныс бойынша',
     copied: 'Көшірілді', err_order: 'Атыңыз бен тапсырманы толтырыңыз.', err_review: 'Атыңыз бен пікіріңізді толтырыңыз.',
   },
 };

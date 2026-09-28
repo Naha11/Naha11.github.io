@@ -388,7 +388,721 @@ const leaves = (() => {
   };
 })();
 
-/* ─── ПРЕЛОАДЕР: ШАГ В ОСЕННИЙ ПАРК (фото + WebGL) ─────────────────────── */
+/* ─── ОСЕННИЙ ЛЕС: процедурная сцена (всё запекается один раз) ────────── */
+const Forest = (() => {
+  const TREE_PALS = [[0, 1, 1, 6, 0], [4, 5, 5, 6, 4, 1], [6, 6, 1, 4, 0], [0, 2, 4, 6, 1, 5], [2, 3, 0, 1, 2, 6], [1, 6, 4, 0, 5], [0, 0, 1, 2, 6], [5, 4, 6, 6, 1]];
+  const srand = seed => { let s = seed % 2147483646 + 1; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
+  const FOG = '#e3a06e';
+  let A = null; // запечённые спрайты
+
+  const newCv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+  function withFog(cv) {
+    const f = newCv(cv.width, cv.height), c = f.getContext('2d');
+    c.drawImage(cv, 0, 0); c.globalCompositeOperation = 'source-in'; c.fillStyle = FOG; c.fillRect(0, 0, f.width, f.height);
+    return f;
+  }
+  const sprite = (cv, meta = {}) => ({ cv, fog: withFog(cv), W: cv.width, H: cv.height, base: .97, ...meta });
+  const leafAt = (c, pi, x, y, sz, rot, sy = 1, shape) => {
+    const s = leafSprites[pi * 3 + (shape ?? ((Math.random() * 3) | 0))].sharp;
+    c.save(); c.translate(x, y); c.rotate(rot); c.scale(1, sy); c.drawImage(s, -sz / 2, -sz / 2, sz, sz); c.restore();
+  };
+  function shadeAtop(c, W, H, top, sideLight = true) {
+    c.globalCompositeOperation = 'source-atop';
+    if (sideLight) {
+      const gx = c.createLinearGradient(0, 0, W, 0);
+      gx.addColorStop(0, 'rgba(40,22,70,.38)'); gx.addColorStop(.5, 'rgba(0,0,0,0)'); gx.addColorStop(1, 'rgba(255,196,110,.26)');
+      c.fillStyle = gx; c.fillRect(0, 0, W, H);
+    }
+    const gy = c.createLinearGradient(0, top, 0, H);
+    gy.addColorStop(0, 'rgba(255,215,140,.12)'); gy.addColorStop(.5, 'rgba(0,0,0,0)'); gy.addColorStop(1, 'rgba(30,14,45,.42)');
+    c.fillStyle = gy; c.fillRect(0, 0, W, H);
+    c.globalCompositeOperation = 'source-over';
+  }
+  function grass(c, R, pick2, x0, x1, y, hMin, hMax, n) {
+    c.lineCap = 'round';
+    for (let i = 0; i < n; i++) {
+      const gx = R(x0, x1), h = R(hMin, hMax);
+      c.strokeStyle = pick2(['#6b7a2a', '#8a8a34', '#a2873c', '#5a5a22', '#b59a4c', '#c9a857']);
+      c.lineWidth = R(.8, 1.8);
+      c.beginPath(); c.moveTo(gx, y); c.quadraticCurveTo(gx + R(-3, 3), y - h * .6, gx + R(-h * .45, h * .45), y - h); c.stroke();
+    }
+  }
+
+  /* ── деревья ── */
+  function bakeTree(idx, W0, H0) {
+    const r = srand(idx * 7919 + 101), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
+    const W = Math.round(W0 * 1.9), H = Math.round(H0 * 1.35);
+    const cv = newCv(W, H), c = cv.getContext('2d');
+    const pal = TREE_PALS[idx % TREE_PALS.length], tips = [];
+    const baseX = W * .5, baseY = H * .97;
+    W0 = H0 * .66;
+    function limb(x, y, len, ang, w, depth) {
+      const x2 = x + Math.sin(ang) * len, y2 = y - Math.cos(ang) * len, nx = Math.cos(ang), ny = Math.sin(ang);
+      const bend = R(-.18, .18) * len, mx = (x + x2) / 2 + nx * bend, my = (y + y2) / 2 + ny * bend, w2 = w * R(.62, .72);
+      c.beginPath();
+      c.moveTo(x - nx * w / 2, y - ny * w / 2);
+      c.quadraticCurveTo(mx - nx * (w + w2) / 4, my - ny * (w + w2) / 4, x2 - nx * w2 / 2, y2 - ny * w2 / 2);
+      c.lineTo(x2 + nx * w2 / 2, y2 + ny * w2 / 2);
+      c.quadraticCurveTo(mx + nx * (w + w2) / 4, my + ny * (w + w2) / 4, x + nx * w / 2, y + ny * w / 2);
+      c.closePath();
+      const g = c.createLinearGradient(x - nx * w, y - ny * w, x + nx * w, y + ny * w);
+      g.addColorStop(0, '#16111f'); g.addColorStop(.5, '#34231f'); g.addColorStop(.85, '#6e4a33'); g.addColorStop(1, '#c08a52');
+      c.fillStyle = g; c.fill();
+      if (w > 5) {
+        c.lineCap = 'round';
+        for (let i = 0; i < Math.min(12, w / 2.5); i++) {
+          const o = R(-.42, .42), t0 = R(0, .5), t1 = R(.5, 1);
+          c.strokeStyle = r() < .75 ? `rgba(12,6,2,${R(.3, .6)})` : `rgba(190,140,95,${R(.12, .25)})`;
+          c.lineWidth = Math.max(.5, w * R(.02, .06));
+          c.beginPath(); c.moveTo(lerp(x, x2, t0) + nx * w * o, lerp(y, y2, t0) + ny * w * o);
+          c.lineTo(lerp(x, x2, t1) + nx * w2 * o + R(-1, 1), lerp(y, y2, t1) + ny * w2 * o); c.stroke();
+        }
+        if (depth === 0) { // мох у основания
+          c.fillStyle = 'rgba(110,130,40,.35)';
+          for (let i = 0; i < 10; i++) { c.beginPath(); c.ellipse(x + R(-w * .4, w * .1), y - R(0, len * .25), R(2, w * .2), R(1, w * .12), 0, 0, 6.28); c.fill(); }
+        }
+      }
+      if (depth >= 6 || len < H0 * .028) { tips.push([x2, y2, depth]); return; }
+      if (depth >= 3) tips.push([mx, my, depth]);
+      const n = depth === 0 ? 3 : r() < .4 ? 3 : 2;
+      for (let i = 0; i < n; i++) {
+        const spread = depth === 0 ? R(.35, .6) : R(.3, .75);
+        limb(x2, y2, len * R(.66, .8), ang + (i === 0 ? -spread : i === 1 ? spread : R(-.2, .2)) + R(-.12, .12), w2, depth + 1);
+      }
+    }
+    c.fillStyle = '#1e140c';
+    for (let i = 0; i < 5; i++) {
+      const dir = i < 2 ? -1 : i < 4 ? 1 : R(-1, 1);
+      c.beginPath(); c.moveTo(baseX - W0 * .03, baseY - H0 * .03);
+      c.quadraticCurveTo(baseX + dir * W0 * R(.04, .07), baseY - H0 * .01, baseX + dir * W0 * R(.08, .13), baseY + H0 * .004);
+      c.lineTo(baseX + W0 * .03, baseY - H0 * .03); c.fill();
+    }
+    limb(baseX, baseY, H0 * R(.24, .3), R(-.07, .07), W0 * R(.06, .08), 0);
+    for (const [x, y] of tips) {
+      const rr = W0 * R(.05, .085);
+      c.fillStyle = `rgba(35,14,4,${R(.16, .28)})`;
+      c.beginPath(); c.ellipse(x + R(-4, 4), y + rr * .3, rr, rr * .8, 0, 0, 6.28); c.fill();
+    }
+    let minY = H;
+    for (const [x, y, d] of tips) {
+      const rr = W0 * R(.04, .075), n = d >= 5 ? 30 : 22;
+      minY = Math.min(minY, y - rr);
+      for (let i = 0; i < n; i++) {
+        const a = r() * 6.28, dd = Math.sqrt(r()) * rr;
+        c.save(); c.translate(x + Math.cos(a) * dd, y + Math.sin(a) * dd * .85); c.rotate(r() * 6.28); c.scale(R(.55, 1), 1);
+        const sz = W0 * R(.026, .042), spr = leafSprites[P(pal) * 3 + ((r() * 3) | 0)].sharp;
+        c.drawImage(spr, -sz / 2, -sz / 2, sz, sz); c.restore();
+      }
+    }
+    c.globalCompositeOperation = 'lighter';
+    for (const [x, y] of tips) {
+      if (x < baseX - W0 * .05 || r() < .35) continue;
+      const rr = W0 * R(.03, .06);
+      for (let i = 0; i < 8; i++) { c.globalAlpha = R(.18, .38); leafAt(c, P(pal), x + R(0, rr), y + R(-rr, rr * .4), W0 * R(.02, .034), r() * 6.28, 1, 2); }
+    }
+    c.globalAlpha = 1;
+    shadeAtop(c, W, H, minY);
+    for (let i = 0; i < 26; i++) leafAt(c, P(pal), baseX + R(-W0 * .16, W0 * .16), baseY + R(-H0 * .008, H0 * .012), W0 * R(.02, .035), r() * 6.28, .45);
+    grass(c, R, P, baseX - W0 * .18, baseX + W0 * .18, baseY + H0 * .006, H0 * .012, H0 * .035, 70);
+    // обрезка по содержимому
+    const pad = W0 * .1;
+    let x0 = baseX - W0 * .2, x1 = baseX + W0 * .2, y0 = baseY - H0 * .3;
+    for (const [x, y] of tips) { x0 = Math.min(x0, x - pad); x1 = Math.max(x1, x + pad); y0 = Math.min(y0, y - pad); }
+    x0 = Math.max(0, Math.floor(x0)); x1 = Math.min(W, Math.ceil(x1)); y0 = Math.max(0, Math.floor(y0));
+    const out = newCv(x1 - x0, H - y0);
+    out.getContext('2d').drawImage(cv, -x0, -y0);
+    return sprite(out, { ax: (baseX - x0) / (x1 - x0), base: (baseY - y0) / (H - y0), hs: (H - y0) / H0 });
+  }
+
+  /* ── кусты ── */
+  function bakeBush(k, S) {
+    const r = srand(k * 313 + 5), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
+    const W = Math.round(260 * S), H = Math.round(190 * S), cv = newCv(W, H), c = cv.getContext('2d');
+    const pal = [[2, 3, 3, 0], [4, 5, 6, 4], [0, 1, 6, 1], [3, 2, 1, 4], [6, 4, 0, 5]][k % 5];
+    const by = H * .97, tips = [];
+    for (let i = 0; i < 26; i++) { const a = R(Math.PI * 1.05, Math.PI * 1.95); const d = Math.sqrt(r()); tips.push([W / 2 + Math.cos(a) * d * W * .4, by + Math.sin(a) * d * H * .78]); }
+    c.strokeStyle = '#2a1a0e'; c.lineWidth = 2 * S;
+    for (const [x, y] of tips.slice(0, 10)) { c.beginPath(); c.moveTo(W / 2 + R(-8, 8), by); c.quadraticCurveTo(W / 2, (by + y) / 2, x, y); c.stroke(); }
+    for (const [x, y] of tips) { c.fillStyle = `rgba(30,12,3,${R(.2, .32)})`; c.beginPath(); c.ellipse(x, y + 6 * S, W * .1, H * .12, 0, 0, 6.28); c.fill(); }
+    for (const [x, y] of tips) for (let i = 0; i < 24; i++) {
+      const a = r() * 6.28, d = Math.sqrt(r()) * W * .085;
+      leafAt(c, P(pal), x + Math.cos(a) * d, y + Math.sin(a) * d * .8, R(13, 22) * S, r() * 6.28, R(.6, 1));
+    }
+    if (k % 2 === 0) { // ягоды
+      for (let i = 0; i < 26; i++) { c.fillStyle = r() < .5 ? '#c21f1a' : '#e23b2a'; c.beginPath(); c.arc(W / 2 + R(-W * .35, W * .35), by - R(H * .1, H * .7), R(2, 3.4) * S, 0, 6.28); c.fill(); }
+    }
+    c.globalCompositeOperation = 'lighter';
+    for (const [x, y] of tips) if (x > W * .5 && r() < .6) { c.globalAlpha = R(.2, .35); leafAt(c, P(pal), x + R(0, 14), y - R(0, 10), R(12, 18) * S, r() * 6.28, 1, 2); }
+    c.globalAlpha = 1;
+    shadeAtop(c, W, H, H * .15);
+    grass(c, R, P, W * .1, W * .9, by + 2, 6 * S, 20 * S, 40);
+    return sprite(cv);
+  }
+
+  /* ── бревно ── */
+  function bakeLog(k, S) {
+    const r = srand(k * 71 + 3), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
+    const W = Math.round(380 * S), H = Math.round(150 * S), cv = newCv(W, H), c = cv.getContext('2d');
+    const x0 = 22 * S, x1 = W - 60 * S, yT = H * .38, yB = H * .92, rad = (yB - yT) / 2, cyL = (yT + yB) / 2;
+    c.fillStyle = 'rgba(20,8,2,.35)'; c.beginPath(); c.ellipse(W / 2, yB, W * .46, 10 * S, 0, 0, 6.28); c.fill();
+    const g = c.createLinearGradient(0, yT, 0, yB);
+    g.addColorStop(0, '#8a6444'); g.addColorStop(.35, '#5a3e28'); g.addColorStop(1, '#1f130a');
+    c.fillStyle = g; c.beginPath(); c.moveTo(x0 + rad * .4, yT); c.lineTo(x1, yT); c.lineTo(x1, yB); c.lineTo(x0 + rad * .4, yB);
+    c.quadraticCurveTo(x0 - rad * .2, cyL, x0 + rad * .4, yT); c.fill();
+    for (let i = 0; i < 26; i++) { // кора
+      const y = R(yT + 3, yB - 3), xa = R(x0 + 10, x1 - 60);
+      c.strokeStyle = r() < .7 ? 'rgba(15,8,3,.55)' : 'rgba(200,150,100,.18)'; c.lineWidth = R(.8, 2.2) * S;
+      c.beginPath(); c.moveTo(xa, y); c.bezierCurveTo(xa + 30 * S, y + R(-3, 3), xa + 60 * S, y + R(-3, 3), xa + R(60, 140) * S, y + R(-2, 2)); c.stroke();
+    }
+    c.fillStyle = 'rgba(105,135,40,.55)'; // мох
+    for (let i = 0; i < 40; i++) { c.beginPath(); c.ellipse(R(x0 + 10, x1 - 10), yT + R(-2, 8) * S, R(4, 14) * S, R(2, 5) * S, 0, 0, 6.28); c.fill(); }
+    const eg = c.createRadialGradient(x1, cyL, 0, x1, cyL, rad); // спил с кольцами
+    eg.addColorStop(0, '#d9ac72'); eg.addColorStop(.85, '#b58450'); eg.addColorStop(1, '#6e4a2a');
+    c.fillStyle = eg; c.beginPath(); c.ellipse(x1, cyL, rad * .55, rad, 0, 0, 6.28); c.fill();
+    c.strokeStyle = 'rgba(110,70,35,.55)'; c.lineWidth = 1 * S;
+    for (let i = 1; i < 7; i++) { c.beginPath(); c.ellipse(x1 + R(-1, 1), cyL, rad * .55 * i / 7, rad * i / 7, 0, 0, 6.28); c.stroke(); }
+    c.strokeStyle = '#3a2414'; c.lineWidth = 2.5 * S; c.beginPath(); c.ellipse(x1, cyL, rad * .55, rad, 0, 0, 6.28); c.stroke();
+    if (k % 2) for (let i = 0; i < 4; i++) { // грибы-опята
+      const mx = R(x0 + 40, x1 - 60) , my = yT + R(10, 30) * S;
+      c.fillStyle = '#e8d2a8'; c.fillRect(mx - 2 * S, my - 8 * S, 4 * S, 10 * S);
+      c.fillStyle = '#b8753a'; c.beginPath(); c.ellipse(mx, my - 8 * S, 9 * S, 5 * S, 0, Math.PI, 0); c.fill();
+    }
+    for (let i = 0; i < 14; i++) leafAt(c, P([0, 1, 4, 6, 2]), R(x0, x1), yT + R(-4, 6) * S, R(14, 22) * S, r() * 6.28, .5);
+    grass(c, R, P, x0, W - 20 * S, yB + 3, 8 * S, 26 * S, 50);
+    return sprite(cv);
+  }
+
+  /* ── цветы ── */
+  function bakeFlowers(k, S) {
+    const r = srand(k * 97 + 11), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
+    const W = Math.round(240 * S), H = Math.round(130 * S), cv = newCv(W, H), c = cv.getContext('2d'), by = H * .97;
+    const cols = [['#d8342a', '#f2c230', '#fff4e0'], ['#8e5bc2', '#b78adf', '#f2c230'], ['#f08a2a', '#f2c230', '#d8342a'], ['#fff4e0', '#f2c230', '#e86a9a']][k % 4];
+    grass(c, R, P, W * .05, W * .95, by, 10 * S, 40 * S, 70);
+    for (let i = 0; i < 30; i++) {
+      const x = R(W * .08, W * .92), h = R(25, 90) * S, y = by - h, col = P(cols), pr = R(3.5, 6.5) * S;
+      c.strokeStyle = '#5f6a28'; c.lineWidth = 1.2 * S;
+      c.beginPath(); c.moveTo(x + R(-6, 6), by); c.quadraticCurveTo(x + R(-5, 5), y + h * .5, x, y); c.stroke();
+      c.fillStyle = col;
+      for (let p = 0; p < 6; p++) { const a = p / 6 * 6.28 + R(0, .5); c.beginPath(); c.ellipse(x + Math.cos(a) * pr, y + Math.sin(a) * pr * .7, pr * .75, pr * .45, a, 0, 6.28); c.fill(); }
+      c.fillStyle = '#6a3a10'; c.beginPath(); c.arc(x, y, pr * .45, 0, 6.28); c.fill();
+    }
+    shadeAtop(c, W, H, 0);
+    return sprite(cv);
+  }
+
+  /* ── мухоморы ── */
+  function bakeMush(S) {
+    const r = srand(55), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
+    const W = Math.round(150 * S), H = Math.round(110 * S), cv = newCv(W, H), c = cv.getContext('2d'), by = H * .97;
+    for (const [x, h, cr] of [[W * .35, 60, 26], [W * .62, 42, 19], [W * .8, 26, 12]]) {
+      const hh = h * S, rr = cr * S;
+      const sg = c.createLinearGradient(x - 6, 0, x + 6, 0); sg.addColorStop(0, '#d9c8a8'); sg.addColorStop(1, '#fff6e6');
+      c.fillStyle = sg; c.beginPath(); c.moveTo(x - rr * .22, by); c.lineTo(x - rr * .16, by - hh); c.lineTo(x + rr * .16, by - hh); c.lineTo(x + rr * .26, by); c.fill();
+      const cg = c.createRadialGradient(x + rr * .3, by - hh - rr * .4, 1, x, by - hh, rr * 1.2);
+      cg.addColorStop(0, '#f2553a'); cg.addColorStop(1, '#8e1a10');
+      c.fillStyle = cg; c.beginPath(); c.ellipse(x, by - hh, rr, rr * .62, 0, Math.PI, 0); c.fill();
+      c.fillStyle = '#fff8ea';
+      for (let i = 0; i < 7; i++) { c.beginPath(); c.arc(x + R(-rr * .75, rr * .75), by - hh - R(rr * .1, rr * .5), R(1.5, 3) * S, 0, 6.28); c.fill(); }
+    }
+    grass(c, R, P, W * .1, W * .95, by, 6 * S, 22 * S, 30);
+    for (let i = 0; i < 6; i++) leafAt(c, P([0, 1, 4]), R(W * .1, W * .9), by - R(0, 4), R(12, 18) * S, r() * 6.28, .45);
+    return sprite(cv);
+  }
+
+  /* ── камни ── */
+  function bakeRock(k, S) {
+    const r = srand(k * 41 + 9), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
+    const W = Math.round(200 * S), H = Math.round(130 * S), cv = newCv(W, H), c = cv.getContext('2d'), by = H * .97;
+    c.beginPath();
+    const n = 11;
+    for (let i = 0; i <= n; i++) { const a = Math.PI + i / n * Math.PI; const rx = W * R(.36, .45), ry = H * R(.6, .82); c.lineTo(W / 2 + Math.cos(a) * rx, by + Math.sin(a) * ry); }
+    c.closePath();
+    const g = c.createLinearGradient(0, 0, W, H); g.addColorStop(0, '#a89a88'); g.addColorStop(.5, '#6e6254'); g.addColorStop(1, '#2e2720');
+    c.fillStyle = g; c.fill();
+    c.save(); c.clip();
+    for (let i = 0; i < 30; i++) { c.fillStyle = r() < .5 ? 'rgba(20,15,10,.18)' : 'rgba(230,220,200,.12)'; c.beginPath(); c.ellipse(R(0, W), R(0, H), R(3, 16) * S, R(2, 8) * S, R(0, 3), 0, 6.28); c.fill(); }
+    c.fillStyle = 'rgba(110,140,45,.6)';
+    for (let i = 0; i < 22; i++) { c.beginPath(); c.ellipse(R(W * .2, W * .8), R(H * .1, H * .45), R(4, 14) * S, R(2, 6) * S, 0, 0, 6.28); c.fill(); }
+    c.restore();
+    for (let i = 0; i < 8; i++) leafAt(c, P([0, 1, 4, 6]), R(W * .1, W * .9), by - R(0, H * .2), R(12, 20) * S, r() * 6.28, .5);
+    grass(c, R, P, 0, W, by, 6 * S, 22 * S, 40);
+    return sprite(cv);
+  }
+
+  /* ── фонарь ── */
+  function bakeLamp(S) {
+    const W = Math.round(70 * S), H = Math.round(320 * S), cv = newCv(W, H), c = cv.getContext('2d'), by = H * .97, x = W / 2;
+    const g = c.createLinearGradient(x - 5 * S, 0, x + 5 * S, 0); g.addColorStop(0, '#0e0a08'); g.addColorStop(1, '#4a3c30');
+    c.fillStyle = g; c.fillRect(x - 3.5 * S, H * .16, 7 * S, by - H * .16);
+    c.fillRect(x - 9 * S, by - 12 * S, 18 * S, 12 * S);
+    c.fillStyle = '#1a120c'; c.beginPath(); c.moveTo(x - 20 * S, H * .08); c.lineTo(x + 20 * S, H * .08); c.lineTo(x + 11 * S, H * .03); c.lineTo(x - 11 * S, H * .03); c.fill();
+    const gl = c.createLinearGradient(0, H * .08, 0, H * .17); gl.addColorStop(0, '#fff2c0'); gl.addColorStop(1, '#f2a340');
+    c.fillStyle = gl; c.fillRect(x - 14 * S, H * .08, 28 * S, H * .085);
+    c.strokeStyle = '#1a120c'; c.lineWidth = 2.5 * S; c.strokeRect(x - 14 * S, H * .08, 28 * S, H * .085);
+    c.beginPath(); c.moveTo(x, H * .08); c.lineTo(x, H * .165); c.stroke();
+    return sprite(cv, { glow: [[.5, .125, .9]] });
+  }
+
+  /* ── камыш ── */
+  function bakeReed(k, S) {
+    const r = srand(k * 17 + 2), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
+    const W = Math.round(120 * S), H = Math.round(200 * S), cv = newCv(W, H), c = cv.getContext('2d'), by = H * .97;
+    c.lineCap = 'round';
+    for (let i = 0; i < 16; i++) {
+      const x = R(W * .2, W * .8), h = R(.45, .95) * H, bend = R(-18, 18) * S;
+      c.strokeStyle = P(['#5f6a28', '#8a7a34', '#6e5a28', '#a38a44', '#7a8a3a']); c.lineWidth = R(1.2, 2.6) * S;
+      c.beginPath(); c.moveTo(x, by); c.quadraticCurveTo(x + bend * .3, by - h * .6, x + bend, by - h); c.stroke();
+      if (r() < .35) { c.fillStyle = '#4a2a14'; c.beginPath(); c.ellipse(x + bend * .8, by - h * .88, 3.5 * S, 12 * S, bend * .01, 0, 6.28); c.fill(); }
+    }
+    return sprite(cv);
+  }
+
+  /* ── домик ── */
+  function bakeHouse(k, S) {
+    const r = srand(k * 211 + 17), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
+    const W = Math.round(460 * S), H = Math.round(420 * S), cv = newCv(W, H), c = cv.getContext('2d'), by = H * .97;
+    const x0 = W * .16, x1 = W * .84, wallTop = H * .5, glow = [];
+    c.fillStyle = '#4a4038'; c.fillRect(x0 - 6 * S, by - 16 * S, x1 - x0 + 12 * S, 16 * S); // фундамент
+    for (let i = 0; i < 14; i++) { c.fillStyle = `rgba(${R(90, 140)},${R(80, 120)},${R(70, 100)},.9)`; c.beginPath(); c.ellipse(R(x0, x1), by - R(3, 13) * S, R(8, 16) * S, R(4, 7) * S, 0, 0, 6.28); c.fill(); }
+    const rows = 9, rh = (by - 16 * S - wallTop) / rows; // сруб
+    for (let i = 0; i < rows; i++) {
+      const y = wallTop + i * rh, g = c.createLinearGradient(0, y, 0, y + rh);
+      g.addColorStop(0, '#9a6c42'); g.addColorStop(.45, '#6e4a2c'); g.addColorStop(1, '#2e1c10');
+      c.fillStyle = g; c.beginPath(); c.roundRect(x0 - 10 * S, y, x1 - x0 + 20 * S, rh + 1, rh / 2); c.fill();
+      c.fillStyle = '#c29a66'; c.beginPath(); c.ellipse(x0 - 10 * S, y + rh / 2, rh * .32, rh * .48, 0, 0, 6.28); c.fill(); c.beginPath(); c.ellipse(x1 + 10 * S, y + rh / 2, rh * .32, rh * .48, 0, 0, 6.28); c.fill();
+    }
+    const win = (wx, wy, ww, wh) => { // окна с тёплым светом
+      c.fillStyle = '#2a1a10'; c.fillRect(wx - 5 * S, wy - 5 * S, ww + 10 * S, wh + 10 * S);
+      const g = c.createLinearGradient(0, wy, 0, wy + wh); g.addColorStop(0, '#fff0b8'); g.addColorStop(1, '#f09a38');
+      c.fillStyle = g; c.fillRect(wx, wy, ww, wh);
+      c.strokeStyle = '#2a1a10'; c.lineWidth = 3 * S; c.beginPath(); c.moveTo(wx + ww / 2, wy); c.lineTo(wx + ww / 2, wy + wh); c.moveTo(wx, wy + wh / 2); c.lineTo(wx + ww, wy + wh / 2); c.stroke();
+      c.fillStyle = '#6a4424'; c.fillRect(wx - 8 * S, wy + wh + 4 * S, ww + 16 * S, 6 * S);
+      glow.push([(wx + ww / 2) / W, (wy + wh / 2) / H, ww / W * 2.2]);
+    };
+    win(x0 + 30 * S, wallTop + rh * 2, 62 * S, 62 * S);
+    win(x1 - 92 * S, wallTop + rh * 2, 62 * S, 62 * S);
+    c.fillStyle = '#3a2414'; c.fillRect(W / 2 - 26 * S, by - 16 * S - 110 * S, 52 * S, 110 * S); // дверь
+    c.strokeStyle = '#1e120a'; c.lineWidth = 2 * S; for (let i = 1; i < 4; i++) { c.beginPath(); c.moveTo(W / 2 - 26 * S + i * 13 * S, by - 126 * S); c.lineTo(W / 2 - 26 * S + i * 13 * S, by - 16 * S); c.stroke(); }
+    const cx0 = W * .66; // печная труба
+    c.fillStyle = '#6a5a4c'; c.fillRect(cx0, H * .1, 34 * S, wallTop - H * .1);
+    for (let i = 0; i < 10; i++) { c.fillStyle = `rgba(${R(60, 110)},${R(50, 90)},${R(40, 70)},.8)`; c.fillRect(cx0 + R(0, 24) * S, H * .1 + R(0, wallTop - H * .1 - 10 * S), 12 * S, 7 * S); }
+    const ov = 30 * S; // крыша
+    const rg = c.createLinearGradient(0, H * .14, 0, wallTop);
+    rg.addColorStop(0, '#4a2a1a'); rg.addColorStop(1, '#23140c');
+    c.fillStyle = rg; c.beginPath(); c.moveTo(x0 - ov, wallTop + 6 * S); c.lineTo(W / 2, H * .14); c.lineTo(x1 + ov, wallTop + 6 * S); c.closePath(); c.fill();
+    c.strokeStyle = 'rgba(10,5,2,.5)'; c.lineWidth = 1.5 * S;
+    for (let i = 1; i < 9; i++) { const t = i / 9; c.beginPath(); c.moveTo(lerp(W / 2, x0 - ov, t), lerp(H * .14, wallTop + 6 * S, t)); c.lineTo(lerp(W / 2, x1 + ov, t), lerp(H * .14, wallTop + 6 * S, t)); c.stroke(); }
+    c.strokeStyle = '#1a0e06'; c.lineWidth = 7 * S; c.beginPath(); c.moveTo(x0 - ov, wallTop + 6 * S); c.lineTo(W / 2, H * .14); c.lineTo(x1 + ov, wallTop + 6 * S); c.stroke();
+    for (let i = 0; i < 60; i++) { const t = R(0, 1), side = r() < .5 ? x0 - ov : x1 + ov; leafAt(c, P([0, 1, 4, 5, 6]), lerp(W / 2, side, t) + R(-20, 20) * S, lerp(H * .14, wallTop, t) + R(4, 20) * S, R(12, 20) * S, r() * 6.28, .55); }
+    glow.push([.5, (by - 70 * S) / H, .12]);
+    c.fillStyle = '#ffd98a'; c.beginPath(); c.arc(W / 2 + 40 * S, by - 100 * S, 7 * S, 0, 6.28); c.fill(); // фонарик у двери
+    glow.push([(W / 2 + 40 * S) / W, (by - 100 * S) / H, .1]);
+    shadeAtop(c, W, H, H * .1);
+    for (let i = 0; i < 4; i++) { // кусты у дома
+      const bx = r() < .5 ? R(x0 - 20 * S, x0 + 50 * S) : R(x1 - 50 * S, x1 + 20 * S);
+      for (let j = 0; j < 26; j++) leafAt(c, P([2, 3, 6, 4]), bx + R(-26, 26) * S, by - R(0, 40) * S, R(12, 18) * S, r() * 6.28, R(.6, 1));
+    }
+    grass(c, R, P, x0 - 30 * S, x1 + 30 * S, by, 8 * S, 26 * S, 90);
+    return sprite(cv, { glow, chimney: [(cx0 + 17 * S) / W, H * .1 / H] });
+  }
+
+  function bakeTufts() {
+    return Array.from({ length: 6 }, (_, k) => {
+      const r = srand(k * 131 + 7), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
+      const cv = newCv(90, 60), c = cv.getContext('2d');
+      grass(c, R, P, 17, 73, 60, 18, 56, 24);
+      if (k % 3 === 0) for (let i = 0; i < 3; i++) leafAt(c, P([0, 1, 4, 6]), R(20, 70), R(48, 58), 16, r() * 6.28, .5);
+      return sprite(cv);
+    });
+  }
+
+  function ensureAssets() {
+    if (A) return;
+    const S = isMobile ? .62 : 1;
+    const tW = isMobile ? 300 : 460, tH = isMobile ? 460 : 700;
+    A = {
+      tree: Array.from({ length: isMobile ? 6 : 8 }, (_, i) => bakeTree(i, tW, tH)),
+      bush: Array.from({ length: 5 }, (_, i) => bakeBush(i, S)),
+      log: [bakeLog(0, S), bakeLog(1, S)],
+      flowers: Array.from({ length: 4 }, (_, i) => bakeFlowers(i, S)),
+      mush: [bakeMush(S)],
+      rock: [bakeRock(0, S), bakeRock(1, S)],
+      lamp: [bakeLamp(S)],
+      reed: [bakeReed(0, S), bakeReed(1, S), bakeReed(2, S)],
+      house: [bakeHouse(0, S), bakeHouse(1, S)],
+      tuft: bakeTufts(),
+    };
+  }
+
+  // высота объекта в мировых единицах
+  const SIZE = { tree: 3.9, bush: .95, log: .5, flowers: .34, mush: .2, rock: .42, lamp: 1.9, reed: .95, house: 3.1, tuft: .3 };
+  const LAKE_X0 = 1.95, LAKE_X1 = 7.4;
+
+  function create(canvas, opt = {}) {
+    const ctx = canvas.getContext('2d');
+    const small = isMobile, dens = small ? 1.45 : 1;
+    const CAM = .55, FAR = 17;
+    const HY = opt.horizon || .5;
+    let W, H, dpr, hy, cx, K, sky, far, ground, waterCv;
+    const proj = (x, y, z) => ({ x: cx + x * K / z, y: hy + (CAM - y) * K / z, s: K / z });
+
+    ensureAssets();
+
+    function bakeSky() {
+      sky = newCv(W, Math.ceil(hy) + 2);
+      const c = sky.getContext('2d'), g = c.createLinearGradient(0, 0, 0, hy);
+      g.addColorStop(0, '#1f1b3a'); g.addColorStop(.3, '#4a2d52'); g.addColorStop(.55, '#a4486a'); g.addColorStop(.72, '#e0764f'); g.addColorStop(.88, '#f4ad62'); g.addColorStop(1, '#fde0a6');
+      c.fillStyle = g; c.fillRect(0, 0, W, hy + 2);
+      const r = srand(42), R = (a, b) => a + r() * (b - a);
+      for (let i = 0; i < 70; i++) {
+        const y = R(.08, .62) * hy, x = R(-.1, 1.1) * W, rw = R(.06, .2) * W, rh = rw * R(.12, .25), warm = y / hy;
+        const cg = c.createRadialGradient(x, y + rh * .4, 0, x, y, rw);
+        cg.addColorStop(0, `rgba(255,${Math.round(150 + warm * 70)},${Math.round(110 + warm * 40)},${R(.12, .3)})`); cg.addColorStop(1, 'rgba(255,170,120,0)');
+        c.fillStyle = cg; c.beginPath(); c.ellipse(x, y, rw, rh, 0, 0, 6.28); c.fill();
+      }
+      c.fillStyle = 'rgba(40,20,20,.7)'; // птицы
+      for (let i = 0; i < 7; i++) {
+        const bx = W * R(.55, .8), bY = hy * R(.25, .45), s = R(3, 6);
+        c.beginPath(); c.moveTo(bx - s, bY); c.quadraticCurveTo(bx - s / 2, bY - s * .6, bx, bY); c.quadraticCurveTo(bx + s / 2, bY - s * .6, bx + s, bY);
+        c.quadraticCurveTo(bx + s / 2, bY - s * .3, bx, bY + 1); c.quadraticCurveTo(bx - s / 2, bY - s * .3, bx - s, bY); c.fill();
+      }
+    }
+    function bakeFar() {
+      const bh = Math.ceil(H * .2);
+      far = newCv(W, bh);
+      const c = far.getContext('2d'), r = srand(9), R = (a, b) => a + r() * (b - a);
+      const layer = (count, hMin, hMax, haze, hazeA) => {
+        const lc = newCv(W, bh), l = lc.getContext('2d');
+        for (let i = 0; i < count; i++) {
+          const x = R(0, W), th = bh * R(hMin, hMax);
+          if (Math.abs(x - W / 2) < W * .035) continue;
+          l.strokeStyle = '#2a1a10'; l.lineWidth = Math.max(1, th * .04);
+          l.beginPath(); l.moveTo(x, bh); l.lineTo(x + R(-2, 2), bh - th * .55); l.stroke();
+          const pal = LEAF_PAL[(r() * LEAF_PAL.length) | 0];
+          for (let k = 0; k < 42; k++) { l.fillStyle = pal[(r() * 3) | 0]; l.beginPath(); l.ellipse(x + R(-th * .3, th * .3), bh - th * R(.45, 1), th * R(.04, .09), th * R(.03, .07), R(0, 3), 0, 6.28); l.fill(); }
+        }
+        l.globalCompositeOperation = 'source-atop';
+        l.fillStyle = haze.replace('A', hazeA); l.fillRect(0, 0, W, bh);
+        c.drawImage(lc, 0, 0);
+      };
+      layer(small ? 120 : 220, .35, .75, 'rgba(232,160,112,A)', .74);
+      layer(small ? 90 : 160, .25, .6, 'rgba(176,96,96,A)', .45);
+    }
+    function bakeGround() {
+      const gh = H - Math.floor(hy);
+      ground = newCv(W, gh);
+      const c = ground.getContext('2d'), g = c.createLinearGradient(0, 0, 0, gh);
+      g.addColorStop(0, '#b0714a'); g.addColorStop(.16, '#6e4128'); g.addColorStop(.55, '#3e2419'); g.addColorStop(1, '#1d1219');
+      c.fillStyle = g; c.fillRect(0, 0, W, gh);
+      const r = srand(77), R = (a, b) => a + r() * (b - a);
+      const pathAt = y => 1.05 * y / CAM;
+      for (let i = 0; i < (small ? 3500 : 7000); i++) {
+        const v = Math.pow(r(), 1.6), y = v * gh, x = R(0, W);
+        if (Math.abs(x - cx) < pathAt(y) * .8 && r() < .7) continue;
+        const s = .5 + v * (small ? 5 : 7), pal = LEAF_PAL[(r() * LEAF_PAL.length) | 0];
+        c.fillStyle = pal[(r() * 3) | 0]; c.globalAlpha = R(.45, .9) * (.5 + v * .5);
+        c.beginPath(); c.ellipse(x, y, s, s * .45, R(0, 3), 0, 6.28); c.fill();
+      }
+      c.globalAlpha = 1;
+      const pa = proj(-.62, 0, FAR * 1.5), pb = proj(.62, 0, FAR * 1.5), pc = proj(1.15, 0, .3), pd = proj(-1.15, 0, .3);
+      const path = grow => { c.beginPath(); c.moveTo(pa.x - grow * .1, pa.y - hy); c.lineTo(pb.x + grow * .1, pb.y - hy); c.lineTo(pc.x + grow, pc.y - hy); c.lineTo(pd.x - grow, pd.y - hy); c.closePath(); };
+      const pg = c.createLinearGradient(0, 0, 0, gh);
+      pg.addColorStop(0, 'rgba(246,208,150,.85)'); pg.addColorStop(.3, 'rgba(196,146,94,.7)'); pg.addColorStop(1, 'rgba(120,82,48,.7)');
+      c.fillStyle = 'rgba(120,80,45,.25)'; path(W * .05); c.fill();
+      c.fillStyle = pg; path(0); c.fill();
+      c.save(); path(0); c.clip();
+      for (let i = 0; i < (small ? 900 : 1800); i++) {
+        const v = Math.pow(r(), 1.5), y = v * gh, x = cx + R(-1, 1) * pathAt(y) * K / K, s = .4 + v * 3.2;
+        c.fillStyle = r() < .6 ? `rgba(90,60,35,${R(.2, .45)})` : LEAF_PAL[(r() * LEAF_PAL.length) | 0][(r() * 2) | 0];
+        c.beginPath(); c.ellipse(x, y, s, s * .5, R(0, 3), 0, 6.28); c.fill();
+      }
+      const sun = c.createRadialGradient(cx, 0, 0, cx, 0, gh * .9);
+      sun.addColorStop(0, 'rgba(255,225,160,.55)'); sun.addColorStop(1, 'rgba(255,200,130,0)');
+      c.fillStyle = sun; c.fillRect(0, 0, W, gh);
+      c.restore();
+    }
+
+    /* ── объекты мира ── */
+    const things = [];
+    const LANES = [
+      ['tree', -1, 1.45, 2.3, 1.15], ['tree', -1, 3.1, 5.2, 1.3], ['tree', 1, 1.4, 1.7, 2.4], ['tree', 1, 7.7, 11, 1.0], ['tree', -1, 6.5, 9, 1.6],
+      ['bush', -1, 1.35, 3.3, .85], ['bush', 1, 1.3, 1.65, 3.4], ['bush', 1, 7.5, 9, 1.6],
+      ['flowers', -1, 1.08, 1.35, .75], ['flowers', 1, 1.08, 1.25, 1.7], ['flowers', -1, 2.4, 4, 1.8],
+      ['log', -1, 1.9, 3.6, 4.2], ['rock', -1, 1.25, 3.2, 3.1], ['rock', 1, 1.5, 1.8, 5.5], ['mush', -1, 1.3, 2.6, 3.4],
+      ['lamp', -1, 1.2, 1.24, 4.4], ['reed', 1, 1.84, 2.0, 1.15], ['reed', 1, 7.25, 7.45, .6],
+      ['house', -1, 5.6, 6.6, 9.5], ['house', 1, 9.2, 10.5, 12],
+      ['tuft', -1, 1.02, 4, .22], ['tuft', 1, 1.02, 1.75, .35],
+    ];
+    const mk = (type, side, x0, x1, z) => ({ type, side, x: side * rand(x0, x1), z, v: (Math.random() * A[type].length) | 0, sc: rand(.85, 1.15), ph: rand(0, 6.28), lane: [x0, x1] });
+    for (const [type, side, x0, x1, step] of LANES) {
+      for (let z = rand(.4, step); z < FAR; z += step * dens * rand(.7, 1.3)) things.push(mk(type, side, x0, x1, z));
+    }
+    const gLeaves = Array.from({ length: small ? 140 : 260 }, () => ({ x: rand(-4.5, 1.85), z: rand(.3, FAR), spr: pick(leafSprites).sharp, rot: rand(0, 6.28) }));
+    const lakeLeaves = Array.from({ length: small ? 18 : 34 }, () => ({ x: rand(LAKE_X0 + .2, LAKE_X1 - .2), z: rand(.4, FAR), spr: pick(leafSprites).sharp, rot: rand(0, 6.28), sp: rand(-.1, .1) }));
+    const stream = { z: 9 };
+    const motes = Array.from({ length: small ? 30 : 60 }, () => ({ x: rand(-.5, .5), y: rand(-.4, .5), s: rand(.6, 2.2), ph: rand(0, 6.28), v: rand(.005, .02) }));
+    const rays = Array.from({ length: 9 }, (_, i) => ({ a: (i - 4) * .36 + rand(-.1, .1), w: rand(.025, .07), al: rand(.05, .12), ph: rand(0, 6.28) }));
+    const air = opt.air ? [
+      ...Array.from({ length: small ? 14 : 26 }, () => mkAir(0)),
+      ...Array.from({ length: small ? 10 : 18 }, () => mkAir(1)),
+      ...Array.from({ length: small ? 2 : 4 }, () => mkAir(2)),
+    ] : [];
+    function mkAir(layer) {
+      return {
+        layer, x: rand(-.1, 1.1), y: rand(-1.1, 1), spr: pick(leafSprites),
+        s: layer === 2 ? rand(60, 100) : layer === 1 ? rand(22, 38) : rand(9, 16),
+        vy: layer === 2 ? rand(.16, .26) : layer === 1 ? rand(.08, .14) : rand(.04, .07),
+        ph: rand(0, 6.28), rot: rand(0, 6.28), vr: rand(-1.8, 1.8), f: rand(0, 6.28), fs: rand(1.6, 3.4),
+      };
+    }
+
+    function resize() {
+      dpr = Math.min(devicePixelRatio || 1, opt.maxDpr || 1.5);
+      W = canvas.clientWidth || innerWidth; H = canvas.clientHeight || innerHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      hy = H * HY; cx = W / 2;
+      K = Math.max(Math.min(W, H * 1.25) * .55, H * .42);
+      bakeSky(); bakeFar(); bakeGround();
+      waterCv = newCv(W, Math.ceil(H - hy) + 4);
+    }
+
+    const fogOf = z => Math.pow(clamp((z - 1.2) / (FAR - 1.2), 0, 1), .75) * .82;
+    function drawThing(c, o, t, reflect) {
+      const z = o.z; if (z < .3) return;
+      const T = A[o.type][o.v], p = proj(o.x, 0, z);
+      const h = SIZE[o.type] * (T.hs || 1) * o.sc * p.s, w = h * T.W / T.H, ax = T.ax ?? .5;
+      if (w < .8 || p.x + w < -10 || p.x - w > W + 10) return;
+      const fade = clamp((FAR - z) / 2.2, 0, 1) * (reflect ? .5 : 1);
+      if (fade <= 0) return;
+      const fogA = fogOf(z);
+      c.save();
+      c.translate(p.x, p.y);
+      if (reflect) c.scale(1, -1);
+      if (o.type === 'tree' || o.type === 'reed' || o.type === 'tuft' || o.type === 'flowers') c.rotate(Math.sin(t * (o.type === 'tree' ? .7 : 1.6) + o.ph) * (o.type === 'tree' ? .012 : .035));
+      if (o.side > 0) c.scale(-1, 1);
+      const oy = -h * T.base;
+      c.globalAlpha = fade;
+      c.drawImage(T.cv, -w * ax, oy, w, h);
+      if (fogA > .02) { c.globalAlpha = fade * fogA; c.drawImage(T.fog, -w * ax, oy, w, h); }
+      c.restore();
+      if (reflect) return;
+      if (T.glow) { // тёплый свет окон и фонарей
+        c.globalCompositeOperation = 'lighter';
+        for (const [u, v, s] of T.glow) {
+          const gx = p.x + (o.side > 0 ? -1 : 1) * (u - ax) * w, gy = p.y + oy + v * h, gr = Math.max(4, s * w * 1.6);
+          const g = c.createRadialGradient(gx, gy, 0, gx, gy, gr);
+          g.addColorStop(0, `rgba(255,210,130,${.55 * fade * (1 - fogA * .6) * (.9 + .1 * Math.sin(t * 7 + o.ph))})`); g.addColorStop(1, 'rgba(255,170,80,0)');
+          c.fillStyle = g; c.fillRect(gx - gr, gy - gr, gr * 2, gr * 2);
+        }
+        c.globalCompositeOperation = 'source-over';
+      }
+      if (T.chimney) { // дым из трубы
+        const sx = p.x + (o.side > 0 ? -1 : 1) * (T.chimney[0] - ax) * w, sy = p.y + oy + T.chimney[1] * h;
+        for (let k = 0; k < 8; k++) {
+          const ph = ((t * .16 + k / 8 + o.ph) % 1 + 1) % 1, rr = h * (.03 + ph * .16);
+          const g = c.createRadialGradient(sx + Math.sin(ph * 5 + o.ph) * h * .06 * ph - ph * h * .12, sy - ph * h * .55, 0, sx - ph * h * .12, sy - ph * h * .55, rr);
+          g.addColorStop(0, `rgba(215,190,175,${.28 * (1 - ph) * fade})`); g.addColorStop(1, 'rgba(215,190,175,0)');
+          c.fillStyle = g; c.beginPath(); c.arc(sx - ph * h * .12, sy - ph * h * .55, rr, 0, 6.28); c.fill();
+        }
+      }
+    }
+    function drawShadow(o) {
+      if (o.type !== 'tree' && o.type !== 'house' && o.type !== 'lamp') return;
+      const z = o.z; if (z < .5 || z > FAR - 1) return;
+      const wd = o.type === 'house' ? .8 : o.type === 'lamp' ? .03 : .07, len = o.type === 'house' ? 2.2 : 2.8;
+      const z2 = Math.max(.35, z - len);
+      const a = proj(o.x - wd, 0, z), b = proj(o.x + wd, 0, z), c2 = proj(o.x * 1.2 + .35 + wd, 0, z2), d = proj(o.x * 1.2 - .35 - wd, 0, z2);
+      ctx.globalAlpha = .34 * clamp((FAR - z) / 3, 0, 1);
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c2.x, c2.y); ctx.lineTo(d.x, d.y); ctx.closePath(); ctx.fill();
+    }
+    function waterPoly(c, xa, xb, za, zb, add) {
+      const p1 = proj(xa, 0, za), p2 = proj(xb, 0, za), p3 = proj(xb, 0, zb), p4 = proj(xa, 0, zb);
+      if (!add) c.beginPath();
+      c.moveTo(p1.x, p1.y); c.lineTo(p2.x, p2.y); c.lineTo(p3.x, p3.y); c.lineTo(p4.x, p4.y); c.closePath();
+    }
+    function drawWater(t) {
+      const gy0 = Math.floor(hy), gh = waterCv.height;
+      const w = waterCv.getContext('2d');
+      w.setTransform(1, 0, 0, 1, 0, 0); w.clearRect(0, 0, W, gh);
+      const wg = w.createLinearGradient(0, 0, 0, gh);
+      wg.addColorStop(0, '#fde0a6'); wg.addColorStop(.1, '#f4ad62'); wg.addColorStop(.3, '#d98a72'); wg.addColorStop(.6, '#9a7092'); wg.addColorStop(1, '#5e6a92');
+      w.fillStyle = wg; w.fillRect(0, 0, W, gh);
+      w.translate(0, -gy0);
+      for (const o of things) if (o.x > LAKE_X0 - .2 && o.type !== 'tuft') drawThing(w, o, t, true); // отражения берега
+      w.globalCompositeOperation = 'lighter';
+      for (let i = 0; i < (small ? 160 : 320); i++) { // блики на воде
+        const u = (i * 37.3 % 100) / 100, v = Math.pow((i * 61.7 % 100) / 100, 1.8);
+        const zz = .4 + v * FAR * .9, q = proj(lerp(LAKE_X0, LAKE_X1, u), 0, zz);
+        const tw = .5 + .5 * Math.sin(t * 3 + i * 1.7);
+        w.fillStyle = `rgba(255,232,190,${.55 * tw * (1 - v * .5)})`;
+        w.fillRect(q.x, q.y, 3 + q.s * .12, Math.max(1, q.s * .008));
+      }
+      w.globalCompositeOperation = 'source-over';
+      ctx.save();
+      waterPoly(ctx, LAKE_X0, LAKE_X1 + 30, .3, FAR * 1.4);
+      const s0 = stream.z, sp = s0 > .3 && s0 < FAR;
+      if (sp) { waterPoly(ctx, -40, LAKE_X0 + .1, Math.max(.3, s0 - .32), s0 + .32, true); }
+      ctx.clip();
+      for (let y = 0; y < gh; y += 2) { // рябь
+        const k = y / gh, dx = Math.sin(y * .45 + t * 2.4) * (.6 + k * 4);
+        ctx.drawImage(waterCv, 0, y, W, 2, dx, gy0 + y, W, 2);
+      }
+      ctx.fillStyle = 'rgba(227,160,110,.35)'; ctx.fillRect(0, gy0, W, (H - gy0) * .12); // дымка над водой
+      const sh = ctx.createLinearGradient(0, gy0, 0, H); // глянец
+      sh.addColorStop(0, 'rgba(255,220,170,0)'); sh.addColorStop(1, 'rgba(255,215,175,.16)');
+      ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = sh; ctx.fillRect(0, gy0, W, H - gy0); ctx.globalCompositeOperation = 'source-over';
+      ctx.restore();
+      { // светлая кромка берега
+        const a = proj(LAKE_X0, 0, FAR), b = proj(LAKE_X0, 0, .35);
+        const lg = ctx.createLinearGradient(a.x, a.y, b.x, b.y); lg.addColorStop(0, 'rgba(255,225,180,.1)'); lg.addColorStop(1, 'rgba(255,225,180,.45)');
+        ctx.strokeStyle = lg; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+      // берег
+      for (const l of lakeLeaves) { // листья на воде
+        const q = proj(l.x + Math.sin(t * .2 + l.rot) * .05, 0, l.z), sz = .11 * q.s;
+        if (sz < 1.2) continue;
+        ctx.globalAlpha = 1 - fogOf(l.z);
+        ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(l.rot + t * .05); ctx.scale(1, .4); ctx.drawImage(l.spr, -sz / 2, -sz / 2, sz, sz); ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+      for (let k = 0; k < 4; k++) { // круги на воде
+        const ph = (((t / 2.4) + k / 4) % 1 + 1) % 1, zz = 1.6 + k * 1.7, q = proj(3.2 + k * .8, 0, zz);
+        ctx.strokeStyle = `rgba(255,236,200,${.4 * (1 - ph)})`; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(q.x, q.y, ph * q.s * .5, ph * q.s * .08, 0, 0, 6.28); ctx.stroke();
+      }
+    }
+    function drawBridge(t) {
+      const z = stream.z; if (z < .5 || z > FAR) return;
+      const za = Math.max(.35, z - .5), zb = z + .5, y = .14, x = 1.3;
+      const fogA = fogOf(z);
+      const q = (xx, yy, zz) => proj(xx, yy, zz);
+      ctx.save(); ctx.globalAlpha = 1;
+      // опоры
+      ctx.fillStyle = '#2a1a0e';
+      let a = q(-x, y, za), b = q(x, y, za), c2 = q(x, -.08, za), d = q(-x, -.08, za);
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c2.x, c2.y); ctx.lineTo(d.x, d.y); ctx.fill();
+      // настил
+      const n = 12;
+      for (let i = 0; i < n; i++) {
+        const z0 = lerp(zb, za, i / n), z1 = lerp(zb, za, (i + .88) / n);
+        const p1 = q(-x, y, z0), p2 = q(x, y, z0), p3 = q(x, y, z1), p4 = q(-x, y, z1);
+        ctx.fillStyle = i % 2 ? '#8a6040' : '#7a5236';
+        ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.lineTo(p3.x, p3.y); ctx.lineTo(p4.x, p4.y); ctx.fill();
+      }
+      const lg = ctx.createRadialGradient(cx, hy, 0, cx, hy, H); lg.addColorStop(0, 'rgba(255,210,140,.25)'); lg.addColorStop(1, 'rgba(255,210,140,0)');
+      ctx.fillStyle = lg; a = q(-x, y, zb); b = q(x, y, zb); c2 = q(x, y, za); d = q(-x, y, za);
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.lineTo(c2.x, c2.y); ctx.lineTo(d.x, d.y); ctx.fill();
+      // перила
+      ctx.lineCap = 'round';
+      for (const sx of [-x, x]) {
+        const posts = [zb, z, za];
+        for (const pz of posts) {
+          const p0 = q(sx, y, pz), p1 = q(sx, .95, pz);
+          ctx.strokeStyle = '#3a2414'; ctx.lineWidth = Math.max(1.5, .07 * p0.s);
+          ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
+        }
+        for (const hh of [.95, .55]) {
+          const p0 = q(sx, hh, zb), p1 = q(sx, hh, za);
+          ctx.strokeStyle = hh > .9 ? '#6a4628' : '#4a301a'; ctx.lineWidth = Math.max(1.2, .05 * p1.s);
+          ctx.beginPath(); ctx.moveTo(p0.x, p0.y); ctx.lineTo(p1.x, p1.y); ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
+
+    function frame(t, dz, o = {}) {
+      if (dz) {
+        for (const th of things) {
+          th.z -= dz;
+          if (th.z < .3) { const n = mk(th.type, th.side, th.lane[0], th.lane[1], th.z + FAR); Object.assign(th, n); }
+        }
+        for (const l of gLeaves) { l.z -= dz; if (l.z < .3) { l.z += FAR; l.x = rand(-4.5, 1.85); } }
+        for (const l of lakeLeaves) { l.z -= dz; l.x += l.sp * dz * .1; if (l.z < .4) { l.z += FAR; l.x = rand(LAKE_X0 + .2, LAKE_X1 - .2); } }
+        stream.z -= dz; if (stream.z < -1) stream.z += FAR + 4;
+      }
+      things.sort((a, b) => b.z - a.z);
+      const bob = o.bob ? Math.sin(t * 5.4) * H * .0028 : 0;
+      ctx.save(); ctx.translate(0, bob);
+      ctx.drawImage(sky, 0, -2, W, sky.height + 2);
+      const sunY = hy - H * .03, pulse = 1 + Math.sin(t * 1.1) * .03;
+      ctx.globalCompositeOperation = 'lighter';
+      let sg = ctx.createRadialGradient(cx, sunY, 0, cx, sunY, H * .55 * pulse);
+      sg.addColorStop(0, 'rgba(255,245,215,.95)'); sg.addColorStop(.06, 'rgba(255,225,160,.8)'); sg.addColorStop(.25, 'rgba(255,170,90,.28)'); sg.addColorStop(1, 'rgba(255,140,70,0)');
+      ctx.fillStyle = sg; ctx.fillRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(far, 0, hy - far.height + 1);
+      ctx.drawImage(ground, 0, Math.floor(hy));
+      ctx.globalCompositeOperation = 'lighter';
+      sg = ctx.createRadialGradient(cx, hy, 0, cx, hy, W * .22);
+      sg.addColorStop(0, 'rgba(255,215,150,.55)'); sg.addColorStop(1, 'rgba(255,170,90,0)');
+      ctx.fillStyle = sg; ctx.fillRect(0, hy - H * .25, W, H * .4);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = '#2a1640';
+      for (const th of things) drawShadow(th);
+      ctx.globalAlpha = 1;
+      for (const l of gLeaves) {
+        const q = proj(l.x, 0, l.z), sz = .085 * q.s;
+        if (sz < 1.4 || q.y > H + 20 || q.x < -30 || q.x > W + 30) continue;
+        ctx.globalAlpha = 1 - clamp((l.z - 3) / (FAR - 3), 0, 1) * .7;
+        ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(l.rot); ctx.scale(1, .42); ctx.drawImage(l.spr, -sz / 2, -sz / 2, sz, sz); ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+      drawWater(t);
+      let bridgeDone = false;
+      for (const th of things) {
+        if (!bridgeDone && th.z < stream.z) { drawBridge(t); bridgeDone = true; }
+        drawThing(ctx, th, t, false);
+      }
+      if (!bridgeDone) drawBridge(t);
+      ctx.globalCompositeOperation = 'lighter';
+      const R0 = Math.hypot(W, H) * 1.1;
+      for (const ry of rays) {
+        const a = ry.a + Math.sin(t * .18 + ry.ph) * .05, w = ry.w * (1 + Math.sin(t * .4 + ry.ph) * .25);
+        const gr = ctx.createRadialGradient(cx, sunY, 0, cx, sunY, R0);
+        gr.addColorStop(0, `rgba(255,215,150,${ry.al * .9})`); gr.addColorStop(.45, `rgba(255,190,120,${ry.al * .22})`); gr.addColorStop(1, 'rgba(255,170,100,0)');
+        ctx.fillStyle = gr;
+        ctx.beginPath(); ctx.moveTo(cx, sunY);
+        ctx.lineTo(cx + Math.sin(a - w) * R0, sunY + Math.cos(a - w) * R0 * (a > 1.2 || a < -1.2 ? .4 : 1));
+        ctx.lineTo(cx + Math.sin(a + w) * R0, sunY + Math.cos(a + w) * R0 * (a > 1.2 || a < -1.2 ? .4 : 1));
+        ctx.closePath(); ctx.fill();
+      }
+      for (const m of motes) {
+        m.y -= m.v * .016; if (m.y < -.5) m.y = .5;
+        const x = cx + (m.x + Math.sin(t * .3 + m.ph) * .03) * W * .8, y = sunY + m.y * H * .7;
+        const tw = .4 + .6 * Math.abs(Math.sin(t * 1.4 + m.ph));
+        ctx.fillStyle = `rgba(255,230,180,${.55 * tw * (1 - Math.abs(m.x) * 1.4)})`;
+        ctx.beginPath(); ctx.arc(x, y, m.s, 0, 6.28); ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.restore();
+      if (air.length) {
+        const push = .08 + (o.push || 0), dt = .016;
+        for (const l of air) {
+          l.ph += dt * 1.2; l.f += l.fs * dt; l.rot += l.vr * dt; l.y += l.vy * dt;
+          l.x += (Math.sin(l.ph) * .04 - .015) * dt + (l.x - .5) * push * dt * (l.layer + 1) * .5;
+          l.y += (l.y - .55) * push * dt * (l.layer + 1) * .25;
+          if (l.y > 1.15 || l.x < -.2 || l.x > 1.2) Object.assign(l, mkAir(l.layer), { y: rand(-.2, -.05) });
+          drawLeafSprite(ctx, l.spr, l.x * W, l.y * H, l.s * (small ? .75 : 1), l.rot, Math.cos(l.f), l.layer === 0 ? .8 : .95, l.layer === 2);
+        }
+      }
+      const v = ctx.createRadialGradient(cx, H * .55, H * .25, cx, H * .55, Math.hypot(W, H) * .6);
+      v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(22,12,34,.62)');
+      ctx.fillStyle = v; ctx.fillRect(0, 0, W, H);
+      if (o.flash) {
+        const f = ctx.createRadialGradient(cx, sunY, 0, cx, sunY, Math.max(W, H) * (.15 + o.flash * 1.3));
+        f.addColorStop(0, `rgba(255,246,225,${o.flash})`); f.addColorStop(1, 'rgba(255,220,160,0)');
+        ctx.fillStyle = f; ctx.fillRect(0, 0, W, H);
+      }
+      if (o.fadeIn != null && o.fadeIn < 1) { ctx.fillStyle = `rgba(27,19,12,${1 - o.fadeIn})`; ctx.fillRect(0, 0, W, H); }
+    }
+
+    resize();
+    return { resize, frame };
+  }
+  return { create };
+})();
+
+/* ─── ПРЕЛОАДЕР: ПРОГУЛКА ПО ОСЕННЕЙ АЛЛЕЕ ────────────────────────────── */
 function runIntro(done) {
   const loader = $('#loader');
   let finished = false;
@@ -404,195 +1118,42 @@ function runIntro(done) {
   if (reduceMotion || store.sget('naha_intro')) { loader.remove(); document.body.classList.remove('is-loading'); return done(); }
   document.body.classList.add('is-loading');
   $('#loader-skip').addEventListener('click', finish);
-
-  const glc = $('#loader-gl'), lc = $('#loader-leaves'), lctx = lc.getContext('2d');
-  const gl = glc.getContext('webgl', { antialias: false, premultipliedAlpha: false });
-  const img = new Image();
-  img.src = innerWidth < 900 ? 'img/autumn-sm.jpg' : 'img/autumn.jpg';
-  const bail = setTimeout(finish, 6000); // если фото не загрузилось — сразу на сайт
-
-  let W, H, dpr;
-  function resize() {
-    dpr = Math.min(devicePixelRatio || 1, 1.5);
-    W = innerWidth; H = innerHeight;
-    lc.width = W * dpr; lc.height = H * dpr; lctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    const q = isMobile ? 1 : Math.min(dpr, 1.25);
-    glc.width = W * q; glc.height = H * q;
-    if (gl) gl.viewport(0, 0, glc.width, glc.height);
-  }
-  resize(); addEventListener('resize', resize);
-
-  const vs = 'attribute vec2 a;varying vec2 v;void main(){v=vec2(a.x*.5+.5,.5-a.y*.5);gl_Position=vec4(a,0.,1.);}';
-  const fs = `precision highp float;
-varying vec2 v;uniform sampler2D img;uniform vec2 res;uniform float ia,t,z,e;
-float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
-float fbm(vec2 p){float s=0.,a=.5;for(int i=0;i<4;i++){s+=a*n(p);p*=2.03;a*=.5;}return s;}
-void main(){
- float sa=res.x/res.y;vec2 iuv=v;
- if(sa>ia)iuv.y=.5+(v.y-.5)*ia/sa;else iuv.x=(sa<1.?.72:.5)+(v.x-.5)*sa/ia;
- vec2 vp=vec2(.31,.74);
- float d=clamp(distance(iuv,vp)*1.5,0.,1.);
- iuv=vp+(iuv-vp)/(1.+z*(.16+.8*d*d));
- iuv.y+=sin(t*5.6)*.0022*(1.-e);iuv.x+=sin(t*2.8)*.0014*(1.-e);
- float can=smoothstep(.66,.18,iuv.y);
- iuv+=can*.0018*vec2(n(iuv*16.+t*.9)-.5,n(iuv*16.-t*.7+3.)-.5);
- float wm=smoothstep(.665,.7,iuv.x)*smoothstep(.975,.94,iuv.x)*smoothstep(.685,.72,iuv.y)*smoothstep(1.,.965,iuv.y);
- iuv.x+=wm*sin(iuv.y*230.-t*2.3)*.0017;
- iuv.y+=wm*sin(iuv.x*150.+t*1.7)*.0011;
- vec3 c=texture2D(img,clamp(iuv,.001,.999)).rgb;
- float lum=dot(c,vec3(.299,.587,.114));
- float sp=pow(n(iuv*vec2(170.,560.)+vec2(t*.5,t*1.6)),16.)*wm;
- c+=vec3(1.,.9,.7)*sp*3.*smoothstep(.35,.85,lum);
- vec2 sun=vec2(.775,.5);vec2 dv=(iuv-sun)*vec2(ia,1.);float ds=length(dv);float an=atan(dv.y,dv.x);
- float rays=pow(n(vec2(an*8.,t*.22)),3.)*.9+pow(n(vec2(an*21.+3.,-t*.18)),4.)*.6;
- c+=vec3(1.,.76,.42)*rays*smoothstep(1.1,0.,ds)*.2;
- c+=vec3(1.,.8,.5)*smoothstep(.4,0.,ds)*(.1+.04*sin(t*1.3));
- float fog=fbm(vec2(iuv.x*3.-t*.06,iuv.y*7.+t*.02))*smoothstep(.5,.95,iuv.y);
- c=mix(c,vec3(1.,.86,.64),fog*.16);
- c=pow(c,vec3(.96))*vec3(1.05,1.,.93);
- c*=mix(.5,1.,smoothstep(1.2,.3,distance(v,vec2(.5))));
- c*=smoothstep(0.,1.1,t);
- c=mix(c,vec3(1.,.95,.86),e*smoothstep(1.6,0.,ds)*e);
- gl_FragColor=vec4(c,1.);}`;
-
-  let prog = null, U = {};
-  if (gl) {
-    const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
-    prog = gl.createProgram();
-    gl.attachShader(prog, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, fs));
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) prog = null;
-  }
-  if (prog) {
-    gl.useProgram(prog);
-    const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-    const loc = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-    ['img', 'res', 'ia', 't', 'z', 'e'].forEach(k => { U[k] = gl.getUniformLocation(prog, k); });
-  }
-
-  // листья сцены: дальние, средние и ближние размытые
-  const VPX = .31, VPY = .7;
-  const mk = layer => ({
-    layer, x: rand(-.1, 1.1), y: rand(-1.1, 1), spr: pick(leafSprites),
-    s: layer === 2 ? rand(70, 110) : layer === 1 ? rand(26, 44) : rand(10, 18),
-    vy: layer === 2 ? rand(.16, .26) : layer === 1 ? rand(.08, .14) : rand(.04, .07),
-    ph: rand(0, 6.28), rot: rand(0, 6.28), vr: rand(-1.8, 1.8), f: rand(0, 6.28), fs: rand(1.6, 3.4),
-  });
-  const air = [
-    ...Array.from({ length: isMobile ? 14 : 26 }, () => mk(0)),
-    ...Array.from({ length: isMobile ? 10 : 18 }, () => mk(1)),
-    ...Array.from({ length: isMobile ? 2 : 4 }, () => mk(2)),
-  ];
-
-  const DUR = 6200;
-  let t0, last, alive = true;
-  function frame(now) {
-    if (!alive) return;
-    const el = now - t0, p = clamp(el / DUR, 0, 1), dt = Math.min(.05, (now - last) / 1000); last = now;
-    const z = p < .72 ? p / .72 * .55 : .55 + Math.pow((p - .72) / .28, 2) * 1.6;
-    const e = clamp((p - .76) / .24, 0, 1);
-    if (prog) {
-      gl.uniform2f(U.res, glc.width, glc.height); gl.uniform1f(U.ia, img.width / img.height);
-      gl.uniform1f(U.t, el / 1000); gl.uniform1f(U.z, z); gl.uniform1f(U.e, e);
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    }
-    lctx.clearRect(0, 0, W, H);
-    const push = .08 + z * .5;
-    for (const l of air) {
-      l.ph += dt * 1.2; l.f += l.fs * dt; l.rot += l.vr * dt;
-      l.y += l.vy * dt;
-      l.x += (Math.sin(l.ph) * .04 - .02) * dt + (l.x - VPX) * push * dt * (l.layer + 1) * .5;
-      l.y += (l.y - VPY) * push * dt * (l.layer + 1) * .25;
-      if (l.y > 1.15 || l.x < -.2 || l.x > 1.2) Object.assign(l, mk(l.layer), { y: rand(-.2, -.05) });
-      drawLeafSprite(lctx, l.spr, l.x * W, l.y * H, l.s * (isMobile ? .75 : 1) * (1 + z * .4 * l.layer), l.rot, Math.cos(l.f),
-        l.layer === 0 ? .8 : .95, l.layer === 2);
-    }
-    if (el >= DUR) { alive = false; finish(); return; }
-    requestAnimationFrame(frame);
-  }
-  img.onload = () => {
-    clearTimeout(bail);
-    if (prog) {
-      const tex = gl.createTexture();
-      gl.bindTexture(gl.TEXTURE_2D, tex);
-      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, img);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-      gl.uniform1i(U.img, 0);
-    } else {
-      glc.replaceWith(Object.assign(img, { className: 'loader-fallback', alt: '' }));
-    }
+  setTimeout(() => { // даём браузеру отрисовать экран до запекания сцены
+    let scene;
+    try { scene = Forest.create($('#loader-canvas'), { air: true, horizon: .5 }); } catch (e) { console.error(e); return finish(); }
+    addEventListener('resize', () => !finished && scene.resize());
     loader.classList.add('is-ready');
-    t0 = last = performance.now();
-    requestAnimationFrame(frame);
-  };
-  img.onerror = () => { clearTimeout(bail); finish(); };
+    const DUR = 6800, t0 = performance.now();
+    let last = t0;
+    (function frame(now) {
+      if (finished) return;
+      const el = Math.max(0, now - t0), p = clamp(el / DUR, 0, 1), dt = Math.min(.05, (now - last) / 1000); last = now;
+      const speed = p < .7 ? 1.6 : 1.6 + Math.pow((p - .7) / .3, 2) * 10;
+      scene.frame(el / 1000, speed * dt, { bob: true, push: p > .7 ? (p - .7) * 2 : 0, flash: clamp((p - .76) / .24, 0, 1), fadeIn: clamp(el / 900, 0, 1) });
+      if (el >= DUR) return finish();
+      requestAnimationFrame(frame);
+    })(t0);
+  }, 30);
 }
 
-/* ─── HERO: ШЕЙДЕР-АУРА ────────────────────────────────────────────────── */
-function startAura() {
-  const cv = $('#aura'); if (!cv || reduceMotion) return;
-  const gl = cv.getContext('webgl', { antialias: false, alpha: false, premultipliedAlpha: false });
-  if (!gl) return;
-  const vs = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
-  const fs = `precision mediump float;
-uniform vec2 r;uniform float t;uniform vec2 m;uniform float light;
-float h(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
-return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}
-float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p*=2.02;a*=.5;}return v;}
-void main(){
- vec2 uv=gl_FragCoord.xy/r;vec2 p=uv*vec2(r.x/r.y,1.);
- float q=fbm(p*1.4+vec2(t*.025,-t*.018));
- float f=fbm(p*1.8+q*1.6+vec2(-t*.02,t*.015));
- float g=smoothstep(.85,.0,distance(uv,m));
- vec3 base=mix(vec3(.086,.07,.051),vec3(.96,.93,.878),light);
- vec3 amber=mix(vec3(.62,.3,.08),vec3(.93,.62,.3),light);
- vec3 red=mix(vec3(.5,.13,.08),vec3(.86,.45,.36),light);
- vec3 green=mix(vec3(.28,.34,.1),vec3(.62,.7,.42),light);
- vec3 gold=mix(vec3(.75,.55,.12),vec3(.97,.82,.45),light);
- vec3 c=base;
- c=mix(c,amber,smoothstep(.35,.85,f)*(.35+.55*g));
- c=mix(c,red,smoothstep(.55,.9,fbm(p*2.6-t*.03+4.))*.45);
- c=mix(c,green,smoothstep(.6,.92,fbm(p*2.2+t*.02+9.))*.35);
- c+=gold*pow(g,3.)*.28*(1.-light*.6);
- c=mix(c,base,smoothstep(.45,.0,uv.y)*.6);
- gl_FragColor=vec4(c,1.);}`;
-  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); return s; };
-  const pr = gl.createProgram();
-  gl.attachShader(pr, sh(gl.VERTEX_SHADER, vs)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, fs));
-  gl.linkProgram(pr);
-  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return;
-  gl.useProgram(pr);
-  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-  const loc = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
-  const U = n => gl.getUniformLocation(pr, n);
-  const uR = U('r'), uT = U('t'), uM = U('m'), uL = U('light');
-  const scale = isMobile ? .35 : .5;
-  let visible = true, mx = .7, my = .6, tx = .7, ty = .6, lightV = isLight() ? 1 : 0;
-  function resize() { cv.width = cv.clientWidth * scale; cv.height = cv.clientHeight * scale; gl.viewport(0, 0, cv.width, cv.height); }
-  resize(); addEventListener('resize', resize);
-  $('.hero').addEventListener('pointermove', e => {
-    const b = cv.getBoundingClientRect(); tx = (e.clientX - b.left) / b.width; ty = 1 - (e.clientY - b.top) / b.height;
-  });
-  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) requestAnimationFrame(frame); }).observe(cv);
-  const t0 = performance.now();
+/* ─── HERO: ТА ЖЕ АЛЛЕЯ, МЕДЛЕННО ──────────────────────────────────────── */
+function startHeroScene() {
+  const cv = $('#hero-scene'); if (!cv) return;
+  let scene;
+  try { scene = Forest.create(cv, { horizon: .56, maxDpr: isMobile ? 1 : 1.25 }); } catch (e) { console.error(e); return; }
+  let visible = true, last = performance.now(), acc = 0;
+  const t0 = last;
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) { last = performance.now(); requestAnimationFrame(frame); } }).observe(cv);
+  addEventListener('resize', () => scene.resize());
+  const step = isMobile ? 1 / 24 : 1 / 30;
   function frame(now) {
     if (!visible || document.hidden) return;
-    mx = lerp(mx, tx, .04); my = lerp(my, ty, .04);
-    lightV = lerp(lightV, isLight() ? 1 : 0, .08);
-    gl.uniform2f(uR, cv.width, cv.height); gl.uniform1f(uT, (now - t0) / 1000);
-    gl.uniform2f(uM, mx, my); gl.uniform1f(uL, lightV);
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    const dt = Math.min(.1, (now - last) / 1000); last = now; acc += dt;
+    if (acc >= step) { scene.frame(Math.max(0, now - t0) / 1000, reduceMotion ? 0 : .12 * acc); acc = 0; }
     requestAnimationFrame(frame);
   }
-  document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) requestAnimationFrame(frame); });
-  requestAnimationFrame(frame);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && visible) { last = performance.now(); requestAnimationFrame(frame); } });
+  scene.frame(0, 0);
 }
 
 /* ─── HERO: ЖИВОЙ ЧАТ ──────────────────────────────────────────────────── */
@@ -761,7 +1322,7 @@ function startPointerFx() {
 /* ─── ПАРАЛЛАКС ПЕЙЗАЖА И ЛИНИЯ ПРОЦЕССА ───────────────────────────────── */
 function startScrollFx() {
   const steps = $('.steps'), stepEls = $$('.step');
-  const topbar = $('#topbar'), heroPhoto = $('.hero-photo');
+  const topbar = $('#topbar'), heroPhoto = $('.hero-scene-wrap');
   let lastY = scrollY, ticking = false;
   function update() {
     ticking = false;
@@ -914,7 +1475,7 @@ runIntro(() => {
   startReveal();
   startPointerFx();
   startScrollFx();
-  startAura();
+  startHeroScene();
   chat.start();
   leaves.start();
 });

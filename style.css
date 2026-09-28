@@ -133,11 +133,9 @@ main, .topbar, .footer { position: relative; z-index: 2; }
   background: #1b130c;
   transition: opacity 1.1s var(--ease), visibility 1.1s;
 }
-.loader canvas, .loader-fallback { position: absolute; inset: 0; width: 100%; height: 100%; }
-.loader-fallback { object-fit: cover; animation: kenburns 6s ease-in reverse both; }
-.loader-brand, .loader-skip, .loader-credit { opacity: 0; transition: opacity .8s .3s; }
-.loader.is-ready .loader-skip, .loader.is-ready .loader-credit { opacity: 1; }
-.loader-credit { position: absolute; left: 20px; bottom: 22px; font: 400 11px/1 var(--f-mono); color: rgba(251, 233, 207, .55); letter-spacing: .03em; }
+.loader canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.loader-brand, .loader-skip { opacity: 0; transition: opacity .8s .3s; }
+.loader.is-ready .loader-skip { opacity: 1; }
 .loader-brand {
   position: absolute; left: 50%; bottom: 12vh; transform: translateX(-50%);
   font: 600 clamp(28px, 4vw, 44px)/1 var(--f-display); letter-spacing: .02em; color: #fbe9cf;
@@ -274,23 +272,17 @@ main, .topbar, .footer { position: relative; z-index: 2; }
 
 /* ============ HERO ============ */
 .hero { position: relative; padding: 48px 0 0; min-height: calc(100dvh - 72px); display: flex; flex-direction: column; overflow: hidden; margin-top: -72px; padding-top: 120px; }
-.aura { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; opacity: .5; mix-blend-mode: screen; pointer-events: none; }
-:root[data-theme="light"] .aura { opacity: .3; mix-blend-mode: soft-light; }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .aura { opacity: .3; mix-blend-mode: soft-light; } }
-.hero-photo { position: absolute; inset: -8% 0 0; z-index: 0; overflow: hidden; will-change: transform; }
-.hero-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 55%; animation: kenburns 28s ease-in-out infinite alternate; }
-@keyframes kenburns { from { transform: scale(1.12) translate(1.5%, 0); } to { transform: scale(1) translate(0, 0); } }
-.hero-photo::after {
+.hero-scene-wrap { position: absolute; inset: 0 0 -10%; z-index: 0; overflow: hidden; will-change: transform; }
+.hero-scene-wrap canvas { width: 100%; height: 100%; display: block; }
+.hero-scene-wrap::after {
   content: ""; position: absolute; inset: 0;
   background:
-    linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 88%, transparent) 30%, color-mix(in srgb, var(--bg) 45%, transparent) 62%, color-mix(in srgb, var(--bg) 25%, transparent) 100%),
-    linear-gradient(0deg, var(--bg) 0%, transparent 32%),
+    linear-gradient(90deg, var(--bg) 0%, color-mix(in srgb, var(--bg) 86%, transparent) 30%, color-mix(in srgb, var(--bg) 35%, transparent) 62%, color-mix(in srgb, var(--bg) 12%, transparent) 100%),
+    linear-gradient(0deg, var(--bg) 0%, transparent 30%),
     linear-gradient(180deg, color-mix(in srgb, var(--bg) 70%, transparent) 0%, transparent 22%);
 }
-:root[data-theme="light"] .hero-photo img { filter: saturate(.9) brightness(1.1); }
-@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .hero-photo img { filter: saturate(.9) brightness(1.1); } }
 @media (max-width: 900px) {
-  .hero-photo::after { background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 70%, transparent) 0%, color-mix(in srgb, var(--bg) 82%, transparent) 45%, var(--bg) 100%); }
+  .hero-scene-wrap::after { background: linear-gradient(180deg, color-mix(in srgb, var(--bg) 72%, transparent) 0%, color-mix(in srgb, var(--bg) 84%, transparent) 45%, var(--bg) 100%); }
 }
 .no-intro .loader { display: none; }
 .hero-grid {
@@ -597,7 +589,6 @@ main, .topbar, .footer { position: relative; z-index: 2; }
 .footer { border-top: 1px solid var(--line-soft); padding: 28px 0; font-size: 14px; color: var(--muted); }
 .footer-inner { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .footer a:hover { color: var(--accent); }
-.footer .credit { font-size: 12px; color: var(--faint); }
 
 /* ============ ПОЯВЛЕНИЕ ============ */
 .reveal { opacity: 0; transform: translateY(40px); transition: opacity 1s var(--ease), transform 1s var(--ease); transition-delay: var(--d, 0ms); }

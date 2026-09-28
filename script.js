@@ -730,6 +730,37 @@ const Forest = (() => {
     return sprite(cv);
   }
 
+  function bakeGravel(k) {
+    const r = srand(k * 37 + 5), R = (a, b) => a + r() * (b - a);
+    const cv = newCv(40, 28), c = cv.getContext('2d'), tone = k / 5;
+    const n = k < 3 ? 1 : 3;
+    for (let i = 0; i < n; i++) {
+      const x = n === 1 ? 20 : R(9, 31), y = n === 1 ? 15 : R(12, 19), gw = n === 1 ? 14 : R(5, 8), gh = gw * R(.55, .7);
+      c.fillStyle = 'rgba(30,18,10,.5)'; c.beginPath(); c.ellipse(x + gw * .15, y + gh * .45, gw * 1.05, gh * .55, 0, 0, 6.28); c.fill();
+      const t2 = (tone + R(-.15, .15));
+      c.fillStyle = `rgb(${lerp(112, 186, t2) | 0},${lerp(100, 164, t2) | 0},${lerp(86, 134, t2) | 0})`;
+      c.beginPath(); c.ellipse(x, y, gw, gh, R(-.4, .4), 0, 6.28); c.fill();
+      c.fillStyle = 'rgba(255,238,210,.35)'; c.beginPath(); c.ellipse(x - gw * .3, y - gh * .35, gw * .4, gh * .3, 0, 0, 6.28); c.fill();
+    }
+    return cv;
+  }
+  function bakeClod(k) {
+    const cv = newCv(40, 20), c = cv.getContext('2d');
+    const g = c.createRadialGradient(20, 10, 0, 20, 10, 18);
+    g.addColorStop(0, k ? 'rgba(215,180,135,.45)' : 'rgba(45,26,14,.55)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+    c.fillStyle = g; c.beginPath(); c.ellipse(20, 10, 18, 8, 0, 0, 6.28); c.fill();
+    return cv;
+  }
+
+  function bakeFlatLeaves() {
+    return Array.from({ length: 18 }, (_, i) => {
+      const cv = newCv(64, 32), c = cv.getContext('2d');
+      c.translate(32, 16); c.scale(1, .45); c.rotate(Math.random() * 6.28);
+      c.drawImage(leafSprites[i % leafSprites.length].sharp, -30, -30, 60, 60);
+      return cv;
+    });
+  }
+
   function bakeTufts() {
     return Array.from({ length: 6 }, (_, k) => {
       const r = srand(k * 131 + 7), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
@@ -755,6 +786,9 @@ const Forest = (() => {
       reed: [bakeReed(0, S), bakeReed(1, S), bakeReed(2, S)],
       house: [bakeHouse(0, S), bakeHouse(1, S)],
       tuft: bakeTufts(),
+      gravel: Array.from({ length: 6 }, (_, i) => bakeGravel(i)),
+      clod: [bakeClod(0), bakeClod(1)],
+      flat: bakeFlatLeaves(),
       stone: [bakeStones(0, S), bakeStones(1, S), bakeStones(2, S), bakeStones(3, S)],
     };
   }
@@ -773,6 +807,8 @@ const Forest = (() => {
 
     ensureAssets();
 
+    const trailEdge = (side, z) => side * (.84 + Math.sin(z * 1.7 + side * 2.1) * .07 + Math.sin(z * 4.3 + side) * .035);
+    const trailMid = z => Math.sin(z * .45) * .06;
     function bakeSky() {
       sky = newCv(W, Math.ceil(hy) + 2);
       const c = sky.getContext('2d'), g = c.createLinearGradient(0, 0, 0, hy);
@@ -821,17 +857,16 @@ const Forest = (() => {
       c.fillStyle = g; c.fillRect(0, 0, W, gh);
       const r = srand(77), R = (a, b) => a + r() * (b - a);
       const pathAt = y => 1.05 * y / CAM;
-      for (let i = 0; i < (small ? 3500 : 7000); i++) {
+      for (let i = 0; i < (small ? 1200 : 2400); i++) {
         const v = Math.pow(r(), 1.6), y = v * gh, x = R(0, W);
         if (Math.abs(x - cx) < pathAt(y) * .8 && r() < .7) continue;
         const s = .5 + v * (small ? 5 : 7), pal = LEAF_PAL[(r() * LEAF_PAL.length) | 0];
-        c.fillStyle = pal[(r() * 3) | 0]; c.globalAlpha = R(.45, .9) * (.5 + v * .5);
+        c.fillStyle = pal[(r() * 3) | 0]; c.globalAlpha = R(.2, .4) * (.5 + v * .5);
         c.beginPath(); c.ellipse(x, y, s, s * .45, R(0, 3), 0, 6.28); c.fill();
       }
       c.globalAlpha = 1;
       // лесная тропа: утоптанная земля с неровными краями
-      const edge = (side, z) => side * (.84 + Math.sin(z * 1.7 + side * 2.1) * .07 + Math.sin(z * 4.3 + side) * .035);
-      const mid = z => Math.sin(z * .45) * .06;
+      const edge = trailEdge, mid = trailMid;
       const zs = []; for (let z = .3; z < FAR * 1.6; z *= 1.045) zs.push(z);
       const trailPath = grow => {
         c.beginPath();
@@ -849,33 +884,6 @@ const Forest = (() => {
         const g2 = c.createRadialGradient(q.x, q.y - hy, 0, q.x, q.y - hy, rx);
         g2.addColorStop(0, 'rgba(232,196,148,.2)'); g2.addColorStop(1, 'rgba(232,196,148,0)');
         c.fillStyle = g2; c.beginPath(); c.ellipse(q.x, q.y - hy, rx, ry * 2.2, 0, 0, 6.28); c.fill();
-      }
-      for (let i = 0; i < (small ? 4200 : 8500); i++) { // комья земли, гравий, листья
-        const z = .3 + Math.pow(r(), 2.2) * FAR * 1.4, u = R(-1, 1);
-        const q = proj(mid(z) + u * .9, 0, z), sz = Math.max(.35, q.s * R(.004, .016));
-        const kind = r();
-        const y0 = q.y - hy;
-        if (kind < .4) { // комья и пятна земли
-          c.fillStyle = r() < .5 ? `rgba(50,30,16,${R(.18, .42)})` : `rgba(215,180,135,${R(.12, .3)})`;
-          c.beginPath(); c.ellipse(q.x, y0, sz * 1.6, sz * .55, R(0, 3), 0, 6.28); c.fill();
-        } else if (kind < .8) { // гравий
-          const gs = sz * R(.6, 1.1), tone = R(0, 1);
-          c.fillStyle = 'rgba(30,18,10,.45)'; c.beginPath(); c.ellipse(q.x + gs * .15, y0 + gs * .3, gs * 1.05, gs * .5, 0, 0, 6.28); c.fill();
-          c.fillStyle = `rgb(${lerp(118, 178, tone) | 0},${lerp(104, 156, tone) | 0},${lerp(88, 128, tone) | 0})`;
-          c.beginPath(); c.ellipse(q.x, y0, gs, gs * .62, R(-.4, .4), 0, 6.28); c.fill();
-          c.fillStyle = 'rgba(255,236,205,.3)'; c.beginPath(); c.ellipse(q.x - gs * .3, y0 - gs * .2, gs * .38, gs * .2, 0, 0, 6.28); c.fill();
-        } else { // листья по краям тропы
-          if (Math.abs(u) < .5 && r() < .6) continue;
-          const pal = LEAF_PAL[(r() * LEAF_PAL.length) | 0]; c.fillStyle = pal[(r() * 3) | 0];
-          c.beginPath(); c.ellipse(q.x, y0, sz * 1.6, sz * .55, R(0, 3), 0, 6.28); c.fill();
-        }
-      }
-      for (let i = 0; i < (small ? 22 : 40); i++) { // корни у краёв тропы
-        const z = .8 + Math.pow(r(), 1.6) * FAR * .8, side = r() < .5 ? -1 : 1;
-        const a = proj(mid(z) + edge(side, z) * 1.04, 0, z), b = proj(mid(z) + edge(side, z) * R(.72, .86), 0, z + R(-.12, .12));
-        const bend = a.s * R(.01, .03);
-        c.strokeStyle = `rgba(48,28,14,${R(.4, .65)})`; c.lineWidth = Math.max(.6, a.s * R(.006, .011)); c.lineCap = 'round';
-        c.beginPath(); c.moveTo(a.x, a.y - hy); c.bezierCurveTo(lerp(a.x, b.x, .3), a.y - hy - bend, lerp(a.x, b.x, .7), b.y - hy + bend, b.x, b.y - hy); c.stroke();
       }
       const sunGl = c.createRadialGradient(cx, 0, 0, cx, 0, gh * .5);
       sunGl.addColorStop(0, 'rgba(255,225,165,.28)'); sunGl.addColorStop(1, 'rgba(255,200,130,0)');
@@ -908,7 +916,15 @@ const Forest = (() => {
     for (const [type, side, x0, x1, step] of LANES) {
       for (let z = rand(.4, step); z < FAR; z += step * dens * rand(.7, 1.3)) things.push(mk(type, side, x0, x1, z));
     }
-    const gLeaves = Array.from({ length: small ? 140 : 260 }, () => ({ x: rand(-4.5, 1.85), z: rand(.3, FAR), spr: pick(leafSprites).sharp, rot: rand(0, 6.28) }));
+    const mkGrit = z => {
+      const kind = Math.random(), onTrail = Math.random() < .85;
+      const x = trailMid(z) + (onTrail ? rand(-.8, .8) : rand(-1.1, 1.1));
+      return kind < .6 ? { z, x, spr: pick(A.gravel), w: rand(.04, .085), h: .7 }
+        : kind < .85 ? { z, x, spr: pick(A.clod), w: rand(.07, .16), h: .5 }
+        : { z, x, spr: pick(A.flat), w: rand(.06, .09), h: .5 };
+    };
+    const grit = Array.from({ length: opt.lite ? (small ? 260 : 520) : (small ? 650 : 1300) }, () => mkGrit(rand(.3, FAR)));
+    const gLeaves = Array.from({ length: opt.lite ? (small ? 140 : 260) : (small ? 300 : 600) }, () => ({ x: rand(-4.5, 1.85), z: rand(.3, FAR), spr: pick(A.flat) }));
     const lakeLeaves = Array.from({ length: small ? 18 : 34 }, () => ({ x: rand(LAKE_X0 + .2, LAKE_X1 - .2), z: rand(.4, FAR), spr: pick(leafSprites).sharp, rot: rand(0, 6.28), sp: rand(-.1, .1) }));
     const stream = { z: 9 };
     const motes = Array.from({ length: small ? 30 : 60 }, () => ({ x: rand(-.5, .5), y: rand(-.4, .5), s: rand(.6, 2.2), ph: rand(0, 6.28), v: rand(.005, .02) }));
@@ -1089,6 +1105,7 @@ const Forest = (() => {
           if (th.z < .3) { const n = mk(th.type, th.side, th.lane[0], th.lane[1], th.z + FAR); Object.assign(th, n); }
         }
         for (const l of gLeaves) { l.z -= dz; if (l.z < .3) { l.z += FAR; l.x = rand(-4.5, 1.85); } }
+        for (let i = 0; i < grit.length; i++) { const g = grit[i]; g.z -= dz; if (g.z < .3) grit[i] = mkGrit(g.z + FAR); }
         for (const l of lakeLeaves) { l.z -= dz; l.x += l.sp * dz * .1; if (l.z < .4) { l.z += FAR; l.x = rand(LAKE_X0 + .2, LAKE_X1 - .2); } }
         stream.z -= dz; if (stream.z < -1) stream.z += FAR + 4;
       }
@@ -1112,11 +1129,19 @@ const Forest = (() => {
       ctx.fillStyle = '#2a1640';
       for (const th of things) drawShadow(th);
       ctx.globalAlpha = 1;
+      for (const g of grit) { // гравий, комья и листья на тропе едут навстречу
+        const q = proj(g.x, 0, g.z), w = g.w * q.s;
+        if (w < .9 || q.y > H + 20) continue;
+        const hh = w * g.h;
+        ctx.globalAlpha = 1 - clamp((g.z - 4) / (FAR - 4), 0, 1) * .75;
+        ctx.drawImage(g.spr, q.x - w / 2, q.y - hh / 2, w, hh);
+      }
+      ctx.globalAlpha = 1;
       for (const l of gLeaves) {
         const q = proj(l.x, 0, l.z), sz = .085 * q.s;
         if (sz < 1.4 || q.y > H + 20 || q.x < -30 || q.x > W + 30) continue;
         ctx.globalAlpha = 1 - clamp((l.z - 3) / (FAR - 3), 0, 1) * .7;
-        ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(l.rot); ctx.scale(1, .42); ctx.drawImage(l.spr, -sz / 2, -sz / 2, sz, sz); ctx.restore();
+        ctx.drawImage(l.spr, q.x - sz / 2, q.y - sz / 4, sz, sz / 2);
       }
       ctx.globalAlpha = 1;
       drawWater(t);
@@ -1214,7 +1239,7 @@ function runIntro(done) {
 function startHeroScene() {
   const cv = $('#hero-scene'); if (!cv) return;
   let scene;
-  try { scene = Forest.create(cv, { horizon: .56, maxDpr: isMobile ? .8 : .75, strip: 3 }); } catch (e) { console.error(e); return; }
+  try { scene = Forest.create(cv, { horizon: .56, maxDpr: isMobile ? .8 : .75, strip: 3, lite: true }); } catch (e) { console.error(e); return; }
   let visible = true, last = performance.now(), acc = 0;
   const t0 = last;
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) { last = performance.now(); requestAnimationFrame(frame); } }).observe(cv);

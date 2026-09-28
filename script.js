@@ -872,10 +872,46 @@ const Forest = (() => {
       for (let i = zs.length - 1; i >= 0; i--) { const z = zs[i], w = off != null ? off : trailEdge(1, z + camZ) + grow, q = proj(trailMid(z + camZ) + w, 0, z); ctx.lineTo(q.x, q.y); }
       ctx.closePath();
     }
+    const TR = srand(4242), TRR = (a, b) => a + TR() * (b - a);
+    const SPECK = Array.from({ length: small ? 2600 : 5200 }, () => {
+      const t = TR(), u = TRR(-1, 1);
+      return { z: .3 + Math.pow(TR(), 2.1) * FAR, u, s: TRR(.002, .007),
+        c: t < .45 ? `rgba(58,34,18,${TRR(.18, .38).toFixed(2)})` : t < .8 ? `rgba(236,204,160,${TRR(.12, .26).toFixed(2)})` : `rgba(150,118,86,${TRR(.3, .5).toFixed(2)})` };
+    });
+    const EDGE_BITS = Array.from({ length: small ? 700 : 1400 }, () => {
+      const side = TR() < .5 ? -1 : 1, t = TR();
+      return { z: .3 + Math.pow(TR(), 2) * FAR, side, d: TRR(-.12, .06), s: TRR(.018, .045),
+        c: t < .3 ? `rgba(96,122,42,${TRR(.35, .6).toFixed(2)})` : LEAF_PAL[(TR() * LEAF_PAL.length) | 0][(TR() * 3) | 0], leaf: t >= .3 };
+    });
     function drawTrail() {
-      ctx.fillStyle = trailEdgeGrad; trailPath(.14); ctx.fill();
+      ctx.fillStyle = 'rgba(40,24,14,.45)'; trailPath(.2); ctx.fill(); // тёмная кромка к подстилке
       ctx.fillStyle = trailGrad; trailPath(0); ctx.fill();
-      ctx.fillStyle = sunGlow; ctx.fillRect(cx - H * .6, hy, H * 1.2, H * .6);
+      ctx.save(); trailPath(0); ctx.clip();
+      // объём поперёк: середина светлее и выпуклее, края в тени
+      ctx.filter = `blur(${Math.round(H * .03)}px)`;
+      ctx.fillStyle = 'rgba(245,214,168,.34)'; trailPath(0, .42); ctx.fill();
+      ctx.fillStyle = 'rgba(255,230,190,.2)'; trailPath(0, .18); ctx.fill();
+      ctx.filter = `blur(${Math.round(H * .02)}px)`;
+      ctx.lineWidth = H * .05; ctx.strokeStyle = 'rgba(30,16,8,.5)'; trailPath(0); ctx.stroke();
+      ctx.filter = 'none';
+      // тёплый отсвет заката уходит вдаль
+      const glow = ctx.createLinearGradient(0, hy, 0, H);
+      glow.addColorStop(0, 'rgba(255,214,150,.42)'); glow.addColorStop(.35, 'rgba(255,200,140,.1)'); glow.addColorStop(1, 'rgba(40,20,40,.35)');
+      ctx.fillStyle = glow; ctx.fillRect(0, hy, W, H - hy);
+      // фактура утоптанной земли
+      for (const p of SPECK) {
+        const q = proj(trailMid(p.z + camZ) + p.u * .85, 0, p.z), r = p.s * q.s;
+        if (r < .35) continue;
+        ctx.fillStyle = p.c; ctx.beginPath(); ctx.ellipse(q.x, q.y, r * 1.6, r * .6, 0, 0, 6.28); ctx.fill();
+      }
+      ctx.restore();
+      // мох и листья, которые ветер сгрёб к кромке
+      for (const b of EDGE_BITS) {
+        const q = proj(trailMid(b.z + camZ) + trailEdge(b.side, b.z + camZ) + b.d * b.side, 0, b.z), r = b.s * q.s;
+        if (r < .5) continue;
+        ctx.fillStyle = b.c; ctx.beginPath();
+        ctx.ellipse(q.x, q.y, r * (b.leaf ? 1 : 1.8), r * (b.leaf ? .42 : .5), b.leaf ? (b.z * 7) % 3 : 0, 0, 6.28); ctx.fill();
+      }
     }
 
     /* ── объекты мира ── */
@@ -897,8 +933,8 @@ const Forest = (() => {
     const mkGrit = z => {
       const kind = Math.random(), onTrail = Math.random() < .85;
       const u = onTrail ? rand(-.8, .8) : rand(-1.1, 1.1);
-      return kind < .6 ? { z, u, spr: pick(A.gravel), w: rand(.04, .085), h: .7 }
-        : kind < .85 ? { z, u, spr: pick(A.clod), w: rand(.07, .16), h: .5 }
+      return kind < .7 ? { z, u, spr: pick(A.gravel), w: rand(.035, .075), h: .7 }
+        : kind < .7 ? { z, u, spr: pick(A.clod), w: rand(.07, .16), h: .5 }
         : { z, u, spr: pick(A.flat), w: rand(.06, .09), h: .5 };
     };
     const grit = Array.from({ length: opt.lite ? (small ? 260 : 520) : (small ? 650 : 1300) }, () => mkGrit(rand(.3, FAR)));
@@ -1134,7 +1170,7 @@ const Forest = (() => {
       ctx.globalCompositeOperation = 'lighter';
       const R0 = Math.hypot(W, H) * 1.1;
       ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, hy); ctx.clip();
-      for (const ry of rays) {
+      for (const ry of []) {
         const a = ry.a + Math.sin(t * .18 + ry.ph) * .05, w = ry.w * (1 + Math.sin(t * .4 + ry.ph) * .25);
         const gr = ctx.createRadialGradient(cx, sunY, 0, cx, sunY, R0);
         gr.addColorStop(0, `rgba(255,215,150,${ry.al * .9})`); gr.addColorStop(.45, `rgba(255,190,120,${ry.al * .22})`); gr.addColorStop(1, 'rgba(255,170,100,0)');
@@ -1145,7 +1181,7 @@ const Forest = (() => {
         ctx.closePath(); ctx.fill();
       }
       ctx.restore();
-      for (const m of motes) {
+      for (const m of []) {
         m.y -= m.v * .016; if (m.y < -.5) m.y = .5;
         const x = cx + (m.x + Math.sin(t * .3 + m.ph) * .03) * W * .8, y = sunY + (m.y - .25) * H * .5;
         const tw = .4 + .6 * Math.abs(Math.sin(t * 1.4 + m.ph));

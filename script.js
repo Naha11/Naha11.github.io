@@ -330,7 +330,7 @@ const leaves = (() => {
   const cv = $('#leaves'); const ctx = cv.getContext('2d');
   let W, H, dpr, list = [], running = false, visible = true, last = 0, wind = 0;
   const mouse = { x: -999, y: -999 };
-  const COUNT = reduceMotion ? 0 : isMobile ? 12 : 22;
+  const COUNT = 0; // листья падают только в заставке
   function resize() {
     dpr = Math.min(devicePixelRatio || 1, 1.5);
     W = cv.clientWidth; H = cv.clientHeight;
@@ -707,6 +707,29 @@ const Forest = (() => {
     return sprite(cv, { glow, chimney: [(cx0 + 17 * S) / W, H * .1 / H] });
   }
 
+  function bakeStones(k, S) {
+    const r = srand(k * 59 + 23), R = (a, b) => a + r() * (b - a);
+    const W = Math.round(180 * S), H = Math.round(90 * S), cv = newCv(W, H), c = cv.getContext('2d'), by = H * .96;
+    const n = k === 0 ? 1 : k === 1 ? 3 : 5;
+    for (let i = 0; i < n; i++) {
+      const x = W / 2 + (n === 1 ? 0 : R(-W * .32, W * .32)), rw = (n === 1 ? R(.32, .4) : R(.1, .2)) * W, rh = rw * R(.5, .7);
+      c.fillStyle = 'rgba(25,14,8,.45)'; c.beginPath(); c.ellipse(x + rw * .12, by - rh * .1, rw * 1.08, rh * .35, 0, 0, 6.28); c.fill();
+      c.beginPath();
+      for (let j = 0; j <= 9; j++) { const a = Math.PI + j / 9 * Math.PI; c.lineTo(x + Math.cos(a) * rw * R(.9, 1.05), by - rh * .15 + Math.sin(a) * rh * R(.85, 1.05)); }
+      c.closePath();
+      const g = c.createLinearGradient(x - rw, by - rh, x + rw, by);
+      const t = R(0, 1);
+      g.addColorStop(0, `rgb(${lerp(180, 205, t) | 0},${lerp(165, 188, t) | 0},${lerp(142, 160, t) | 0})`); g.addColorStop(.55, `rgb(${lerp(120, 140, t) | 0},${lerp(108, 124, t) | 0},${lerp(92, 104, t) | 0})`); g.addColorStop(1, '#3e342c');
+      c.fillStyle = g; c.fill();
+      c.save(); c.clip();
+      for (let j = 0; j < 8; j++) { c.fillStyle = r() < .5 ? 'rgba(30,20,12,.18)' : 'rgba(255,240,215,.14)'; c.beginPath(); c.ellipse(x + R(-rw, rw), by - R(0, rh), R(2, rw * .3), R(1, rh * .2), R(0, 3), 0, 6.28); c.fill(); }
+      if (r() < .4) { c.fillStyle = 'rgba(110,135,45,.5)'; c.beginPath(); c.ellipse(x - rw * .2, by - rh * .9, rw * .45, rh * .2, 0, 0, 6.28); c.fill(); }
+      c.restore();
+    }
+    for (let i = 0; i < 14; i++) { const gs = R(1.5, 3.5) * S; c.fillStyle = `rgb(${R(120, 175) | 0},${R(108, 155) | 0},${R(90, 125) | 0})`; c.beginPath(); c.ellipse(R(W * .1, W * .9), by - R(0, 4) * S, gs, gs * .6, 0, 0, 6.28); c.fill(); }
+    return sprite(cv);
+  }
+
   function bakeTufts() {
     return Array.from({ length: 6 }, (_, k) => {
       const r = srand(k * 131 + 7), R = (a, b) => a + r() * (b - a), P = a => a[(r() * a.length) | 0];
@@ -732,11 +755,12 @@ const Forest = (() => {
       reed: [bakeReed(0, S), bakeReed(1, S), bakeReed(2, S)],
       house: [bakeHouse(0, S), bakeHouse(1, S)],
       tuft: bakeTufts(),
+      stone: [bakeStones(0, S), bakeStones(1, S), bakeStones(2, S), bakeStones(3, S)],
     };
   }
 
   // высота объекта в мировых единицах
-  const SIZE = { tree: 3.9, bush: .95, log: .5, flowers: .34, mush: .2, rock: .42, lamp: 1.9, reed: .95, house: 3.1, tuft: .3 };
+  const SIZE = { stone: .2, tree: 3.9, bush: .95, log: .5, flowers: .34, mush: .2, rock: .42, lamp: 1.9, reed: .95, house: 3.1, tuft: .3 };
   const LAKE_X0 = 1.95, LAKE_X1 = 7.4;
 
   function create(canvas, opt = {}) {
@@ -805,22 +829,67 @@ const Forest = (() => {
         c.beginPath(); c.ellipse(x, y, s, s * .45, R(0, 3), 0, 6.28); c.fill();
       }
       c.globalAlpha = 1;
-      const pa = proj(-.62, 0, FAR * 1.5), pb = proj(.62, 0, FAR * 1.5), pc = proj(1.15, 0, .3), pd = proj(-1.15, 0, .3);
-      const path = grow => { c.beginPath(); c.moveTo(pa.x - grow * .1, pa.y - hy); c.lineTo(pb.x + grow * .1, pb.y - hy); c.lineTo(pc.x + grow, pc.y - hy); c.lineTo(pd.x - grow, pd.y - hy); c.closePath(); };
-      const pg = c.createLinearGradient(0, 0, 0, gh);
-      pg.addColorStop(0, 'rgba(246,208,150,.85)'); pg.addColorStop(.3, 'rgba(196,146,94,.7)'); pg.addColorStop(1, 'rgba(120,82,48,.7)');
-      c.fillStyle = 'rgba(120,80,45,.25)'; path(W * .05); c.fill();
-      c.fillStyle = pg; path(0); c.fill();
-      c.save(); path(0); c.clip();
-      for (let i = 0; i < (small ? 900 : 1800); i++) {
-        const v = Math.pow(r(), 1.5), y = v * gh, x = cx + R(-1, 1) * pathAt(y) * K / K, s = .4 + v * 3.2;
-        c.fillStyle = r() < .6 ? `rgba(90,60,35,${R(.2, .45)})` : LEAF_PAL[(r() * LEAF_PAL.length) | 0][(r() * 2) | 0];
-        c.beginPath(); c.ellipse(x, y, s, s * .5, R(0, 3), 0, 6.28); c.fill();
+      // лесная тропа: утоптанная земля с неровными краями
+      const edge = (side, z) => side * (.84 + Math.sin(z * 1.7 + side * 2.1) * .07 + Math.sin(z * 4.3 + side) * .035);
+      const mid = z => Math.sin(z * .45) * .06;
+      const zs = []; for (let z = .3; z < FAR * 1.6; z *= 1.045) zs.push(z);
+      const trailPath = grow => {
+        c.beginPath();
+        zs.forEach((z, i) => { const q = proj(mid(z) + edge(-1, z) - grow, 0, z); i ? c.lineTo(q.x, q.y - hy) : c.moveTo(q.x, q.y - hy); });
+        for (let i = zs.length - 1; i >= 0; i--) { const z = zs[i], q = proj(mid(z) + edge(1, z) + grow, 0, z); c.lineTo(q.x, q.y - hy); }
+        c.closePath();
+      };
+      c.fillStyle = 'rgba(70,42,24,.35)'; trailPath(.14); c.fill(); // переход к лесной подстилке
+      const tg = c.createLinearGradient(0, 0, 0, gh);
+      tg.addColorStop(0, '#caa27e'); tg.addColorStop(.12, '#a47552'); tg.addColorStop(.45, '#7a5236'); tg.addColorStop(1, '#4e3322');
+      c.fillStyle = tg; trailPath(0); c.fill();
+      c.save(); trailPath(0); c.clip();
+      for (const z of zs) { // светлая протоптанная середина, мягко
+        const q = proj(mid(z), 0, z), rx = q.s * .42, ry = Math.max(1, q.s * .05);
+        const g2 = c.createRadialGradient(q.x, q.y - hy, 0, q.x, q.y - hy, rx);
+        g2.addColorStop(0, 'rgba(232,196,148,.2)'); g2.addColorStop(1, 'rgba(232,196,148,0)');
+        c.fillStyle = g2; c.beginPath(); c.ellipse(q.x, q.y - hy, rx, ry * 2.2, 0, 0, 6.28); c.fill();
       }
-      const sun = c.createRadialGradient(cx, 0, 0, cx, 0, gh * .9);
-      sun.addColorStop(0, 'rgba(255,225,160,.55)'); sun.addColorStop(1, 'rgba(255,200,130,0)');
-      c.fillStyle = sun; c.fillRect(0, 0, W, gh);
+      for (let i = 0; i < (small ? 4200 : 8500); i++) { // комья земли, гравий, листья
+        const z = .3 + Math.pow(r(), 2.2) * FAR * 1.4, u = R(-1, 1);
+        const q = proj(mid(z) + u * .9, 0, z), sz = Math.max(.35, q.s * R(.004, .016));
+        const kind = r();
+        const y0 = q.y - hy;
+        if (kind < .4) { // комья и пятна земли
+          c.fillStyle = r() < .5 ? `rgba(50,30,16,${R(.18, .42)})` : `rgba(215,180,135,${R(.12, .3)})`;
+          c.beginPath(); c.ellipse(q.x, y0, sz * 1.6, sz * .55, R(0, 3), 0, 6.28); c.fill();
+        } else if (kind < .8) { // гравий
+          const gs = sz * R(.6, 1.1), tone = R(0, 1);
+          c.fillStyle = 'rgba(30,18,10,.45)'; c.beginPath(); c.ellipse(q.x + gs * .15, y0 + gs * .3, gs * 1.05, gs * .5, 0, 0, 6.28); c.fill();
+          c.fillStyle = `rgb(${lerp(118, 178, tone) | 0},${lerp(104, 156, tone) | 0},${lerp(88, 128, tone) | 0})`;
+          c.beginPath(); c.ellipse(q.x, y0, gs, gs * .62, R(-.4, .4), 0, 6.28); c.fill();
+          c.fillStyle = 'rgba(255,236,205,.3)'; c.beginPath(); c.ellipse(q.x - gs * .3, y0 - gs * .2, gs * .38, gs * .2, 0, 0, 6.28); c.fill();
+        } else { // листья по краям тропы
+          if (Math.abs(u) < .5 && r() < .6) continue;
+          const pal = LEAF_PAL[(r() * LEAF_PAL.length) | 0]; c.fillStyle = pal[(r() * 3) | 0];
+          c.beginPath(); c.ellipse(q.x, y0, sz * 1.6, sz * .55, R(0, 3), 0, 6.28); c.fill();
+        }
+      }
+      for (let i = 0; i < (small ? 22 : 40); i++) { // корни у краёв тропы
+        const z = .8 + Math.pow(r(), 1.6) * FAR * .8, side = r() < .5 ? -1 : 1;
+        const a = proj(mid(z) + edge(side, z) * 1.04, 0, z), b = proj(mid(z) + edge(side, z) * R(.72, .86), 0, z + R(-.12, .12));
+        const bend = a.s * R(.01, .03);
+        c.strokeStyle = `rgba(48,28,14,${R(.4, .65)})`; c.lineWidth = Math.max(.6, a.s * R(.006, .011)); c.lineCap = 'round';
+        c.beginPath(); c.moveTo(a.x, a.y - hy); c.bezierCurveTo(lerp(a.x, b.x, .3), a.y - hy - bend, lerp(a.x, b.x, .7), b.y - hy + bend, b.x, b.y - hy); c.stroke();
+      }
+      const sunGl = c.createRadialGradient(cx, 0, 0, cx, 0, gh * .5);
+      sunGl.addColorStop(0, 'rgba(255,225,165,.28)'); sunGl.addColorStop(1, 'rgba(255,200,130,0)');
+      c.fillStyle = sunGl; c.fillRect(0, 0, W, gh);
       c.restore();
+      c.lineCap = 'round'; // трава заходит на края тропы
+      for (let i = 0; i < (small ? 900 : 1800); i++) {
+        const z = .3 + Math.pow(r(), 2) * FAR * 1.2, side = r() < .5 ? -1 : 1;
+        const q = proj(mid(z) + edge(side, z) + R(-.08, .05) * side, 0, z), h = q.s * R(.02, .06);
+        if (h < .8) continue;
+        c.strokeStyle = ['#6b7a2a', '#8a8a34', '#a2873c', '#5a5a22', '#b59a4c'][(r() * 5) | 0];
+        c.lineWidth = Math.max(.5, q.s * .004);
+        c.beginPath(); c.moveTo(q.x, q.y - hy); c.quadraticCurveTo(q.x + R(-2, 2), q.y - hy - h * .6, q.x + R(-h * .4, h * .4), q.y - hy - h); c.stroke();
+      }
     }
 
     /* ── объекты мира ── */
@@ -833,6 +902,7 @@ const Forest = (() => {
       ['lamp', -1, 1.2, 1.24, 4.4], ['reed', 1, 1.84, 2.0, 1.15], ['reed', 1, 7.25, 7.45, .6],
       ['house', -1, 5.6, 6.6, 9.5], ['house', 1, 9.2, 10.5, 12],
       ['tuft', -1, 1.02, 4, .22], ['tuft', 1, 1.02, 1.75, .35],
+      ['stone', -1, .05, .8, 1.5], ['stone', 1, .05, .8, 1.7], ['stone', -1, .82, 1.02, 1.1], ['stone', 1, .82, 1.02, 1.3],
     ];
     const mk = (type, side, x0, x1, z) => ({ type, side, x: side * rand(x0, x1), z, v: (Math.random() * A[type].length) | 0, sc: rand(.85, 1.15), ph: rand(0, 6.28), lane: [x0, x1] });
     for (const [type, side, x0, x1, step] of LANES) {
@@ -842,7 +912,7 @@ const Forest = (() => {
     const lakeLeaves = Array.from({ length: small ? 18 : 34 }, () => ({ x: rand(LAKE_X0 + .2, LAKE_X1 - .2), z: rand(.4, FAR), spr: pick(leafSprites).sharp, rot: rand(0, 6.28), sp: rand(-.1, .1) }));
     const stream = { z: 9 };
     const motes = Array.from({ length: small ? 30 : 60 }, () => ({ x: rand(-.5, .5), y: rand(-.4, .5), s: rand(.6, 2.2), ph: rand(0, 6.28), v: rand(.005, .02) }));
-    const rays = Array.from({ length: 9 }, (_, i) => ({ a: (i - 4) * .36 + rand(-.1, .1), w: rand(.025, .07), al: rand(.05, .12), ph: rand(0, 6.28) }));
+    const rays = Array.from({ length: 9 }, (_, i) => ({ a: (i - 4) * .3 + rand(-.08, .08), w: rand(.02, .05), al: rand(.03, .07), ph: rand(0, 6.28) }));
     const air = opt.air ? [
       ...Array.from({ length: small ? 14 : 26 }, () => mkAir(0)),
       ...Array.from({ length: small ? 10 : 18 }, () => mkAir(1)),
@@ -944,9 +1014,10 @@ const Forest = (() => {
       const s0 = stream.z, sp = s0 > .3 && s0 < FAR;
       if (sp) { waterPoly(ctx, -40, LAKE_X0 + .1, Math.max(.3, s0 - .32), s0 + .32, true); }
       ctx.clip();
-      for (let y = 0; y < gh; y += 2) { // рябь
+      const st = opt.strip || 2;
+      for (let y = 0; y < gh; y += st) { // рябь
         const k = y / gh, dx = Math.sin(y * .45 + t * 2.4) * (.6 + k * 4);
-        ctx.drawImage(waterCv, 0, y, W, 2, dx, gy0 + y, W, 2);
+        ctx.drawImage(waterCv, 0, y, W, st, dx, gy0 + y, W, st);
       }
       ctx.fillStyle = 'rgba(227,160,110,.35)'; ctx.fillRect(0, gy0, W, (H - gy0) * .12); // дымка над водой
       const sh = ctx.createLinearGradient(0, gy0, 0, H); // глянец
@@ -1057,19 +1128,21 @@ const Forest = (() => {
       if (!bridgeDone) drawBridge(t);
       ctx.globalCompositeOperation = 'lighter';
       const R0 = Math.hypot(W, H) * 1.1;
+      ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, hy); ctx.clip();
       for (const ry of rays) {
         const a = ry.a + Math.sin(t * .18 + ry.ph) * .05, w = ry.w * (1 + Math.sin(t * .4 + ry.ph) * .25);
         const gr = ctx.createRadialGradient(cx, sunY, 0, cx, sunY, R0);
         gr.addColorStop(0, `rgba(255,215,150,${ry.al * .9})`); gr.addColorStop(.45, `rgba(255,190,120,${ry.al * .22})`); gr.addColorStop(1, 'rgba(255,170,100,0)');
         ctx.fillStyle = gr;
         ctx.beginPath(); ctx.moveTo(cx, sunY);
-        ctx.lineTo(cx + Math.sin(a - w) * R0, sunY + Math.cos(a - w) * R0 * (a > 1.2 || a < -1.2 ? .4 : 1));
-        ctx.lineTo(cx + Math.sin(a + w) * R0, sunY + Math.cos(a + w) * R0 * (a > 1.2 || a < -1.2 ? .4 : 1));
+        ctx.lineTo(cx + Math.sin(a - w) * R0, sunY - Math.cos(a - w) * R0 * .6);
+        ctx.lineTo(cx + Math.sin(a + w) * R0, sunY - Math.cos(a + w) * R0 * .6);
         ctx.closePath(); ctx.fill();
       }
+      ctx.restore();
       for (const m of motes) {
         m.y -= m.v * .016; if (m.y < -.5) m.y = .5;
-        const x = cx + (m.x + Math.sin(t * .3 + m.ph) * .03) * W * .8, y = sunY + m.y * H * .7;
+        const x = cx + (m.x + Math.sin(t * .3 + m.ph) * .03) * W * .8, y = sunY + (m.y - .25) * H * .5;
         const tw = .4 + .6 * Math.abs(Math.sin(t * 1.4 + m.ph));
         ctx.fillStyle = `rgba(255,230,180,${.55 * tw * (1 - Math.abs(m.x) * 1.4)})`;
         ctx.beginPath(); ctx.arc(x, y, m.s, 0, 6.28); ctx.fill();
@@ -1141,12 +1214,12 @@ function runIntro(done) {
 function startHeroScene() {
   const cv = $('#hero-scene'); if (!cv) return;
   let scene;
-  try { scene = Forest.create(cv, { horizon: .56, maxDpr: isMobile ? 1 : 1.25 }); } catch (e) { console.error(e); return; }
+  try { scene = Forest.create(cv, { horizon: .56, maxDpr: isMobile ? .8 : .75, strip: 3 }); } catch (e) { console.error(e); return; }
   let visible = true, last = performance.now(), acc = 0;
   const t0 = last;
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) { last = performance.now(); requestAnimationFrame(frame); } }).observe(cv);
   addEventListener('resize', () => scene.resize());
-  const step = isMobile ? 1 / 24 : 1 / 30;
+  const step = 1 / 20;
   function frame(now) {
     if (!visible || document.hidden) return;
     const dt = Math.min(.1, (now - last) / 1000); last = now; acc += dt;

@@ -103,7 +103,14 @@ const I18N = {
     l_name: 'Your name', ph_name: 'Name', l_task: 'Task', ph_task: 'e.g. a booking bot for a salon, 3 stylists, client reminders',
     btn_send: 'Send via Telegram', order_note: 'Telegram opens with a ready message — just press Send.',
     footer: 'Telegram bots & automation', to_top: 'Back to top ↑',
-    on_request: 'code on request',
+    price_quote: 'price depends on the task', ask: 'ask in Telegram ↗',
+    services_lead: 'My main focus is Telegram bots. For other tasks I name an exact price after a short chat and fix it before work starts.',
+    rev_empty: 'If we have worked together, write a review. It comes to me in Telegram, and I publish it on the site only with your permission.',
+    btn_review: 'Send via Telegram', l_rev_name: 'Name', l_rev_text: 'Review', ph_rev_text: 'What worked and how the project went',
+    a_logo: 'NAHA — back to top', a_nav: 'Main navigation', a_lang: 'Language', a_sound: 'Sound', a_theme: 'Theme', a_menu: 'Menu',
+    a_stack: 'Tech stack', a_filter: 'Filter work', a_rating: 'Rating',
+    msg_project: 'Hi! I am interested in the project «%s» from your website.',
+    msg_review: 'Review for NAHA\nName: %n\nRating: %r/5\n\n%t\n\n(Publish on the site only with my permission.)',
     copied: 'Copied', err_order: 'Fill in your name and describe the task.', err_review: 'Fill in your name and review.',
   },
   kz: {
@@ -161,11 +168,18 @@ const I18N = {
     l_name: 'Атыңыз', ph_name: 'Аты', l_task: 'Тапсырма', ph_task: 'Мысалы: салонға жазылым боты, 3 шебер, клиенттерге еске салу',
     btn_send: 'Telegram-ға жіберу', order_note: 'Дайын хабармен Telegram ашылады — тек «Жіберу» басыңыз.',
     footer: 'Telegram боттар және автоматтандыру', to_top: 'Жоғары ↑',
-    on_request: 'код сұраныс бойынша',
+    price_quote: 'бағасы тапсырмаға байланысты', ask: 'Telegram-да сұрау ↗',
+    services_lead: 'Негізгі бағытым — Telegram боттар. Басқа тапсырмалардың нақты бағасын қысқа талқылаудан кейін айтып, жұмыс басталғанға дейін бекітемін.',
+    rev_empty: 'Бірге жұмыс істеген болсақ, пікір жазыңыз. Ол маған Telegram-ға келеді, сайтқа тек сіздің рұқсатыңызбен жариялаймын.',
+    btn_review: 'Telegram-ға жіберу', l_rev_name: 'Аты', l_rev_text: 'Пікір', ph_rev_text: 'Не шықты және жұмыс қалай өтті',
+    a_logo: 'NAHA — жоғары', a_nav: 'Негізгі мәзір', a_lang: 'Тіл', a_sound: 'Дыбыс', a_theme: 'Тақырып', a_menu: 'Мәзір',
+    a_stack: 'Технологиялар', a_filter: 'Жұмыстар сүзгісі', a_rating: 'Баға',
+    msg_project: 'Сәлеметсіз бе! Сайттағы «%s» жобасы қызықтырады.',
+    msg_review: 'NAHA туралы пікір\nАты: %n\nБаға: %r/5\n\n%t\n\n(Сайтқа тек менің рұқсатыммен жариялаңыз.)',
     copied: 'Көшірілді', err_order: 'Атыңыз бен тапсырманы толтырыңыз.', err_review: 'Атыңыз бен пікіріңізді толтырыңыз.',
   },
 };
-const RU_EXTRA = { copied: 'Скопировано', err_order: 'Заполните имя и опишите задачу.', err_review: 'Заполните имя и отзыв.' };
+const RU_EXTRA = { msg_project: 'Здравствуйте! Интересует проект «%s» с вашего сайта.', msg_review: 'Отзыв для NAHA\nИмя: %n\nОценка: %r/5\n\n%t\n\n(Публиковать на сайте только с моего разрешения.)', copied: 'Скопировано', err_order: 'Заполните имя и опишите задачу.', err_review: 'Заполните имя и отзыв.' };
 const CHAT = {
   ru: { hi: 'Здравствуйте! Хочу записаться', pick: 'Добрый день! Выберите услугу:', svc: ['Стрижка', 'Борода', 'Комплекс'],
         slot: 'Свободно завтра:', done: 'Готово ✓ Вы записаны на завтра, 14:30. Напомню за час до визита.',
@@ -182,6 +196,7 @@ let lang = 'ru';
 const RU = { ...RU_EXTRA };
 $$('[data-i18n]').forEach(el => { RU[el.dataset.i18n] ??= el.textContent.trim(); });
 $$('[data-i18n-ph]').forEach(el => { RU[el.dataset.i18nPh] ??= el.placeholder; });
+$$('[data-i18n-aria]').forEach(el => { RU[el.dataset.i18nAria] ??= el.getAttribute('aria-label'); });
 const t = key => (lang !== 'ru' && I18N[lang][key]) || RU[key] || key;
 
 function applyLang(l) {
@@ -192,9 +207,10 @@ function applyLang(l) {
     if (el.classList.contains('split')) splitWords(el, true);
   });
   $$('[data-i18n-ph]').forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  $$('[data-i18n-aria]').forEach(el => { el.setAttribute('aria-label', t(el.dataset.i18nAria)); if (el.hasAttribute('title')) el.title = t(el.dataset.i18nAria); });
+  updateAskLinks();
   $$('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
   store.set('naha_lang', lang);
-  renderReviews();
   chat.restart();
 }
 $$('.lang-btn').forEach(b => b.addEventListener('click', () => applyLang(b.dataset.lang)));
@@ -1502,7 +1518,7 @@ $$('.field').forEach(f => f.addEventListener('input', () => f.classList.remove('
 /* ─── ОТЗЫВЫ ───────────────────────────────────────────────────────────── */
 let stars = 5;
 const starBtns = $$('.star-btn');
-const paintStars = n => starBtns.forEach(s => s.classList.toggle('active', +s.dataset.star <= n));
+const paintStars = n => starBtns.forEach(s => { s.classList.toggle('active', +s.dataset.star <= n); s.setAttribute('aria-pressed', String(+s.dataset.star === stars)); });
 starBtns.forEach(b => {
   b.addEventListener('click', () => { stars = +b.dataset.star; paintStars(stars); });
   b.addEventListener('pointerenter', () => paintStars(+b.dataset.star));
@@ -1510,44 +1526,24 @@ starBtns.forEach(b => {
 $('#stars-input').addEventListener('pointerleave', () => paintStars(stars));
 paintStars(stars);
 
-const getReviews = () => { try { return JSON.parse(store.get('naha_reviews') || '[]'); } catch { return []; } };
-const esc = s => { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
-function renderReviews() {
-  const list = $('#reviews-list'), empty = $('#review-empty');
-  const rs = getReviews();
-  empty.hidden = rs.length > 0;
-  list.innerHTML = rs.map(r => `
-    <article class="review">
-      <div class="review-stars">${'★'.repeat(r.stars)}${'☆'.repeat(5 - r.stars)}</div>
-      <p class="review-text">${esc(r.text)}</p>
-      <div class="review-meta">${esc(r.name)} · ${esc(r.date)}</div>
-    </article>`).join('');
-}
 $('#review-form').addEventListener('submit', e => {
   e.preventDefault();
   const n = $('#review-name'), tx = $('#review-text'), err = $('#review-error');
   [n, tx].forEach(f => f.classList.toggle('is-invalid', !f.value.trim()));
   if (!n.value.trim() || !tx.value.trim()) { err.textContent = t('err_review'); return; }
   err.textContent = '';
-  const rs = getReviews();
-  rs.unshift({ name: n.value.trim(), text: tx.value.trim(), stars, date: new Date().toLocaleDateString('ru-RU') });
-  store.set('naha_reviews', JSON.stringify(rs));
-  n.value = ''; tx.value = ''; stars = 5; paintStars(5);
-  renderReviews();
-  leaves.burst(10);
+  const msg = t('msg_review').replace('%n', n.value.trim()).replace('%r', stars).replace('%t', tx.value.trim());
+  window.open(`https://t.me/akhnnoname?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
 });
 
-/* ─── TIDIO: прячем всплывающий баблик ─────────────────────────────────── */
-(function hideTidio() {
-  const hide = () => {
-    const c = document.getElementById('tidio-chat'); if (!c) return;
-    c.querySelectorAll(':scope > *:not(#tidio-chat-iframe)').forEach(el => {
-      el.style.setProperty('display', 'none', 'important');
-      el.style.setProperty('pointer-events', 'none', 'important');
-    });
-  };
-  const iv = setInterval(hide, 400); setTimeout(() => clearInterval(iv), 15000);
-})();
+/* ─── ЗАКРЫТЫЕ ПРОЕКТЫ: вопрос в Telegram ─────────────────────────────── */
+function updateAskLinks() {
+  $$('.work-ask').forEach(a => {
+    const title = a.querySelector('strong').textContent.trim();
+    a.href = `https://t.me/akhnnoname?text=${encodeURIComponent(t('msg_project').replace('%s', title))}`;
+  });
+}
+
 
 /* ─── ЗАЩИТА ТЕКСТА ОТ КОПИРОВАНИЯ ─────────────────────────────────────── */
 const copyAllowed = el => !!(el && el.closest && el.closest('input, textarea, .pay-val'));
@@ -1560,7 +1556,7 @@ document.addEventListener('dragstart', e => { if (!copyAllowed(e.target)) e.prev
 
 /* ─── СТАРТ ────────────────────────────────────────────────────────────── */
 const saved = store.get('naha_lang');
-if (saved && saved !== 'ru' && I18N[saved]) applyLang(saved); else renderReviews();
+if (saved && saved !== 'ru' && I18N[saved]) applyLang(saved); else updateAskLinks();
 
 function startSmoothScroll() {
   if (reduceMotion || !finePointer || !window.Lenis) return;

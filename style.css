@@ -8,7 +8,7 @@
   --line-soft: #2c241a;
   --text: #f1e8d8;
   --muted: #a8998a;
-  --faint: #6f6356;
+  --faint: #958777;
   --accent: #e0812f;
   --accent-ink: #1a120a;
   --accent-soft: rgba(224, 129, 47, .14);
@@ -48,7 +48,7 @@
   --line-soft: #e8dcc9;
   --text: #2a1f15;
   --muted: #6f5f4e;
-  --faint: #a39280;
+  --faint: #7a6754;
   --accent: #b9531c;
   --accent-ink: #fff8ef;
   --accent-soft: rgba(185, 83, 28, .1);
@@ -69,7 +69,7 @@
     --line-soft: #e8dcc9;
     --text: #2a1f15;
     --muted: #6f5f4e;
-    --faint: #a39280;
+    --faint: #7a6754;
     --accent: #b9531c;
     --accent-ink: #fff8ef;
     --accent-soft: rgba(185, 83, 28, .1);
@@ -186,7 +186,8 @@ main, .topbar, .footer { position: relative; z-index: 2; }
   transform: rotate(25deg);
 }
 .preview.is-on { opacity: 1; transform: scale(1) rotate(-3deg); }
-.preview-tag { font: 500 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; opacity: .8; }
+.preview-tag { font: 600 11px/1 var(--f-mono); letter-spacing: .1em; text-transform: uppercase; text-shadow: 0 1px 6px rgba(20, 8, 0, .55); }
+.preview-title { text-shadow: 0 2px 12px rgba(20, 8, 0, .5); }
 .preview-title { font: 600 26px/1.05 var(--f-display); }
 
 /* ============ ШАПКА ============ */
@@ -424,6 +425,7 @@ main, .topbar, .footer { position: relative; z-index: 2; }
 .svc-tags li { font-size: 13px; padding: 6px 11px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); }
 .svc-price { text-align: right; font: 600 24px/1 var(--f-num); letter-spacing: -.01em; white-space: nowrap; }
 .svc-price span { font: 400 14px/1 var(--f-body); color: var(--muted); }
+.svc-price--quote { font: italic 500 17px/1.3 var(--f-body); color: var(--muted); white-space: normal; }
 .svc-price small { display: block; margin-top: 6px; font: 400 13px/1 var(--f-mono); color: var(--faint); }
 
 /* работы */
@@ -452,10 +454,11 @@ main, .topbar, .footer { position: relative; z-index: 2; }
 .feat img, .feat-art { height: 250px; width: 100%; object-fit: cover; transition: transform 1.2s var(--ease); }
 .feat:hover img, .feat:hover .feat-art { transform: scale(1.06); }
 .feat-art {
+  text-shadow: 0 2px 18px rgba(30, 10, 0, .45);
   display: flex; flex-direction: column; justify-content: center; align-items: center; color: #fff4e2;
   font: 600 110px/1 var(--f-display); position: relative; overflow: hidden;
 }
-.feat-art small { font: 500 12px/1 var(--f-mono); letter-spacing: .15em; text-transform: uppercase; opacity: .8; margin-top: 6px; }
+.feat-art small { font: 600 12px/1 var(--f-mono); letter-spacing: .15em; text-transform: uppercase; margin-top: 6px; text-shadow: 0 1px 8px rgba(30, 10, 0, .6); }
 .feat--plugins .feat-art, .feat--cnk .feat-art { background: radial-gradient(circle at 30% 30%, #e8b632, transparent 55%), radial-gradient(circle at 80% 70%, #c0392b, transparent 50%), #8a4a1c; }
 .feat--isekai .feat-art { background: radial-gradient(circle at 70% 20%, #9ab84a, transparent 50%), radial-gradient(circle at 20% 90%, #e0812f, transparent 55%), #2f3a1a; }
 .feat-body { padding: 26px 28px 28px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
@@ -467,15 +470,16 @@ main, .topbar, .footer { position: relative; z-index: 2; }
 
 .works { border-top: 1px solid var(--line); }
 .work { border-bottom: 1px solid var(--line); transition: opacity .4s, max-height .5s var(--ease); }
-.work a, .work-row {
+.work a {
   display: grid; grid-template-columns: 140px 260px 1fr auto; gap: 20px; align-items: baseline;
   padding: 22px 8px; transition: padding .4s var(--ease), color .3s;
 }
 .work strong { font: 600 24px/1.15 var(--f-display); }
 .work-desc { color: var(--muted); font-size: 15px; }
 .work-go { justify-self: end; color: var(--faint); transition: transform .4s var(--spring), color .3s; }
-.work a:hover, .work-row:hover { padding-left: 20px; }
+.work a:hover { padding-left: 20px; }
 .work-lock { font: 500 11px/1.2 var(--f-mono); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+.work-ask .work-lock { color: var(--muted); }
 .work a:hover .work-go { color: var(--accent); transform: translate(3px, -3px) rotate(0deg) scale(1.2); }
 .work.is-hidden { display: none; }
 
@@ -515,7 +519,8 @@ main, .topbar, .footer { position: relative; z-index: 2; }
 .review-text { margin: 8px 0 10px; }
 .review-meta { font-size: 13px; color: var(--muted); }
 .review-empty { color: var(--muted); font-size: 15px; margin-bottom: 16px; }
-.review-form { display: grid; gap: 10px; }
+.review-form { display: grid; gap: 8px; }
+.review-form label { font-size: 14px; color: var(--muted); }
 .review-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .stars-input { display: flex; gap: 2px; }
 .star-btn { font-size: 22px; color: var(--line); transition: color .2s, transform .3s var(--spring); padding: 2px; }
@@ -595,7 +600,7 @@ main, .topbar, .footer { position: relative; z-index: 2; }
   .svc { grid-template-columns: 50px 1fr 150px; }
   .svc-tags { grid-column: 2; grid-row: 2; }
   .svc-price { grid-row: 1 / 3; grid-column: 3; }
-  .work a, .work-row { grid-template-columns: 120px 1fr auto; }
+  .work a { grid-template-columns: 120px 1fr auto; }
   .work-desc { grid-column: 2; }
   .work-go { grid-column: 3; grid-row: 1; }
   .guarantees { grid-template-columns: repeat(2, 1fr); }
@@ -646,11 +651,13 @@ main, .topbar, .footer { position: relative; z-index: 2; }
   .feat img, .feat-art { height: 190px; }
   .feat-body { padding: 20px; }
   .feat h3 { font-size: 30px; }
-  .work a, .work-row { grid-template-columns: 1fr auto; gap: 6px 12px; padding: 18px 4px; }
-  .work a:hover, .work-row:hover { padding-left: 4px; }
+  .work a { grid-template-columns: 1fr auto; gap: 6px 12px; padding: 18px 4px; }
+  .work a:hover { padding-left: 4px; }
   .work .tag { grid-column: 1; }
   .work strong, .work-desc { grid-column: 1; }
   .work-go { grid-column: 2; grid-row: 1 / 3; align-self: center; }
+  .work-ask { grid-template-columns: 1fr; }
+  .work-ask .work-lock { grid-column: 1; grid-row: auto; justify-self: start; margin-top: 4px; }
   .steps, .guarantees { grid-template-columns: 1fr; }
   .order, .reviews { padding: 20px; }
   .faq-list summary { font-size: 21px; }

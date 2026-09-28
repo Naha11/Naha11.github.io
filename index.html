@@ -21,7 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Onest:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap&subset=cyrillic,cyrillic-ext" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css?v=8" />
+  <link rel="stylesheet" href="style.css?v=9" />
 </head>
 <body>
   <a class="skip" href="#main">К содержанию</a>
@@ -33,8 +33,8 @@
 
   <header class="topbar" id="topbar">
     <div class="wrap topbar-inner">
-      <a href="#top" class="logo" aria-label="NAHA — наверх">naha<span>/</span></a>
-      <nav class="nav" id="nav" aria-label="Основная навигация">
+      <a href="#top" class="logo" aria-label="NAHA — наверх" data-i18n-aria="a_logo">naha<span>/</span></a>
+      <nav class="nav" id="nav" aria-label="Основная навигация" data-i18n-aria="a_nav">
         <a href="#services" data-i18n="nav_services">Услуги</a>
         <a href="#work" data-i18n="nav_portfolio">Работы</a>
         <a href="#process" data-i18n="nav_process">Процесс</a>
@@ -42,19 +42,19 @@
         <a href="#faq" data-i18n="nav_faq">Вопросы</a>
       </nav>
       <div class="topbar-right">
-        <div class="lang" role="group" aria-label="Язык">
+        <div class="lang" role="group" aria-label="Язык" data-i18n-aria="a_lang">
           <button class="lang-btn active" data-lang="ru">RU</button>
           <button class="lang-btn" data-lang="en">EN</button>
           <button class="lang-btn" data-lang="kz">KZ</button>
         </div>
-        <button class="icon-btn" id="sound-toggle" type="button" aria-label="Звук" aria-pressed="false" title="Звук">
+        <button class="icon-btn" id="sound-toggle" type="button" aria-label="Звук" aria-pressed="false" title="Звук" data-i18n-aria="a_sound">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="snd-on" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path class="snd-off" d="M16 9l5 6M21 9l-5 6"/></svg>
         </button>
-        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Тема" title="Тема">
+        <button class="icon-btn" id="theme-toggle" type="button" aria-label="Тема" title="Тема" data-i18n-aria="a_theme">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9z"/></svg>
         </button>
         <a href="https://t.me/akhnnoname" target="_blank" rel="noopener" class="btn btn-sm btn-accent topbar-cta" data-i18n="btn_write">Написать</a>
-        <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="nav"><span></span><span></span></button>
+        <button class="burger" id="burger" aria-label="Меню" data-i18n-aria="a_menu" aria-expanded="false" aria-controls="nav"><span></span><span></span></button>
       </div>
     </div>
   </header>
@@ -106,7 +106,7 @@
         </div>
       </div>
 
-      <div class="ticker" aria-label="Стек технологий">
+      <div class="ticker" aria-label="Стек технологий" data-i18n-aria="a_stack">
         <div class="ticker-track">
           <span>Python</span><span>aiogram 3</span><span>discord.py</span><span>Playwright</span><span>BeautifulSoup</span><span>Google Sheets API</span><span>openpyxl</span><span>SQLite</span><span>PostgreSQL</span><span>ЮKassa</span><span>Robokassa</span><span>React</span><span>TypeScript</span><span>Java / Paper</span><span>HTML / CSS / JS</span>
           <span>Python</span><span>aiogram 3</span><span>discord.py</span><span>Playwright</span><span>BeautifulSoup</span><span>Google Sheets API</span><span>openpyxl</span><span>SQLite</span><span>PostgreSQL</span><span>ЮKassa</span><span>Robokassa</span><span>React</span><span>TypeScript</span><span>Java / Paper</span><span>HTML / CSS / JS</span>
@@ -120,7 +120,7 @@
         <div class="sec-head">
           <span class="sec-idx">01</span>
           <h2 data-i18n="services_title">Что я делаю</h2>
-          <p class="sec-lead" data-i18n="services_lead">Цена фиксируется до начала работы. Ниже — стартовые цены за простой вариант.</p>
+          <p class="sec-lead" data-i18n="services_lead">Основное направление — Telegram-боты. Для остальных задач назову точную цену после короткого обсуждения и зафиксирую её до начала работы.</p>
         </div>
 
         <ol class="services">
@@ -140,7 +140,7 @@
               <p data-i18n="s2_desc">Python-скрипты для Excel и Google Sheets. Автозаполнение, формулы, интеграции с API.</p>
             </div>
             <ul class="svc-tags"><li>Excel / Sheets</li><li data-i18n="s2_l2">Авто-отчёты</li><li data-i18n="s2_l3">Связка с Telegram</li></ul>
-            <div class="svc-price"><span data-i18n="from">от</span> 1 000 ₽<small>$10 · 5 000 ₸</small></div>
+            <div class="svc-price svc-price--quote"><span data-i18n="price_quote">цена зависит от задачи</span></div>
           </li>
           <li class="svc">
             <span class="svc-num">03</span>
@@ -149,7 +149,7 @@
               <p data-i18n="s3_desc">Соберу данные с любого сайта — товары, цены, контакты. Выдам в Excel или Google Sheets.</p>
             </div>
             <ul class="svc-tags"><li>WB / Ozon</li><li data-i18n="s3_l2">Любой сайт</li><li data-i18n="s3_l3">Сбор по расписанию</li></ul>
-            <div class="svc-price"><span data-i18n="from">от</span> 1 000 ₽<small>$10 · 5 000 ₸</small></div>
+            <div class="svc-price svc-price--quote"><span data-i18n="price_quote">цена зависит от задачи</span></div>
           </li>
           <li class="svc">
             <span class="svc-num">04</span>
@@ -158,7 +158,7 @@
               <p data-i18n="s4_desc">Одностраничный сайт для бизнеса или фрилансера. Имя, услуги, кнопки связи. Быстро.</p>
             </div>
             <ul class="svc-tags"><li>HTML / CSS</li><li data-i18n="s4_l2">Хостинг бесплатно</li><li data-i18n="s4_l3">Адаптив</li></ul>
-            <div class="svc-price"><span data-i18n="from">от</span> 1 000 ₽<small>$10 · 5 000 ₸</small></div>
+            <div class="svc-price svc-price--quote"><span data-i18n="price_quote">цена зависит от задачи</span></div>
           </li>
           <li class="svc">
             <span class="svc-num">05</span>
@@ -167,7 +167,7 @@
               <p data-i18n="s5_desc">Бот для вашего Discord-сервера: приветствие, слэш-команды, автоответы. Под ключ.</p>
             </div>
             <ul class="svc-tags"><li data-i18n="s5_l1">Слэш-команды</li><li data-i18n="s5_l2">Приветствие</li><li data-i18n="s5_l3">Своя логика</li></ul>
-            <div class="svc-price"><span data-i18n="from">от</span> 1 000 ₽<small>$10 · 5 000 ₸</small></div>
+            <div class="svc-price svc-price--quote"><span data-i18n="price_quote">цена зависит от задачи</span></div>
           </li>
         </ol>
       </div>
@@ -179,7 +179,7 @@
         <div class="sec-head">
           <span class="sec-idx">02</span>
           <h2 data-i18n="work_title">Работы</h2>
-          <div class="filters" role="group" aria-label="Фильтр работ">
+          <div class="filters" role="group" aria-label="Фильтр работ" data-i18n-aria="a_filter">
             <button class="chip active" data-filter="all" data-i18n="f_all">Все</button>
             <button class="chip" data-filter="bot" data-i18n="f_bot">Боты</button>
             <button class="chip" data-filter="auto" data-i18n="f_auto">Автоматизация</button>
@@ -223,15 +223,15 @@
           <li class="work" data-cat="bot"><a href="https://github.com/Naha11/telegram-bot-booking" target="_blank" rel="noopener"><span class="tag">Telegram</span><strong data-i18n="p2_title">Бот записи клиентов</strong><span class="work-desc" data-i18n="p2_desc">Выбор услуги, дата и время, уведомление администратору. aiogram 3.</span><span class="work-go">↗</span></a></li>
           <li class="work" data-cat="bot"><a href="https://github.com/Naha11/telegram-bot-orders" target="_blank" rel="noopener"><span class="tag">Telegram</span><strong data-i18n="p3_title">Бот приёма заказов</strong><span class="work-desc" data-i18n="p3_desc">Каталог, корзина, оформление заказа, уведомления. aiogram 3.</span><span class="work-go">↗</span></a></li>
           <li class="work" data-cat="bot"><a href="https://github.com/Naha11/discord-bot" target="_blank" rel="noopener"><span class="tag">Discord</span><strong data-i18n="p8_title">Discord-бот</strong><span class="work-desc" data-i18n="p8_desc">Слэш-команды /ping /info /help, приветствие новых участников. discord.py.</span><span class="work-go">↗</span></a></li>
-          <li class="work" data-cat="auto"><div class="work-row"><span class="tag" data-i18n="t_parser">Парсер</span><strong data-i18n="p9_title">Kwork Monitor</strong><span class="work-desc" data-i18n="p9_desc">Следит за заявками на Kwork по ключевым словам и шлёт их в Telegram. Playwright, работает 24/7.</span><span class="work-go work-lock" data-i18n="on_request">код по запросу</span></div></li>
-          <li class="work" data-cat="auto"><div class="work-row"><span class="tag" data-i18n="t_parser">Парсер</span><strong>Business Finder</strong><span class="work-desc" data-i18n="p10_desc">Контакты кафе, салонов и автосервисов через OpenStreetMap — в Excel с телефонами и адресами.</span><span class="work-go work-lock" data-i18n="on_request">код по запросу</span></div></li>
-          <li class="work" data-cat="auto"><div class="work-row"><span class="tag" data-i18n="t_auto">Автоматизация</span><strong data-i18n="p11_title">Мониторинг цен</strong><span class="work-desc" data-i18n="p11_desc">Цены конкурентов, история изменений, уведомления в Telegram. Python + aiohttp.</span><span class="work-go work-lock" data-i18n="on_request">код по запросу</span></div></li>
-          <li class="work" data-cat="auto"><div class="work-row"><span class="tag">Google Sheets</span><strong data-i18n="p12_title">Дашборд продаж</strong><span class="work-desc" data-i18n="p12_desc">Импорт данных, графики, триггеры и уведомления в Google Таблицах. Apps Script.</span><span class="work-go work-lock" data-i18n="on_request">код по запросу</span></div></li>
-          <li class="work" data-cat="auto"><div class="work-row"><span class="tag" data-i18n="t_db">База данных</span><strong data-i18n="p13_title">CRM-база клиентов</strong><span class="work-desc" data-i18n="p13_desc">Клиенты, заказы, платежи, аналитика. PostgreSQL + миграции.</span><span class="work-go work-lock" data-i18n="on_request">код по запросу</span></div></li>
-          <li class="work" data-cat="auto"><div class="work-row"><span class="tag">Excel</span><strong data-i18n="p5_title">Генератор отчётов</strong><span class="work-desc" data-i18n="p5_desc">Excel-отчёт с графиками, форматированием и сводным листом. Python + openpyxl.</span><span class="work-go work-lock" data-i18n="on_request">код по запросу</span></div></li>
-          <li class="work" data-cat="auto"><div class="work-row"><span class="tag">Excel</span><strong data-i18n="p6_title">Парсинг в Excel</strong><span class="work-desc" data-i18n="p6_desc">Данные с любого сайта в аккуратную таблицу. Python + BeautifulSoup.</span><span class="work-go work-lock" data-i18n="on_request">код по запросу</span></div></li>
-          <li class="work" data-cat="auto"><div class="work-row"><span class="tag">Excel</span><strong data-i18n="p7_title">Шаблон учёта бизнеса</strong><span class="work-desc" data-i18n="p7_desc">Доходы и расходы по 12 месяцам, годовой отчёт, выпадающие списки.</span><span class="work-go work-lock" data-i18n="on_request">код по запросу</span></div></li>
-          <li class="work" data-cat="web"><div class="work-row"><span class="tag" data-i18n="t_web">Вёрстка</span><strong data-i18n="p14_title">Лендинг TechFlow</strong><span class="work-desc" data-i18n="p14_desc">Адаптивный лендинг для IT-компании с анимациями. HTML/CSS/JS.</span><span class="work-go work-lock" data-i18n="on_request">код по запросу</span></div></li>
+          <li class="work" data-cat="auto"><a class="work-ask" href="https://t.me/akhnnoname" target="_blank" rel="noopener"><span class="tag" data-i18n="t_parser">Парсер</span><strong data-i18n="p9_title">Kwork Monitor</strong><span class="work-desc" data-i18n="p9_desc">Следит за заявками на Kwork по ключевым словам и шлёт их в Telegram. Playwright, работает 24/7.</span><span class="work-go work-lock" data-i18n="ask">спросить в Telegram ↗</span></a></li>
+          <li class="work" data-cat="auto"><a class="work-ask" href="https://t.me/akhnnoname" target="_blank" rel="noopener"><span class="tag" data-i18n="t_parser">Парсер</span><strong>Business Finder</strong><span class="work-desc" data-i18n="p10_desc">Контакты кафе, салонов и автосервисов через OpenStreetMap — в Excel с телефонами и адресами.</span><span class="work-go work-lock" data-i18n="ask">спросить в Telegram ↗</span></a></li>
+          <li class="work" data-cat="auto"><a class="work-ask" href="https://t.me/akhnnoname" target="_blank" rel="noopener"><span class="tag" data-i18n="t_auto">Автоматизация</span><strong data-i18n="p11_title">Мониторинг цен</strong><span class="work-desc" data-i18n="p11_desc">Цены конкурентов, история изменений, уведомления в Telegram. Python + aiohttp.</span><span class="work-go work-lock" data-i18n="ask">спросить в Telegram ↗</span></a></li>
+          <li class="work" data-cat="auto"><a class="work-ask" href="https://t.me/akhnnoname" target="_blank" rel="noopener"><span class="tag">Google Sheets</span><strong data-i18n="p12_title">Дашборд продаж</strong><span class="work-desc" data-i18n="p12_desc">Импорт данных, графики, триггеры и уведомления в Google Таблицах. Apps Script.</span><span class="work-go work-lock" data-i18n="ask">спросить в Telegram ↗</span></a></li>
+          <li class="work" data-cat="auto"><a class="work-ask" href="https://t.me/akhnnoname" target="_blank" rel="noopener"><span class="tag" data-i18n="t_db">База данных</span><strong data-i18n="p13_title">CRM-база клиентов</strong><span class="work-desc" data-i18n="p13_desc">Клиенты, заказы, платежи, аналитика. PostgreSQL + миграции.</span><span class="work-go work-lock" data-i18n="ask">спросить в Telegram ↗</span></a></li>
+          <li class="work" data-cat="auto"><a class="work-ask" href="https://t.me/akhnnoname" target="_blank" rel="noopener"><span class="tag">Excel</span><strong data-i18n="p5_title">Генератор отчётов</strong><span class="work-desc" data-i18n="p5_desc">Excel-отчёт с графиками, форматированием и сводным листом. Python + openpyxl.</span><span class="work-go work-lock" data-i18n="ask">спросить в Telegram ↗</span></a></li>
+          <li class="work" data-cat="auto"><a class="work-ask" href="https://t.me/akhnnoname" target="_blank" rel="noopener"><span class="tag">Excel</span><strong data-i18n="p6_title">Парсинг в Excel</strong><span class="work-desc" data-i18n="p6_desc">Данные с любого сайта в аккуратную таблицу. Python + BeautifulSoup.</span><span class="work-go work-lock" data-i18n="ask">спросить в Telegram ↗</span></a></li>
+          <li class="work" data-cat="auto"><a class="work-ask" href="https://t.me/akhnnoname" target="_blank" rel="noopener"><span class="tag">Excel</span><strong data-i18n="p7_title">Шаблон учёта бизнеса</strong><span class="work-desc" data-i18n="p7_desc">Доходы и расходы по 12 месяцам, годовой отчёт, выпадающие списки.</span><span class="work-go work-lock" data-i18n="ask">спросить в Telegram ↗</span></a></li>
+          <li class="work" data-cat="web"><a class="work-ask" href="https://t.me/akhnnoname" target="_blank" rel="noopener"><span class="tag" data-i18n="t_web">Вёрстка</span><strong data-i18n="p14_title">Лендинг TechFlow</strong><span class="work-desc" data-i18n="p14_desc">Адаптивный лендинг для IT-компании с анимациями. HTML/CSS/JS.</span><span class="work-go work-lock" data-i18n="ask">спросить в Telegram ↗</span></a></li>
           <li class="work" data-cat="web"><a href="#top"><span class="tag" data-i18n="t_site">Сайт</span><strong data-i18n="p4_title">Этот сайт</strong><span class="work-desc" data-i18n="p4_desc">Визитка с живым демо бота, фильтром работ и тремя языками. HTML/CSS/JS, GitHub Pages.</span><span class="work-go">↑</span></a></li>
         </ul>
       </div>
@@ -276,20 +276,21 @@
 
         <div class="reviews">
           <h3 class="reviews-title" data-i18n="rev_title">Отзывы</h3>
-          <div id="reviews-list" class="reviews-list"></div>
-          <p class="review-empty" id="review-empty" data-i18n="rev_empty">Отзывов пока нет. Если мы уже работали — буду рад вашему.</p>
+          <p class="review-empty" id="review-empty" data-i18n="rev_empty">Если мы уже работали — напишите отзыв. Он придёт мне в Telegram, а на сайте я опубликую его только с вашего разрешения.</p>
           <form class="review-form" id="review-form" novalidate>
-            <input type="text" id="review-name" class="field" data-i18n-ph="ph_rev_name" placeholder="Ваше имя" maxlength="50" aria-label="Имя" />
-            <textarea id="review-text" class="field" data-i18n-ph="ph_rev_text" placeholder="Ваш отзыв" maxlength="300" rows="3" aria-label="Отзыв"></textarea>
+            <label for="review-name" data-i18n="l_rev_name">Имя</label>
+            <input type="text" id="review-name" class="field" data-i18n-ph="ph_rev_name" placeholder="Ваше имя" maxlength="50" autocomplete="name" />
+            <label for="review-text" data-i18n="l_rev_text">Отзыв</label>
+            <textarea id="review-text" class="field" data-i18n-ph="ph_rev_text" placeholder="Что получилось и как прошла работа" maxlength="300" rows="3"></textarea>
             <div class="review-row">
-              <div class="stars-input" id="stars-input" role="radiogroup" aria-label="Оценка">
-                <button type="button" class="star-btn" data-star="1" aria-label="1">★</button>
-                <button type="button" class="star-btn" data-star="2" aria-label="2">★</button>
-                <button type="button" class="star-btn" data-star="3" aria-label="3">★</button>
-                <button type="button" class="star-btn" data-star="4" aria-label="4">★</button>
-                <button type="button" class="star-btn" data-star="5" aria-label="5">★</button>
+              <div class="stars-input" id="stars-input" role="group" aria-label="Оценка" data-i18n-aria="a_rating">
+                <button type="button" class="star-btn" data-star="1" aria-label="1" aria-pressed="false">★</button>
+                <button type="button" class="star-btn" data-star="2" aria-label="2" aria-pressed="false">★</button>
+                <button type="button" class="star-btn" data-star="3" aria-label="3" aria-pressed="false">★</button>
+                <button type="button" class="star-btn" data-star="4" aria-label="4" aria-pressed="false">★</button>
+                <button type="button" class="star-btn" data-star="5" aria-label="5" aria-pressed="false">★</button>
               </div>
-              <button type="submit" class="btn btn-sm btn-ghost" data-i18n="btn_review">Оставить отзыв</button>
+              <button type="submit" class="btn btn-sm btn-ghost" data-i18n="btn_review">Отправить в Telegram</button>
             </div>
             <p class="form-error" id="review-error" role="alert"></p>
           </form>
@@ -378,7 +379,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/lenis@1.3.26/dist/lenis.min.js"></script>
-  <script src="script.js?v=8"></script>
-  <script src="//code.tidio.co/hhwno1ahppxm68rvugwnu0ctvgkw2mnr.js" async></script>
+  <script src="script.js?v=9"></script>
 </body>
 </html>

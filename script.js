@@ -1181,39 +1181,8 @@ const Forest = (() => {
   return { create };
 })();
 
-/* ─── ПРЕЛОАДЕР: ПРОГУЛКА ПО ОСЕННЕЙ АЛЛЕЕ ────────────────────────────── */
-function runIntro(done) {
-  const loader = $('#loader');
-  let finished = false;
-  const finish = () => {
-    if (finished) return; finished = true;
-    loader.classList.add('is-done');
-    document.body.classList.remove('is-loading');
-    store.sset('naha_intro', '1');
-    setTimeout(() => loader.remove(), 1300);
-    done();
-  };
-  if (!loader) return done();
-  if (reduceMotion || store.sget('naha_intro')) { loader.remove(); document.body.classList.remove('is-loading'); return done(); }
-  document.body.classList.add('is-loading');
-  $('#loader-skip').addEventListener('click', finish);
-  setTimeout(() => { // даём браузеру отрисовать экран до запекания сцены
-    let scene;
-    try { scene = Forest.create($('#loader-canvas'), { air: true, horizon: .5 }); } catch (e) { console.error(e); return finish(); }
-    addEventListener('resize', () => !finished && scene.resize());
-    loader.classList.add('is-ready');
-    const DUR = 6800, t0 = performance.now();
-    let last = t0;
-    (function frame(now) {
-      if (finished) return;
-      const el = Math.max(0, now - t0), p = clamp(el / DUR, 0, 1), dt = Math.min(.05, (now - last) / 1000); last = now;
-      const speed = p < .7 ? 1.6 : 1.6 + Math.pow((p - .7) / .3, 2) * 10;
-      scene.frame(el / 1000, speed * dt, { bob: true, push: p > .7 ? (p - .7) * 2 : 0, flash: clamp((p - .76) / .24, 0, 1), fadeIn: clamp(el / 900, 0, 1) });
-      if (el >= DUR) return finish();
-      requestAnimationFrame(frame);
-    })(t0);
-  }, 30);
-}
+/* ─── ВХОД: без заставки, сайт открывается сразу ─────────────────────── */
+function runIntro(done) { done(); }
 
 /* ─── HERO: ТА ЖЕ АЛЛЕЯ, МЕДЛЕННО ──────────────────────────────────────── */
 function startHeroScene() {

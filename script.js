@@ -1373,8 +1373,8 @@ function startPointerFx() {
       if (!rects) rects = mags.map((m, i) => { const b = m.getBoundingClientRect(); return [b.left - off[i][0] + b.width / 2, b.top - off[i][1] + b.height / 2, b.width / 2 + 40, b.height / 2 + 30]; });
       mags.forEach((m, i) => {
         const [cx, cy, rw, rh] = rects[i], dx = x - cx, dy = y - cy;
-        const near = Math.abs(dx) < rw && Math.abs(dy) < rh;
-        const tx = near ? dx * .22 : 0, ty = near ? dy * .3 : 0;
+        const near = Math.abs(dx) < rw - 40 && Math.abs(dy) < rh - 30; // только когда курсор над самой кнопкой
+        const tx = near ? clamp(dx * .12, -6, 6) : 0, ty = near ? clamp(dy * .2, -4, 4) : 0;
         if (tx === off[i][0] && ty === off[i][1]) return;
         off[i] = [tx, ty]; m.style.translate = near ? `${tx}px ${ty}px` : '';
       });

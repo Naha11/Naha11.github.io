@@ -269,8 +269,14 @@ main, .topbar, .footer { position: relative; z-index: 2; }
 
 /* ============ HERO ============ */
 .hero { position: relative; padding: 48px 0 0; min-height: calc(100dvh - 72px); display: flex; flex-direction: column; overflow: hidden; margin-top: -72px; padding-top: 120px; }
-.hero-scene-wrap { position: absolute; inset: 0 0 -10%; z-index: 0; overflow: hidden; will-change: transform; }
-.hero-scene-wrap canvas { width: 100%; height: 100%; display: block; }
+.hero-scene-wrap {
+  position: absolute; inset: 0 0 -10%; z-index: 0; overflow: hidden; will-change: transform;
+  background-image: url("img/hero-bg.jpg");
+  background-image: image-set(url("img/hero-bg.webp") type("image/webp"), url("img/hero-bg.jpg") type("image/jpeg"));
+  background-size: cover;
+  background-position: center 45%;
+  background-repeat: no-repeat;
+}
 .hero-scene-wrap::after {
   content: ""; position: absolute; inset: 0;
   background:

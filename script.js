@@ -1236,16 +1236,6 @@ const Forest = (() => {
 /* ─── ВХОД: без заставки, сайт открывается сразу ─────────────────────── */
 function runIntro(done) { done(); }
 
-/* ─── HERO: ТА ЖЕ АЛЛЕЯ, МЕДЛЕННО ──────────────────────────────────────── */
-function startHeroScene() {
-  const cv = $('#hero-scene'); if (!cv) return;
-  let scene;
-  try { scene = Forest.create(cv, { horizon: .56, maxDpr: isMobile ? 1 : 1.25, lite: true }); } catch (e) { console.error(e); return; }
-  scene.frame(2.5, 0);
-  let tm;
-  addEventListener('resize', () => { clearTimeout(tm); tm = setTimeout(() => { scene.resize(); scene.frame(2.5, 0); }, 200); });
-}
-
 /* ─── HERO: ЖИВОЙ ЧАТ ──────────────────────────────────────────────────── */
 const chat = (() => {
   const box = $('#chat'), status = $('#chat-status'), notify = $('#notify'), nbody = $('#notify-body');
@@ -1569,7 +1559,6 @@ runIntro(() => {
   startReveal();
   startPointerFx();
   startScrollFx();
-  startHeroScene();
   chat.start();
   leaves.start();
 });
